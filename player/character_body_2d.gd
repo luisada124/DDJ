@@ -1,34 +1,38 @@
 extends CharacterBody2D
 
-const ACCELERATION := 600.0      # força do motor
-const MAX_SPEED := 500.0         # velocidade máxima
-const FRICTION := 100.0          # “atrito” para não ficar eterno
-const ROTATION_SPEED := 3.0      # radianos por segundo (rotação)
+# Direção da FRENTE da nave na textura:
+# Se o nariz estiver virado para cima usa UP, se for para a direita usa RIGHT, etc.
+const SHIP_FORWARD := Vector2.UP
+
+const ACCELERATION := 700.0     # força do motor
+const MAX_SPEED := 500.0        # velocidade máxima
+const DRAG := 0.5               # 0 = sem travão, 1 = trava muito
+const ROTATION_SPEED := 3.0     # radianos por segundo
 
 func _physics_process(delta: float) -> void:
-	# 1. Rodar nave (esquerda / direita)
+	# 1) Rodar nave
 	var turn_dir := Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
 	rotation += turn_dir * ROTATION_SPEED * delta
 
-	# 2. Thrust (acelerar para a frente / trás)
-	var thrust := Input.get_action_strength("ui_up") - Input.get_action_strength("ui_down")
+	# 2) Thrust (motor) – vem de trás mas empurra a nave para a frente
+	var thrust_pressed := Input.is_action_pressed("ui_up")
 
-	if thrust != 0.0:
-		# Vector2.RIGHT é a direção “para a frente” do sprite por defeito
-		var forward := Vector2.RIGHT.rotated(rotation)
-		velocity += forward * thrust * ACCELERATION * delta
+	# ligar/desligar fogo (se tiveres o nó ThrusterParticles como filho da nave)
+	if has_node("ThrusterParticles"):
+		$ThrusterParticles.emitting = thrust_pressed
+
+	if thrust_pressed:
+		# direção da FRENTE da nave no mundo
+		var forward_dir := SHIP_FORWARD.rotated(rotation)
+		velocity += forward_dir * ACCELERATION * delta
 	else:
-		# Aplica um pouquinho de “travão” para não ficar a flutuar para sempre
+		# arrasto suave para não ficar a planar para sempre
 		if velocity.length() > 0.0:
-			var friction_force := FRICTION * delta
-			if friction_force > velocity.length():
-				velocity = Vector2.ZERO
-			else:
-				velocity -= velocity.normalized() * friction_force
+			velocity = velocity.lerp(Vector2.ZERO, DRAG * delta)
 
-	# 3. Limitar velocidade máxima
+	# 3) Limitar velocidade
 	if velocity.length() > MAX_SPEED:
 		velocity = velocity.normalized() * MAX_SPEED
 
-	# 4. Mover a nave com a velocidade atual
+	# 4) Mover
 	move_and_slide()
