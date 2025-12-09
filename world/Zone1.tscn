@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3 uid="uid://cjlxyltpch1o"]
+
+[ext_resource type="Texture2D" uid="uid://exgcs6aggt6v" path="res://textures/space background.webp" id="1_sprn3"]
+[ext_resource type="PackedScene" uid="uid://cshejja03gcoo" path="res://world/comet.tscn" id="2_htqom"]
+
+[node name="Zone1" type="Node2D"]
+position = Vector2(19, 0)
+
+[node name="SpaceBackground" type="Sprite2D" parent="."]
+position = Vector2(337.5442, 208.97676)
+scale = Vector2(0.8219903, 0.73563313)
+texture = ExtResource("1_sprn3")
+
+[node name="comets" type="Node2D" parent="."]
+position = Vector2(-24, 4)
+
+[node name="comet" parent="comets" instance=ExtResource("2_htqom")]
+position = Vector2(87, 132)
+
+[node name="comet2" parent="comets" instance=ExtResource("2_htqom")]
+position = Vector2(448, 259)
+
+[node name="comet3" parent="comets" instance=ExtResource("2_htqom")]
+position = Vector2(419, 46)
