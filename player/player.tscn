@@ -1,3 +1,16 @@
-[gd_scene format=3 uid="uid://dlsssxy4tf0b8"]
+[gd_scene load_steps=3 format=3 uid="uid://dlsssxy4tf0b8"]
 
-[node name="Node2D" type="Node2D"]
+[ext_resource type="Script" uid="uid://uah53r75hcy1" path="res://player/character_body_2d.gd" id="1_rkbax"]
+[ext_resource type="Texture2D" uid="uid://d4nuc6atw4kr2" path="res://textures/pew.png" id="2_g1dw6"]
+
+[node name="player" type="Node2D"]
+
+[node name="CharacterBody2D" type="CharacterBody2D" parent="."]
+script = ExtResource("1_rkbax")
+
+[node name="Sprite2D" type="Sprite2D" parent="CharacterBody2D"]
+texture = ExtResource("2_g1dw6")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="CharacterBody2D"]
+visible = false
+polygon = PackedVector2Array(20, 40, 33, 45, 62, 72, 66, 29, 22, -33, 19, -65, -1, -85, -23, -63, -23, -32, -67, 22, -66, 77, -21, 41)
