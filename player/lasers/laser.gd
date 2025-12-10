@@ -2,6 +2,7 @@ extends Area2D
 
 @export var speed: float = 800.0
 @export var damage: int = 5
+
 var direction: Vector2 = Vector2.UP
 var lifetime: float = 2.0
 
@@ -18,21 +19,32 @@ func _physics_process(delta: float) -> void:
 
 
 func _on_body_entered(body: Node2D) -> void:
-	print("LASER hit:", body, " groups =", body.get_groups())
+	# print("LASER hit:", body, " groups =", body.get_groups())
+
 	if from_player:
-		# --- LASER DO PLAYER ---
-		# 1) cometas (já funcionava, mantemos)
+		# ========= TIRO DO PLAYER =========
+		# Acerta cometas
 		if body.is_in_group("comet") and body.has_method("take_damage"):
 			body.take_damage(damage)
+			queue_free()
+			return
 
-		# 2) inimigos
-		elif body.is_in_group("enemy") and body.has_method("take_damage"):
+		# Acerta inimigos
+		if body.is_in_group("enemy") and body.has_method("take_damage"):
 			body.take_damage(damage)
+			queue_free()
+			return
 
 	else:
-		# --- LASER DO INIMIGO ---
+		# ========= TIRO DO INIMIGO =========
+		# Só interessa o player
 		if body.is_in_group("player"):
 			GameState.damage_player(damage)
+			queue_free()
+			return
 
-	# em qualquer caso, depois de bater desaparece
-	queue_free()
+	# Se chegou aqui:
+	# - tiro do player que bateu no player
+	# - tiro do player que bateu em parede/pickup/etc
+	# - tiro do inimigo que bateu em inimigo/cometa
+	# -> ignorar completamente (não dano, não destruir laser)

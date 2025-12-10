@@ -32,8 +32,6 @@ func shoot() -> void:
 		get_tree().current_scene.add_child(laser)
 
 
-
-
 func _physics_process(delta: float) -> void:
 	# 1) Rodar nave
 	var turn_dir := Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
