@@ -15,7 +15,7 @@ scale_min = 0.5
 
 [node name="player" type="Node2D" groups=["player"]]
 
-[node name="CharacterBody2D" type="CharacterBody2D" parent="."]
+[node name="CharacterBody2D" type="CharacterBody2D" parent="." groups=["player"]]
 script = ExtResource("1_rkbax")
 
 [node name="ThrusterParticles" type="GPUParticles2D" parent="CharacterBody2D"]

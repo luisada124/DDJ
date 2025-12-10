@@ -4,7 +4,7 @@ extends StaticBody2D
 @export var direction: Vector2 = Vector2.LEFT
 @export var min_scrap: int = 1
 @export var max_scrap: int = 3
-@export var explosion_scene: PackedScene  # para partículas/FX mais tarde
+@export var explosion_scene: PackedScene  # opcional: partículas/FX
 
 func _ready() -> void:
 	add_to_group("comet")
@@ -13,21 +13,17 @@ func _process(delta: float) -> void:
 	position += direction * speed * delta
 
 func explode() -> void:
+	# FX opcional
 	if explosion_scene != null:
 		var fx = explosion_scene.instantiate()
-
-		# IMPORTANTE: global_position, não só position
 		fx.global_position = global_position
-
 		get_tree().current_scene.add_child(fx)
 
 	_spawn_loot()
 	queue_free()
 
-
-
 func _spawn_loot() -> void:
-	var pickup_scene: PackedScene = load("res://pickups/Pickup.tscn") # adapta ao caminho real
+	var pickup_scene: PackedScene = load("res://pickups/Pickup.tscn") # adapta o caminho
 
 	var drops := randi_range(min_scrap, max_scrap)
 	for i in range(drops):
