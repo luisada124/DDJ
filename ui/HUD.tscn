@@ -1,33 +1,23 @@
 [gd_scene load_steps=2 format=3 uid="uid://bhyk7leudmqo"]
 
-[ext_resource type="Script" uid="uid://prhvxyk64yf2" path="res://ui/hud.gd" id="1_1x8ju"]
+[ext_resource type="Script" uid="uid://cwxyih27hxbjv" path="res://ui/hud.gd" id="1_1x8ju"]
 
-[node name="Node2D" type="CanvasLayer"]
-follow_viewport_enabled = true
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_1x8ju")
 
-[node name="Control" type="Control" parent="."]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="HealthContainer" type="MarginContainer" parent="."]
-anchors_preset = -1
-offset_right = 40.0
-offset_bottom = 40.0
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-
-[node name="HealthLabel" type="Label" parent="HealthContainer"]
-layout_mode = 2
-text = "HP: 100 / 100"
-
 [node name="ResourcesContainer" type="MarginContainer" parent="."]
+layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -40.0
+offset_left = 935.0
+offset_right = 1240.0
 offset_bottom = 40.0
 grow_horizontal = 0
 theme_override_constants/margin_top = 16
@@ -43,3 +33,14 @@ text = "Text = \"Scrap: 0\""
 [node name="MineralLabel" type="Label" parent="ResourcesContainer/ResourcesBox"]
 layout_mode = 2
 text = "Text = \" | Mineral: 0\""
+
+[node name="HealthContainer" type="MarginContainer" parent="."]
+layout_mode = 0
+offset_right = 116.0
+offset_bottom = 40.0
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+
+[node name="HealthLabel" type="Label" parent="HealthContainer"]
+layout_mode = 2
+text = "HP: 100 / 100"

@@ -7,11 +7,13 @@
 [node name="Main" type="Node2D"]
 
 [node name="Zone1" parent="." instance=ExtResource("2_hh730")]
-position = Vector2(4, 0)
+position = Vector2(28, 1)
 scale = Vector2(2, 2)
 
 [node name="player" parent="." instance=ExtResource("1_oxuid")]
 position = Vector2(659, 544)
 scale = Vector2(0.5, 0.5)
 
-[node name="Node2D" parent="." instance=ExtResource("3_hh730")]
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Control" parent="CanvasLayer" instance=ExtResource("3_hh730")]
