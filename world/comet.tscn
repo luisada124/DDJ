@@ -1,14 +1,20 @@
-[gd_scene load_steps=2 format=3 uid="uid://cshejja03gcoo"]
+[gd_scene load_steps=4 format=3 uid="uid://cshejja03gcoo"]
 
 [ext_resource type="Texture2D" uid="uid://o7ar6qs4uvk5" path="res://textures/cometas/Meteor_01.png" id="1_2lfv5"]
+[ext_resource type="Script" uid="uid://c1rl01lb04knc" path="res://world/comet.gd" id="1_ehe2o"]
 
-[node name="comet" type="Area2D"]
+[sub_resource type="CircleShape2D" id="CircleShape2D_ehe2o"]
+radius = 176.67422
+
+[node name="comet" type="StaticBody2D"]
+script = ExtResource("1_ehe2o")
 
 [node name="comet" type="Sprite2D" parent="."]
-position = Vector2(1, 2)
 scale = Vector2(0.2025, 0.1883333)
 texture = ExtResource("1_2lfv5")
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+[node name="CollisionPolygon2D" type="CollisionShape2D" parent="."]
 visible = false
-polygon = PackedVector2Array(40, -148, 48, -148, 57, -143, 58, -139, 64, -142, 73, -147, 87, -152, 97, -149, 99, -139, 102, -129, 100, -125, 138, -148, 151, -145, 142, -120, 119, -88, 98, -70, 51, 3, 65, 27, 89, 43, 82, 69, 48, 73, 36, 106, -37, 129, -79, 132, -111, 150, -132, 146, -137, 131, -148, 121, -151, 109, -112, 37, -84, 8, -112, -25, -46, -99, -24, -102)
+position = Vector2(2.3841858e-07, 0)
+scale = Vector2(0.20726408, 0.17712314)
+shape = SubResource("CircleShape2D_ehe2o")
