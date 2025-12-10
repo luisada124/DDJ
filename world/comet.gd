@@ -6,11 +6,21 @@ extends StaticBody2D
 @export var max_scrap: int = 3
 @export var explosion_scene: PackedScene  # opcional: partículas/FX
 
+@export var max_health: int = 30
+var health: int
+
 func _ready() -> void:
 	add_to_group("comet")
+	health = max_health
 
 func _process(delta: float) -> void:
 	position += direction * speed * delta
+
+func take_damage(amount: int) -> void:
+	health -= amount
+	print("Comet HP =", health)
+	if health <= 0:
+		explode()
 
 func explode() -> void:
 	# FX opcional
@@ -26,13 +36,10 @@ func explode() -> void:
 		fx.rotation = rotation
 		fx.scale = scale
 
-		# debug opcional
 		print("Comet pos:", position, "  FX pos:", fx.position)
 
-		_spawn_loot()
-		queue_free()
-
-
+	_spawn_loot()
+	queue_free()
 
 func _spawn_loot() -> void:
 	var pickup_scene: PackedScene = load("res://pickups/Pickup.tscn") # adapta o caminho
