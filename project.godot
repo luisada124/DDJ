@@ -11,15 +11,23 @@ config_version=5
 [application]
 
 config/name="Ricky´s Revenge"
-run/main_scene="uid://dlsssxy4tf0b8"
+run/main_scene="uid://cn7tfg61pg54m"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+GameState="*res://systems/GameState.gd"
 
 [display]
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/mode="viewport"
+
+[global_group]
+
+player=""
 
 [input]
 

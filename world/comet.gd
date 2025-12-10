@@ -1,6 +1,6 @@
-extends Area2D
+extends StaticBody2D
 
-@export var speed: float = 80.0
+@export var speed: float = 40.0
 @export var direction: Vector2 = Vector2.LEFT
 
 func _ready() -> void:
@@ -8,3 +8,8 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	position += direction * speed * delta
+
+
+func _on_body_entered(body: Node2D) -> void:
+	if body.is_in_group("player"):
+		print("COLIDIU COM PLAYER!")

@@ -1,11 +1,21 @@
-extends Node2D
+extends Node
 
+var player_max_health: int = 100
+var player_health: int = 100
 
-# Called when the node enters the scene tree for the first time.
-func _ready() -> void:
-	pass # Replace with function body.
+var resources := {
+	"scrap": 0,
+	"mineral": 0,
+}
 
+func add_resource(type: String, amount: int) -> void:
+	if not resources.has(type):
+		resources[type] = 0
+	resources[type] += amount
+	print(type, " =", resources[type])
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
-	pass
+func damage_player(amount: int) -> void:
+	player_health = max(player_health - amount, 0)
+
+func heal_player(amount: int) -> void:
+	player_health = min(player_health + amount, player_max_health)
