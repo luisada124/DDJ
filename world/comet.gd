@@ -16,13 +16,23 @@ func explode() -> void:
 	if explosion_scene != null:
 		var fx = explosion_scene.instantiate()
 
-		# IMPORTANTE: global_position, não só position
-		fx.global_position = global_position
+		# 1) adicionar como filho do MESMO parent (nó "comets")
+		var parent = get_parent()
+		parent.add_child(fx)
 
-		get_tree().current_scene.add_child(fx)
+		# 2) copiar posição/rotação/escala LOCAL
+		fx.position = position
+		fx.rotation = rotation
+		fx.scale = scale
 
-	_spawn_loot()
-	queue_free()
+		# debug opcional
+		print("Comet pos:", position, "  FX pos:", fx.position)
+
+		_spawn_loot()
+		queue_free()
+
+	
+
 
 
 
