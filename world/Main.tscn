@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://dlsssxy4tf0b8" path="res://player/player.tscn" id="1_oxuid"]
 [ext_resource type="PackedScene" uid="uid://cjlxyltpch1o" path="res://world/Zone1.tscn" id="2_hh730"]
 [ext_resource type="PackedScene" uid="uid://bhyk7leudmqo" path="res://ui/HUD.tscn" id="3_hh730"]
-[ext_resource type="PackedScene" uid="uid://b1rtkxje446fd" path="res://enemies/Enemy.tscn" id="4_rqm65"]
+[ext_resource type="PackedScene" path="res://enemies/Enemy.tscn" id="4_rqm65"]
 
 [node name="Main" type="Node2D"]
 
@@ -14,8 +14,6 @@ scale = Vector2(2, 2)
 [node name="player" parent="." instance=ExtResource("1_oxuid")]
 position = Vector2(659, 544)
 scale = Vector2(0.5, 0.5)
-
-[node name="Node2D" parent="." instance=ExtResource("3_hh730")]
 
 [node name="Enemy" parent="." instance=ExtResource("4_rqm65")]
 position = Vector2(518, 195)
@@ -36,3 +34,7 @@ scale = Vector2(0.4, 0.4)
 position = Vector2(143.00002, 459)
 rotation = 2.8501227
 scale = Vector2(0.4, 0.4)
+
+[node name="HUDLayer" type="CanvasLayer" parent="."]
+
+[node name="hud" parent="HUDLayer" instance=ExtResource("3_hh730")]
