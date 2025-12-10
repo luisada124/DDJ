@@ -9,10 +9,6 @@ radius = 176.67422
 
 [node name="comet" type="StaticBody2D" groups=["comet"]]
 script = ExtResource("1_ehe2o")
-speed = null
-direction = null
-min_scrap = null
-max_scrap = null
 explosion_scene = ExtResource("2_rf2k4")
 
 [node name="comet" type="Sprite2D" parent="."]

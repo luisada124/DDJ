@@ -8,7 +8,7 @@
 [node name="Main" type="Node2D"]
 
 [node name="Zone1" parent="." instance=ExtResource("2_hh730")]
-position = Vector2(4, 0)
+position = Vector2(-26, 21)
 scale = Vector2(2, 2)
 
 [node name="player" parent="." instance=ExtResource("1_oxuid")]
@@ -19,5 +19,20 @@ scale = Vector2(0.5, 0.5)
 
 [node name="Enemy" parent="." instance=ExtResource("4_rqm65")]
 position = Vector2(518, 195)
+rotation = 2.8501227
+scale = Vector2(0.4, 0.4)
+
+[node name="Enemy2" parent="." instance=ExtResource("4_rqm65")]
+position = Vector2(946.99994, 704.99994)
+rotation = 2.8501227
+scale = Vector2(0.4, 0.4)
+
+[node name="Enemy3" parent="." instance=ExtResource("4_rqm65")]
+position = Vector2(1142, 259)
+rotation = 2.8501227
+scale = Vector2(0.4, 0.4)
+
+[node name="Enemy4" parent="." instance=ExtResource("4_rqm65")]
+position = Vector2(143.00002, 459)
 rotation = 2.8501227
 scale = Vector2(0.4, 0.4)

@@ -28,7 +28,10 @@ func shoot() -> void:
 		var laser = LaserScene.instantiate()
 		laser.global_position = muzzle.global_position
 		laser.direction = dir
+		laser.from_player = true  # <- garante que é tiro do player
 		get_tree().current_scene.add_child(laser)
+
+
 
 
 func _physics_process(delta: float) -> void:

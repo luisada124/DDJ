@@ -6,10 +6,11 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_43lb5"]
 size = Vector2(177, 188.5)
 
-[node name="Enemy" type="CharacterBody2D" groups=["enemy"]]
+[node name="Enemy" type="CharacterBody2D"]
 script = ExtResource("1_xkw1x")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+rotation = 1.5707964
 texture = ExtResource("2_43lb5")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
