@@ -6,7 +6,7 @@
 [sub_resource type="CircleShape2D" id="CircleShape2D_ehe2o"]
 radius = 176.67422
 
-[node name="comet" type="StaticBody2D"]
+[node name="comet" type="StaticBody2D" groups=["comet"]]
 script = ExtResource("1_ehe2o")
 
 [node name="comet" type="Sprite2D" parent="."]
