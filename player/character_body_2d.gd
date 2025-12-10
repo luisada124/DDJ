@@ -8,10 +8,28 @@ var invincible: bool = false
 var invincible_timer: float = 0.0
 
 const SHIP_FORWARD := Vector2.UP
+
 const ACCELERATION := 700.0
 const MAX_SPEED := 500.0
 const DRAG := 0.5
 const ROTATION_SPEED := 3.0
+const LaserScene := preload("res://player/lasers/Laser.tscn")
+
+const FIRE_INTERVAL := 0.2  # segundos entre tiros
+var fire_cooldown: float = 0.0
+
+func shoot() -> void:
+	# direção da frente da nave
+	var dir := SHIP_FORWARD.rotated(rotation)
+
+	var muzzle_points = [ $GunLeft, $GunRight ]
+
+	for muzzle in muzzle_points:
+		var laser = LaserScene.instantiate()
+		laser.global_position = muzzle.global_position
+		laser.direction = dir
+		get_tree().current_scene.add_child(laser)
+
 
 func _physics_process(delta: float) -> void:
 	# 1) Rodar nave
@@ -38,10 +56,16 @@ func _physics_process(delta: float) -> void:
 	# 4) Mover
 	move_and_slide()
 
-	# 5) Verificar colisões
+	# 5) Disparo contínuo com cooldown
+	fire_cooldown -= delta
+	if Input.is_action_pressed("shoot") and fire_cooldown <= 0.0:
+		shoot()
+		fire_cooldown = FIRE_INTERVAL
+
+	# 6) Verificar colisões
 	_check_collisions()
 	
-	# 6) Atualizar invencibilidade
+	# 7) Atualizar invencibilidade
 	if invincible:
 		invincible_timer -= delta
 		if invincible_timer <= 0.0:

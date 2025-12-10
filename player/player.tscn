@@ -2,14 +2,14 @@
 
 [ext_resource type="Script" uid="uid://uah53r75hcy1" path="res://player/character_body_2d.gd" id="1_rkbax"]
 [ext_resource type="Texture2D" uid="uid://d4nuc6atw4kr2" path="res://textures/pew.png" id="2_g1dw6"]
-[ext_resource type="Texture2D" uid="uid://bvh0m7pa3w1mj" path="res://icon.svg" id="3_g1dw6"]
+[ext_resource type="Texture2D" uid="uid://c8brxwct4jmhy" path="res://textures/Rocket_Effect_01.png" id="2_yw30f"]
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_rkbax"]
 particle_flag_disable_z = true
 direction = Vector3(0, 1, 0)
 spread = 20.0
-initial_velocity_min = 150.0
-initial_velocity_max = 250.0
+initial_velocity_min = 80.0
+initial_velocity_max = 160.0
 gravity = Vector3(0, 0, 0)
 scale_min = 0.5
 
@@ -21,14 +21,22 @@ script = ExtResource("1_rkbax")
 [node name="ThrusterParticles" type="GPUParticles2D" parent="CharacterBody2D"]
 position = Vector2(0, 48)
 emitting = false
-amount = 50
-texture = ExtResource("3_g1dw6")
-lifetime = 0.7
+amount = 10
+texture = ExtResource("2_yw30f")
+lifetime = 0.3
+local_coords = true
 process_material = SubResource("ParticleProcessMaterial_rkbax")
 
 [node name="Sprite2D" type="Sprite2D" parent="CharacterBody2D"]
+position = Vector2(0, -1)
 texture = ExtResource("2_g1dw6")
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="CharacterBody2D"]
 visible = false
 polygon = PackedVector2Array(20, 40, 33, 45, 62, 72, 66, 29, 22, -33, 19, -65, -1, -85, -23, -63, -23, -32, -67, 22, -66, 77, -21, 41)
+
+[node name="GunLeft" type="Marker2D" parent="CharacterBody2D"]
+position = Vector2(-34, -41)
+
+[node name="GunRight" type="Marker2D" parent="CharacterBody2D"]
+position = Vector2(34, -41)
