@@ -18,3 +18,5 @@ texture = ExtResource("2_imgrv")
 visible = false
 rotation = 1.5707964
 shape = SubResource("CapsuleShape2D_0u8g1")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
