@@ -1,17 +1,23 @@
-[gd_scene load_steps=4 format=3 uid="uid://cshejja03gcoo"]
+[gd_scene load_steps=5 format=3 uid="uid://cshejja03gcoo"]
 
-[ext_resource type="Texture2D" uid="uid://o7ar6qs4uvk5" path="res://textures/cometas/Meteor_01.png" id="1_2lfv5"]
 [ext_resource type="Script" uid="uid://c1rl01lb04knc" path="res://world/comet.gd" id="1_ehe2o"]
+[ext_resource type="Texture2D" uid="uid://dhhae4nwhuxjp" path="res://textures/Crystal_03.png" id="2_ehe2o"]
+[ext_resource type="PackedScene" uid="uid://cvddfy1hkpwcr" path="res://world/explosion.tscn" id="2_rf2k4"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ehe2o"]
 radius = 176.67422
 
 [node name="comet" type="StaticBody2D" groups=["comet"]]
 script = ExtResource("1_ehe2o")
+speed = null
+direction = null
+min_scrap = null
+max_scrap = null
+explosion_scene = ExtResource("2_rf2k4")
 
 [node name="comet" type="Sprite2D" parent="."]
 scale = Vector2(0.2025, 0.1883333)
-texture = ExtResource("1_2lfv5")
+texture = ExtResource("2_ehe2o")
 
 [node name="CollisionPolygon2D" type="CollisionShape2D" parent="."]
 visible = false

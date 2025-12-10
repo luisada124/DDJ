@@ -80,14 +80,19 @@ func _check_collisions() -> void:
 		if collider != null and collider.is_in_group("comet"):
 			# só leva dano se não estiver invencível
 			if not invincible:
-				# 1) Dano
 				GameState.damage_player(10)
 				print("Bateu num cometa!")
 
-				# 2) Knockback na direção oposta à colisão
+				# Knockback
 				var normal: Vector2 = collision.get_normal()
 				velocity = normal * KNOCKBACK_FORCE
 
-				# 3) Ativar invencibilidade
+				# Invencibilidade
 				invincible = true
 				invincible_timer = INVINCIBILITY_TIME
+
+			# Explodir sempre que toca (mesmo se invencível)
+			if collider.has_method("explode"):
+				collider.explode()
+			else:
+				collider.queue_free()
