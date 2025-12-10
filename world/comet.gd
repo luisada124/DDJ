@@ -23,23 +23,26 @@ func take_damage(amount: int) -> void:
 		explode()
 
 func explode() -> void:
-	# FX opcional
-	if explosion_scene != null:
-		var fx = explosion_scene.instantiate()
+	#if explosion_scene != null:
+		#var fx = explosion_scene.instantiate()
 
-		# 1) adicionar como filho do MESMO parent (nó "comets")
-		var parent = get_parent()
-		parent.add_child(fx)
+		# 1) adicionar como filho do MESMO parent (nó "comets" dentro de Zone1)
+		#var parent := get_parent()      # isto é o nó "comets"
+		#parent.add_child(fx)
 
-		# 2) copiar posição/rotação/escala LOCAL
-		fx.position = position
-		fx.rotation = rotation
-		fx.scale = scale
+		# 2) usar posição GLOBAL para ficar certinho, mesmo com camera
+		#fx.global_position = global_position
+		#fx.global_rotation = global_rotation
+		#fx.global_scale = global_scale
 
-		print("Comet pos:", position, "  FX pos:", fx.position)
+		#print("Comet GLOBAL:", global_position,
+		#	  " | FX GLOBAL:", fx.global_position,
+		#	  " | FX parent:", fx.get_parent().name)
 
 	_spawn_loot()
 	queue_free()
+
+
 
 func _spawn_loot() -> void:
 	var pickup_scene: PackedScene = load("res://pickups/Pickup.tscn") # adapta o caminho
