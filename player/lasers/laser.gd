@@ -9,6 +9,17 @@ var lifetime: float = 2.0
 # true = tiro do player, false = tiro de inimigo
 var from_player: bool = true
 
+const _LAYER_PLAYER := 1
+const _LAYER_COMET := 2
+const _LAYER_ENEMY := 8
+
+func _ready() -> void:
+	# Ajusta colisões conforme o dono do tiro (evita lasers do player a baterem no player)
+	if from_player:
+		collision_mask = _LAYER_COMET | _LAYER_ENEMY
+	else:
+		collision_mask = _LAYER_PLAYER
+
 
 func _physics_process(delta: float) -> void:
 	global_position += direction * speed * delta
