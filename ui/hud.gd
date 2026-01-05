@@ -3,9 +3,11 @@ extends Control
 @onready var health_label: Label = $HealthContainer/HealthLabel
 @onready var scrap_label: Label = $ResourcesContainer/ResourcesBox/ScrapLabel
 @onready var mineral_label: Label = $ResourcesContainer/ResourcesBox/MineralLabel
+@onready var artifact_label: Label = $ArtifactContainer/ArtifactLabel
 
 @onready var upgrade_menu: Control = $UpgradeMenu
 @onready var upgrade_info: Label = $UpgradeMenu/Panel/Margin/VBox/Info
+@onready var upgrade_description: Label = $UpgradeMenu/Panel/Margin/VBox/Description
 
 @onready var hull_button: Button = $UpgradeMenu/Panel/Margin/VBox/HullButton
 @onready var blaster_button: Button = $UpgradeMenu/Panel/Margin/VBox/BlasterButton
@@ -32,6 +34,8 @@ func _ready() -> void:
 	for upgrade_id in _upgrade_buttons.keys():
 		var button: Button = _upgrade_buttons[upgrade_id]
 		button.pressed.connect(_on_upgrade_pressed.bind(upgrade_id))
+		button.mouse_entered.connect(_on_upgrade_hovered.bind(upgrade_id))
+		button.mouse_exited.connect(_on_upgrade_unhovered)
 
 	reset_button.pressed.connect(_on_reset_pressed)
 	close_button.pressed.connect(_on_close_pressed)
@@ -52,6 +56,8 @@ func _unhandled_input(event: InputEvent) -> void:
 func _set_upgrade_menu_visible(visible: bool) -> void:
 	upgrade_menu.visible = visible
 	get_tree().paused = visible
+	if visible:
+		_on_upgrade_unhovered()
 	_update_hud()
 
 func _update_hud() -> void:
@@ -63,6 +69,11 @@ func _update_hud() -> void:
 	var mineral: int = int(GameState.resources.get("mineral", 0))
 	scrap_label.text = "Scrap: %d" % scrap
 	mineral_label.text = "Mineral: %d" % mineral
+
+	if GameState.artifact_completed:
+		artifact_label.text = "Artefacto: COMPLETO"
+	else:
+		artifact_label.text = "Artefacto: %d / %d" % [GameState.artifact_parts_collected, GameState.ARTIFACT_PARTS_REQUIRED]
 
 	if upgrade_menu.visible:
 		_update_upgrade_menu(scrap, mineral)
@@ -96,6 +107,16 @@ func _format_cost(cost: Dictionary) -> String:
 
 func _on_upgrade_pressed(upgrade_id: String) -> void:
 	GameState.buy_upgrade(upgrade_id)
+
+func _on_upgrade_hovered(upgrade_id: String) -> void:
+	var title := GameState.get_upgrade_title(upgrade_id)
+	var level := GameState.get_upgrade_level(upgrade_id)
+	var max_level := GameState.get_upgrade_max_level(upgrade_id)
+	var desc := GameState.get_upgrade_description(upgrade_id)
+	upgrade_description.text = "%s (Lv %d/%d)\n%s" % [title, level, max_level, desc]
+
+func _on_upgrade_unhovered() -> void:
+	upgrade_description.text = "Passa o rato por cima de um upgrade para ver a descri\u00e7\u00e3o."
 
 func _on_reset_pressed() -> void:
 	GameState.reset_save()

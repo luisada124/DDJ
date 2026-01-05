@@ -34,7 +34,7 @@ func explode() -> void:
 		var fx = explosion_scene.instantiate()
 		get_tree().current_scene.add_child(fx)
 		if fx is Node2D:
-			(fx as Node2D).global_transform = global_transform
+			(fx as Node2D).global_position = global_position
 
 	_spawn_loot()
 	queue_free()

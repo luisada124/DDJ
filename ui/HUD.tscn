@@ -48,6 +48,18 @@ theme_override_constants/margin_top = 16
 layout_mode = 2
 text = "HP: 100 / 100"
 
+[node name="ArtifactContainer" type="MarginContainer" parent="."]
+layout_mode = 0
+offset_top = 40.0
+offset_right = 220.0
+offset_bottom = 80.0
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+
+[node name="ArtifactLabel" type="Label" parent="ArtifactContainer"]
+layout_mode = 2
+text = "Artefacto: 0 / 4"
+
 [node name="UpgradeMenu" type="Control" parent="."]
 process_mode = 3
 layout_mode = 3
@@ -94,6 +106,12 @@ text = "Upgrades"
 [node name="Info" type="Label" parent="UpgradeMenu/Panel/Margin/VBox"]
 layout_mode = 2
 text = "U para fechar"
+
+[node name="Description" type="Label" parent="UpgradeMenu/Panel/Margin/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 48)
+autowrap_mode = 3
+text = "Passa o rato por cima de um upgrade para ver a descri\u00e7\u00e3o."
 
 [node name="HullButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox"]
 layout_mode = 2
