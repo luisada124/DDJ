@@ -1,5 +1,8 @@
 extends StaticBody2D
 
+const CometDatabase := preload("res://world/CometDatabase.gd")
+
+@export var comet_id: String = "meteor_01"
 @export var speed: float = 40.0
 @export var direction: Vector2 = Vector2.LEFT
 @export var min_scrap: int = 1
@@ -12,7 +15,27 @@ var health: int
 
 func _ready() -> void:
 	add_to_group("comet")
+	_apply_comet_data()
+	rotation = randf_range(0.0, TAU)
 	health = max_health
+
+func _apply_comet_data() -> void:
+	var data := CometDatabase.get_data(comet_id)
+	if data == null:
+		return
+
+	speed = data.speed
+	max_health = data.max_health
+	min_scrap = data.min_scrap
+	max_scrap = data.max_scrap
+	mineral_drop_chance = data.mineral_drop_chance
+
+	if has_node("comet"):
+		var sprite := $comet as Sprite2D
+		var tex = load(data.texture_path)
+		if tex is Texture2D:
+			sprite.texture = tex
+		sprite.scale = data.sprite_scale
 
 func _process(delta: float) -> void:
 	position += direction * speed * delta

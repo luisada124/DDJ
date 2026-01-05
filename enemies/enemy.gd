@@ -36,6 +36,20 @@ func _ready() -> void:
 	add_to_group("enemy")
 	player = get_tree().get_first_node_in_group("player") as CharacterBody2D
 	print("Enemy READY, player =", player)
+	_apply_debug_color()
+
+func _apply_debug_color() -> void:
+	if not has_node("Sprite2D"):
+		return
+
+	var sprite := $Sprite2D as Sprite2D
+	match enemy_id:
+		"sniper":
+			sprite.modulate = Color(0.5, 0.95, 1.0) # azul
+		"tank":
+			sprite.modulate = Color(1.0, 0.6, 0.35) # laranja
+		_:
+			sprite.modulate = Color(1, 1, 1)
 
 
 func _physics_process(delta: float) -> void:

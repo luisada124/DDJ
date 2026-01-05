@@ -24,12 +24,15 @@ position = Vector2(-24, 4)
 
 [node name="comet" parent="comets" instance=ExtResource("2_htqom")]
 position = Vector2(87, 132)
+comet_id = "meteor_01"
 
 [node name="comet2" parent="comets" instance=ExtResource("2_htqom")]
 position = Vector2(540, 250)
+comet_id = "meteor_05"
 
 [node name="comet3" parent="comets" instance=ExtResource("2_htqom")]
 position = Vector2(419, 46)
+comet_id = "meteor_09"
 
 [node name="CometSpawner" type="Node2D" parent="."]
 position = Vector2(685, 206)

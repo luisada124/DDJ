@@ -1,5 +1,7 @@
 extends Node2D
 
+const CometDatabase := preload("res://world/CometDatabase.gd")
+
 @export var comet_scene: PackedScene
 
 func _ready() -> void:
@@ -14,6 +16,14 @@ func _on_spawn_timer_timeout() -> void:
 		return
 
 	var comet = comet_scene.instantiate()
+
+	comet.set("comet_id", CometDatabase.get_random_id())
+
+	# direção aleatória (com fallback)
+	var dir := Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0))
+	if dir.length() < 0.2:
+		dir = Vector2.LEFT
+	comet.set("direction", dir.normalized())
 
 	# posição aleatória (ajusta estes valores ao tamanho do teu nível)
 	var x = randf_range(0.0, 1920.0)

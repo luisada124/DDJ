@@ -131,15 +131,15 @@ func get_upgrade_title(upgrade_id: String) -> String:
 func get_upgrade_description(upgrade_id: String) -> String:
 	match upgrade_id:
 		"hull":
-			return "+10 HP m\\u00e1ximo por n\\u00edvel."
+			return "+10 HP máximo por nível."
 		"blaster":
-			return "Dispara mais r\\u00e1pido (reduz o intervalo entre tiros)."
+			return "Dispara mais rápido (reduz o intervalo entre tiros)."
 		"engine":
-			return "Mais acelera\\u00e7\\u00e3o (+12% por n\\u00edvel)."
+			return "Mais aceleração (+12% por nível)."
 		"thrusters":
-			return "Mais velocidade m\\u00e1xima (+10% por n\\u00edvel)."
+			return "Mais velocidade máxima (+10% por nível)."
 		"magnet":
-			return "Aumenta o magnet dos drops (+20% range e +15% speed por n\\u00edvel)."
+			return "Aumenta o magnet dos drops (+20% range e +15% speed por nível)."
 
 	var def = UPGRADE_DEFS.get(upgrade_id)
 	if def == null:
@@ -197,6 +197,7 @@ func collect_artifact_part() -> void:
 	artifact_parts_collected = min(artifact_parts_collected + 1, ARTIFACT_PARTS_REQUIRED)
 	if artifact_parts_collected >= ARTIFACT_PARTS_REQUIRED:
 		artifact_completed = true
+		resources["artifact"] = int(resources.get("artifact", 0)) + 1
 		# Recompensa simples (ajusta quando tiveres balanceamento)
 		resources["scrap"] = int(resources.get("scrap", 0)) + 25
 		resources["mineral"] = int(resources.get("mineral", 0)) + 25
@@ -266,6 +267,7 @@ func _apply_defaults() -> void:
 	resources = {
 		"scrap": 0,
 		"mineral": 0,
+		"artifact": 0,
 	}
 	upgrades = {
 		"hull": 0,

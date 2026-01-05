@@ -18,26 +18,26 @@ position = Vector2(659, 544)
 scale = Vector2(0.5, 0.5)
 
 [node name="Enemy" parent="." instance=ExtResource("4_rqm65")]
-position = Vector2(518, 195)
-rotation = 2.8501227
+position = Vector2(500, 450)
+rotation = 0.0
 scale = Vector2(0.4, 0.4)
 enemy_id = "basic"
 
 [node name="Enemy2" parent="." instance=ExtResource("4_rqm65")]
-position = Vector2(946.99994, 704.99994)
-rotation = 2.8501227
+position = Vector2(850, 450)
+rotation = 0.0
 scale = Vector2(0.4, 0.4)
 enemy_id = "sniper"
 
 [node name="Enemy3" parent="." instance=ExtResource("4_rqm65")]
-position = Vector2(1142, 259)
-rotation = 2.8501227
+position = Vector2(500, 680)
+rotation = 0.0
 scale = Vector2(0.4, 0.4)
 enemy_id = "tank"
 
 [node name="Enemy4" parent="." instance=ExtResource("4_rqm65")]
-position = Vector2(143.00002, 459)
-rotation = 2.8501227
+position = Vector2(850, 680)
+rotation = 0.0
 scale = Vector2(0.4, 0.4)
 enemy_id = "basic"
 
@@ -65,15 +65,19 @@ amount = 3
 
 [node name="ArtifactPart1" parent="TestSetup" instance=ExtResource("6_artifact")]
 position = Vector2(600, 520)
+keep_visible_when_completed = true
 
 [node name="ArtifactPart2" parent="TestSetup" instance=ExtResource("6_artifact")]
 position = Vector2(820, 520)
+keep_visible_when_completed = true
 
 [node name="ArtifactPart3" parent="TestSetup" instance=ExtResource("6_artifact")]
 position = Vector2(600, 660)
+keep_visible_when_completed = true
 
 [node name="ArtifactPart4" parent="TestSetup" instance=ExtResource("6_artifact")]
 position = Vector2(820, 660)
+keep_visible_when_completed = true
 
 [node name="HUDLayer" type="CanvasLayer" parent="."]
 

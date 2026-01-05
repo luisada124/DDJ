@@ -107,12 +107,6 @@ text = "Upgrades"
 layout_mode = 2
 text = "U para fechar"
 
-[node name="Description" type="Label" parent="UpgradeMenu/Panel/Margin/VBox"]
-layout_mode = 2
-custom_minimum_size = Vector2(0, 48)
-autowrap_mode = 3
-text = "Passa o rato por cima de um upgrade para ver a descri\u00e7\u00e3o."
-
 [node name="HullButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox"]
 layout_mode = 2
 text = "Hull"
@@ -132,6 +126,14 @@ text = "Thrusters"
 [node name="MagnetButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox"]
 layout_mode = 2
 text = "Magnet"
+
+[node name="UpgradeDescription" type="RichTextLabel" parent="UpgradeMenu/Panel/Margin/VBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 64)
+fit_content = false
+scroll_active = false
+autowrap_mode = 3
+text = "Passa o rato por cima de um upgrade."
 
 [node name="ButtonsSeparator" type="HSeparator" parent="UpgradeMenu/Panel/Margin/VBox"]
 layout_mode = 2

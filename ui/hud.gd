@@ -7,7 +7,7 @@ extends Control
 
 @onready var upgrade_menu: Control = $UpgradeMenu
 @onready var upgrade_info: Label = $UpgradeMenu/Panel/Margin/VBox/Info
-@onready var upgrade_description: Label = $UpgradeMenu/Panel/Margin/VBox/Description
+@onready var upgrade_description: RichTextLabel = $UpgradeMenu/Panel/Margin/VBox/UpgradeDescription
 
 @onready var hull_button: Button = $UpgradeMenu/Panel/Margin/VBox/HullButton
 @onready var blaster_button: Button = $UpgradeMenu/Panel/Margin/VBox/BlasterButton
@@ -71,7 +71,8 @@ func _update_hud() -> void:
 	mineral_label.text = "Mineral: %d" % mineral
 
 	if GameState.artifact_completed:
-		artifact_label.text = "Artefacto: COMPLETO"
+		var artifacts := int(GameState.resources.get("artifact", 0))
+		artifact_label.text = "Artefacto: OBTIDO (%d)" % artifacts
 	else:
 		artifact_label.text = "Artefacto: %d / %d" % [GameState.artifact_parts_collected, GameState.ARTIFACT_PARTS_REQUIRED]
 
@@ -116,10 +117,12 @@ func _on_upgrade_hovered(upgrade_id: String) -> void:
 	upgrade_description.text = "%s (Lv %d/%d)\n%s" % [title, level, max_level, desc]
 
 func _on_upgrade_unhovered() -> void:
-	upgrade_description.text = "Passa o rato por cima de um upgrade para ver a descri\u00e7\u00e3o."
+	upgrade_description.text = "Passa o rato por cima de um upgrade."
 
 func _on_reset_pressed() -> void:
 	GameState.reset_save()
+	_set_upgrade_menu_visible(false)
+	get_tree().reload_current_scene()
 
 func _on_close_pressed() -> void:
 	_set_upgrade_menu_visible(false)

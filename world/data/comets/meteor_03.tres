@@ -1,0 +1,16 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://world/CometData.gd" id="1_CometData"]
+
+[resource]
+script = ExtResource("1_CometData")
+id = "meteor_03"
+display_name = "Meteor 03"
+texture_path = "res://textures/cometas/Meteor_03.png"
+sprite_scale = Vector2(0.22, 0.22)
+speed = 38.0
+max_health = 34
+min_scrap = 2
+max_scrap = 3
+mineral_drop_chance = 0.2
+
