@@ -22,3 +22,4 @@ visible = false
 position = Vector2(2.3841858e-07, 0)
 scale = Vector2(0.20726408, 0.17712314)
 shape = SubResource("CircleShape2D_ehe2o")
+debug_color = Color(0.38039216, 0.13333334, 0.5176471, 0.49803922)
