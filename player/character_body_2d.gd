@@ -32,8 +32,6 @@ func shoot() -> void:
 		get_tree().current_scene.add_child(laser)
 
 
-
-
 func _physics_process(delta: float) -> void:
 	# 1) Rodar nave
 	var turn_dir := Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
@@ -99,3 +97,22 @@ func _check_collisions() -> void:
 				collider.explode()
 			else:
 				collider.queue_free()
+			continue
+
+		if collider != null and collider.is_in_group("enemy"):
+			if not invincible:
+				var dmg := 10
+				var contact_dmg = collider.get("contact_damage")
+				if contact_dmg != null:
+					dmg = int(contact_dmg)
+
+				GameState.damage_player(dmg)
+				print("Bateu num inimigo!")
+
+				# Knockback
+				var normal: Vector2 = collision.get_normal()
+				velocity = normal * KNOCKBACK_FORCE
+
+				# Invencibilidade
+				invincible = true
+				invincible_timer = INVINCIBILITY_TIME

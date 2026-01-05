@@ -22,7 +22,16 @@ func take_damage(amount: int) -> void:
 	if health <= 0:
 		explode()
 
+
+
+
 func explode() -> void:
+	if explosion_scene != null:
+		var fx = explosion_scene.instantiate()
+		get_tree().current_scene.add_child(fx)
+		if fx is Node2D:
+			(fx as Node2D).global_transform = global_transform
+
 	#if explosion_scene != null:
 		#var fx = explosion_scene.instantiate()
 
