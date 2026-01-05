@@ -56,4 +56,3 @@ static func _register(enemy_id: String, path: String) -> void:
 	var data = load(path)
 	if data is EnemyData:
 		_data_cache[enemy_id] = data
-

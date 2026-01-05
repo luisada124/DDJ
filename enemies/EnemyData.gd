@@ -9,7 +9,7 @@ class_name EnemyData
 @export var desired_distance: float = 300.0
 @export var distance_tolerance: float = 20.0
 @export var chase_range: float = 2000.0
-
+@export var texture: Texture2D
 @export var max_health: int = 30
 @export var contact_damage: int = 10
 
@@ -23,4 +23,3 @@ class_name EnemyData
 @export var mineral_drop_chance: float = 0.25
 @export var scrap_amount: int = 1
 @export var mineral_amount: int = 1
-

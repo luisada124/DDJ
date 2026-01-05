@@ -24,6 +24,8 @@ const EnemyDatabase := preload("res://enemies/EnemyDatabase.gd")
 @export var mineral_drop_chance: float = 0.25
 @export var scrap_amount: int = 1
 @export var mineral_amount: int = 1
+var enemy_data: EnemyData
+
 
 var current_health: int
 var player: CharacterBody2D
@@ -31,26 +33,26 @@ var fire_cooldown: float = 0.0
 
 
 func _ready() -> void:
-	EnemyDatabase.apply_to(self, enemy_id)
+	enemy_data = EnemyDatabase.get_data(enemy_id)   # <- buscar data
+	EnemyDatabase.apply_to(self, enemy_id)          # <- aplicar stats
+
+	_apply_texture()
+
 	current_health = max_health
 	add_to_group("enemy")
 	player = get_tree().get_first_node_in_group("player") as CharacterBody2D
 	print("Enemy READY, player =", player)
-	_apply_debug_color()
 
-func _apply_debug_color() -> void:
+
+func _apply_texture() -> void:
 	if not has_node("Sprite2D"):
+		return
+	if enemy_data == null:
 		return
 
 	var sprite := $Sprite2D as Sprite2D
-	match enemy_id:
-		"sniper":
-			sprite.modulate = Color(0.5, 0.95, 1.0) # azul
-		"tank":
-			sprite.modulate = Color(1.0, 0.6, 0.35) # laranja
-		_:
-			sprite.modulate = Color(1, 1, 1)
-
+	if enemy_data.texture != null:
+		sprite.texture = enemy_data.texture
 
 func _physics_process(delta: float) -> void:
 	if player == null or not is_instance_valid(player):
