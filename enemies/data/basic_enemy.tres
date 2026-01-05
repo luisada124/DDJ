@@ -1,24 +1,9 @@
-[gd_resource type="Resource" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://b1sbgukqfywga"]
 
-[ext_resource type="Script" path="res://enemies/EnemyData.gd" id="1_EnemyData"]
+[ext_resource type="Script" uid="uid://c7u8g8avjhmrh" path="res://enemies/EnemyData.gd" id="1_EnemyData"]
+[ext_resource type="Texture2D" uid="uid://fmf7ptgnigd5" path="res://textures/inimigos/inimigo1-removebg-preview.png" id="2_pp2o4"]
 
 [resource]
 script = ExtResource("1_EnemyData")
-id = "basic"
-display_name = "Basic"
-move_speed = 250.0
-desired_distance = 300.0
-distance_tolerance = 20.0
-chase_range = 2000.0
-max_health = 30
-contact_damage = 10
-fire_interval = 1.2
-laser_damage = 5
-laser_scene_path = "res://player/lasers/Laser.tscn"
-pickup_scene_path = "res://pickups/Pickup.tscn"
-min_drops = 1
-max_drops = 3
+texture = ExtResource("2_pp2o4")
 mineral_drop_chance = 0.15
-scrap_amount = 1
-mineral_amount = 1
-

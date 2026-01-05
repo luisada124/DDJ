@@ -1,20 +1,19 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=4 format=3 uid="uid://b4oidd5qommqi"]
 
 [ext_resource type="Script" path="res://player/alien.gd" id="1_alien"]
-[ext_resource type="Texture2D" uid="uid://dav1hvcsxqb66" path="res://textures/Crystal_01.png" id="2_tex"]
+[ext_resource type="Texture2D" uid="uid://bqlv2ijykt3cs" path="res://textures/ricky.webp" id="2_t3nf7"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_alien"]
 radius = 14.0
 
 [node name="Alien" type="CharacterBody2D"]
-collision_layer = 1
 collision_mask = 14
 script = ExtResource("1_alien")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-scale = Vector2(0.09, 0.09)
-texture = ExtResource("2_tex")
 modulate = Color(0.4, 1, 0.55, 1)
+scale = Vector2(0.09, 0.09)
+texture = ExtResource("2_t3nf7")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_alien")

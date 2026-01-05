@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://cjmbx7whxydvt"]
 
-[ext_resource type="Script" path="res://enemies/enemy.gd" id="1_xkw1x"]
-[ext_resource type="Texture2D" uid="uid://birftgjhn4j57" path="res://textures/space.png" id="2_43lb5"]
+[ext_resource type="Script" uid="uid://b5lhg7xom4q7" path="res://enemies/enemy.gd" id="1_xkw1x"]
+[ext_resource type="Texture2D" uid="uid://fmf7ptgnigd5" path="res://textures/inimigos/inimigo1-removebg-preview.png" id="2_43lb5"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_43lb5"]
 size = Vector2(177, 188.5)
