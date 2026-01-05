@@ -1,6 +1,7 @@
 extends Control
 
 @onready var health_label: Label = $HealthContainer/HealthLabel
+@onready var alien_health_label: Label = $AlienHealthContainer/AlienHealthLabel
 @onready var scrap_label: Label = $ResourcesContainer/ResourcesBox/ScrapLabel
 @onready var mineral_label: Label = $ResourcesContainer/ResourcesBox/MineralLabel
 @onready var artifact_label: Label = $ArtifactContainer/ArtifactLabel
@@ -92,6 +93,10 @@ func _update_hud() -> void:
 	var hp: int = GameState.player_health
 	var max_hp: int = GameState.player_max_health
 	health_label.text = "HP: %d / %d" % [hp, max_hp]
+
+	var alien_hp: int = GameState.alien_health
+	var alien_max_hp: int = GameState.alien_max_health
+	alien_health_label.text = "Alien: %d / %d" % [alien_hp, alien_max_hp]
 
 	var scrap: int = int(GameState.resources.get("scrap", 0))
 	var mineral: int = int(GameState.resources.get("mineral", 0))

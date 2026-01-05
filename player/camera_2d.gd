@@ -3,6 +3,7 @@ extends Camera2D
 @export var zoom_speed := 0.15        # rapidez do tween
 @export var min_zoom := 0.5
 @export var max_zoom := 2.5
+@export var zoom_input_enabled: bool = true
 
 var target_zoom: Vector2
 
@@ -17,7 +18,13 @@ func set_target_zoom_immediate(new_zoom: Vector2) -> void:
 func get_target_zoom() -> Vector2:
 	return target_zoom
 
+func set_zoom_input_enabled(enabled: bool) -> void:
+	zoom_input_enabled = enabled
+
 func _unhandled_input(event):
+	if not zoom_input_enabled:
+		return
+
 	# Scroll do rato
 	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:

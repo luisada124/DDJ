@@ -23,6 +23,16 @@ var _alien: CharacterBody2D = null
 
 var _saved_ship_zoom: Vector2 = Vector2.ONE
 
+func take_damage(amount: int) -> void:
+	if invincible:
+		return
+
+	GameState.damage_player(amount)
+
+	# Invencibilidade
+	invincible = true
+	invincible_timer = INVINCIBILITY_TIME
+
 func shoot() -> void:
 	# direção da frente da nave
 	var dir := SHIP_FORWARD.rotated(rotation)
@@ -39,6 +49,14 @@ func shoot() -> void:
 
 func _physics_process(delta: float) -> void:
 	if _controlling_alien:
+		# se o alien morreu/desapareceu, volta para a nave
+		if _alien == null or not is_instance_valid(_alien):
+			_controlling_alien = false
+			add_to_group("player")
+			_set_camera_zoom_input_enabled(true)
+			_move_camera_to(self, _saved_ship_zoom)
+			return
+
 		# nave fica em "idle" enquanto controlas o alien
 		if has_node("ThrusterParticles"):
 			$ThrusterParticles.emitting = false
@@ -165,19 +183,23 @@ func _spawn_alien() -> void:
 
 	_alien.global_position = global_position + Vector2(0, 48)
 	_alien.add_to_group("player")
+	_alien.add_to_group("alien")
 	remove_from_group("player")
 
 	if _alien.has_method("setup"):
 		_alien.call("setup", self)
 
 	_controlling_alien = true
+	GameState.reset_alien_health()
 	_save_ship_camera_zoom()
 	_move_camera_to(_alien, alien_camera_zoom)
+	_set_camera_zoom_input_enabled(false)
 
 func _try_dock_alien() -> void:
 	if _alien == null or not is_instance_valid(_alien):
 		_controlling_alien = false
 		add_to_group("player")
+		_set_camera_zoom_input_enabled(true)
 		_move_camera_to(self, _saved_ship_zoom)
 		return
 
@@ -188,9 +210,11 @@ func _try_dock_alien() -> void:
 func _on_alien_dock_requested() -> void:
 	_controlling_alien = false
 	add_to_group("player")
+	_set_camera_zoom_input_enabled(true)
 
 	if _alien != null and is_instance_valid(_alien):
 		_alien.remove_from_group("player")
+		_alien.remove_from_group("alien")
 		_alien.queue_free()
 	_alien = null
 
@@ -228,3 +252,10 @@ func _set_camera_zoom_immediate(new_zoom: Vector2) -> void:
 		_camera.call("set_target_zoom_immediate", new_zoom)
 	else:
 		_camera.zoom = new_zoom
+
+func _set_camera_zoom_input_enabled(enabled: bool) -> void:
+	if _camera == null or not is_instance_valid(_camera):
+		return
+
+	if _camera.has_method("set_zoom_input_enabled"):
+		_camera.call("set_zoom_input_enabled", enabled)

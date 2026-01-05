@@ -19,7 +19,12 @@ modulate = Color(0.4, 1, 0.55, 1)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_alien")
 
+[node name="RopeAnchor" type="Marker2D" parent="."]
+position = Vector2(0, 10)
+
 [node name="TetherLine" type="Line2D" parent="."]
 top_level = true
+z_as_relative = false
+z_index = -1
 width = 2.0
 default_color = Color(0.9, 0.9, 1, 0.9)

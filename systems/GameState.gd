@@ -6,12 +6,16 @@ const SAVE_PATH := "user://save.json"
 const SAVE_VERSION := 1
 
 const BASE_PLAYER_MAX_HEALTH := 100
+const BASE_ALIEN_MAX_HEALTH := 50
 const BASE_FIRE_INTERVAL := 0.2
 const BASE_ACCELERATION := 700.0
 const BASE_MAX_SPEED := 500.0
 
 var player_max_health: int = BASE_PLAYER_MAX_HEALTH
 var player_health: int = BASE_PLAYER_MAX_HEALTH
+
+var alien_max_health: int = BASE_ALIEN_MAX_HEALTH
+var alien_health: int = BASE_ALIEN_MAX_HEALTH
 
 var resources := {
 	"scrap": 0,
@@ -95,6 +99,18 @@ func heal_player(amount: int) -> void:
 	player_health = min(player_health + amount, player_max_health)
 	emit_signal("state_changed")
 	_queue_save()
+
+func reset_alien_health() -> void:
+	alien_health = alien_max_health
+	emit_signal("state_changed")
+
+func damage_alien(amount: int) -> void:
+	alien_health = max(alien_health - amount, 0)
+	emit_signal("state_changed")
+
+func heal_alien(amount: int) -> void:
+	alien_health = min(alien_health + amount, alien_max_health)
+	emit_signal("state_changed")
 
 func get_fire_interval() -> float:
 	var level := get_upgrade_level("blaster")
@@ -318,6 +334,8 @@ func _apply_defaults() -> void:
 	unlocked_zones = PackedStringArray(["outer"])
 	_recalculate_player_stats()
 	player_health = player_max_health
+	alien_max_health = BASE_ALIEN_MAX_HEALTH
+	alien_health = alien_max_health
 
 func _recalculate_zone_unlocks() -> void:
 	# Base: sempre podes ir para a zona exterior.

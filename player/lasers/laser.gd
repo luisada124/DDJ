@@ -49,8 +49,21 @@ func _on_body_entered(body: Node2D) -> void:
 	else:
 		# ========= TIRO DO INIMIGO =========
 		# Só interessa o player
+		if body.is_in_group("alien") and body.has_method("take_damage"):
+			body.take_damage(damage)
+			queue_free()
+			return
+
+		if body.is_in_group("ship") and body.has_method("take_damage"):
+			body.take_damage(damage)
+			queue_free()
+			return
+
 		if body.is_in_group("player"):
-			GameState.damage_player(damage)
+			if body.has_method("take_damage"):
+				body.take_damage(damage)
+			else:
+				GameState.damage_player(damage)
 			queue_free()
 			return
 
