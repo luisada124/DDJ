@@ -13,11 +13,11 @@ position = Vector2(19, 0)
 motion_mirroring = Vector2(860, 571)
 
 [node name="SpaceBackground" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer"]
-position = Vector2(426, 250)
-scale = Vector2(1, 0.9)
+texture_repeat = 2
+position = Vector2(2048, 2048.5)
 texture = ExtResource("1_sprn3")
 region_enabled = true
-region_rect = Rect2(0, 0, 860, 571)
+region_rect = Rect2(0, 0, 4096, 4096)
 
 [node name="comets" type="Node2D" parent="."]
 position = Vector2(-24, 4)
