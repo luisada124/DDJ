@@ -1,0 +1,24 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://enemies/EnemyData.gd" id="1_EnemyData"]
+
+[resource]
+script = ExtResource("1_EnemyData")
+id = "sniper"
+display_name = "Sniper"
+move_speed = 220.0
+desired_distance = 550.0
+distance_tolerance = 35.0
+chase_range = 2400.0
+max_health = 22
+contact_damage = 8
+fire_interval = 2.0
+laser_damage = 12
+laser_scene_path = "res://player/lasers/Laser.tscn"
+pickup_scene_path = "res://pickups/Pickup.tscn"
+min_drops = 1
+max_drops = 2
+mineral_drop_chance = 0.35
+scrap_amount = 1
+mineral_amount = 2
+

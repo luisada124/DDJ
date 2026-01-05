@@ -4,6 +4,7 @@ extends StaticBody2D
 @export var direction: Vector2 = Vector2.LEFT
 @export var min_scrap: int = 1
 @export var max_scrap: int = 3
+@export var mineral_drop_chance: float = 0.15
 @export var explosion_scene: PackedScene  # opcional: partículas/FX
 
 @export var max_health: int = 30
@@ -63,4 +64,9 @@ func _spawn_loot() -> void:
 			randf_range(-8.0, 8.0),
 			randf_range(-8.0, 8.0)
 		)
+		if randf() < mineral_drop_chance:
+			loot.set("resource_type", "mineral")
+		else:
+			loot.set("resource_type", "scrap")
+		loot.set("amount", 1)
 		get_tree().current_scene.add_child(loot)

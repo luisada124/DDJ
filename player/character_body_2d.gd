@@ -9,13 +9,10 @@ var invincible_timer: float = 0.0
 
 const SHIP_FORWARD := Vector2.UP
 
-const ACCELERATION := 700.0
-const MAX_SPEED := 500.0
 const DRAG := 0.5
 const ROTATION_SPEED := 3.0
 const LaserScene := preload("res://player/lasers/Laser.tscn")
 
-const FIRE_INTERVAL := 0.2  # segundos entre tiros
 var fire_cooldown: float = 0.0
 
 func shoot() -> void:
@@ -45,14 +42,15 @@ func _physics_process(delta: float) -> void:
 
 	if thrust_pressed:
 		var forward_dir := SHIP_FORWARD.rotated(rotation)
-		velocity += forward_dir * ACCELERATION * delta
+		velocity += forward_dir * GameState.get_acceleration() * delta
 	else:
 		if velocity.length() > 0.0:
 			velocity = velocity.lerp(Vector2.ZERO, DRAG * delta)
 
 	# 3) Limitar velocidade
-	if velocity.length() > MAX_SPEED:
-		velocity = velocity.normalized() * MAX_SPEED
+	var max_speed := GameState.get_max_speed()
+	if velocity.length() > max_speed:
+		velocity = velocity.normalized() * max_speed
 
 	# 4) Mover
 	move_and_slide()
@@ -61,7 +59,7 @@ func _physics_process(delta: float) -> void:
 	fire_cooldown -= delta
 	if Input.is_action_pressed("shoot") and fire_cooldown <= 0.0:
 		shoot()
-		fire_cooldown = FIRE_INTERVAL
+		fire_cooldown = GameState.get_fire_interval()
 
 	# 6) Verificar colisões
 	_check_collisions()
