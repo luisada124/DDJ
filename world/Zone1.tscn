@@ -35,7 +35,7 @@ position = Vector2(419, 46)
 comet_id = "meteor_09"
 
 [node name="CometSpawner" type="Node2D" parent="."]
-position = Vector2(685, 206)
+position = Vector2(-8, -11)
 script = ExtResource("3_a3a3j")
 comet_scene = ExtResource("2_htqom")
 

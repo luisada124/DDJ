@@ -1,6 +1,10 @@
 todo:
 
-zoom com scroll da camara
+alien a sair da nave e a pegar recursos por la
+mecanicas a adicionar:
+
+upgrade para aspirador na nave, assim nao e necessario sair da nave para apanhar materiais
+upgrade turbo a sair da parte da frente da nave para ir para tras 
 
 
 upgrades:

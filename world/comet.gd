@@ -12,12 +12,42 @@ const CometDatabase := preload("res://world/CometDatabase.gd")
 
 @export var max_health: int = 30
 var health: int
+var _exploded: bool = false
 
 func _ready() -> void:
 	add_to_group("comet")
 	_apply_comet_data()
 	rotation = randf_range(0.0, TAU)
 	health = max_health
+
+	# add an Area2D detector to detect collisions with other comets
+	if not has_node("Detector"):
+		var detector := Area2D.new()
+		detector.name = "Detector"
+		# try to copy existing collision shape
+		var cs = get_node_or_null("CollisionShape2D")
+		if cs == null:
+			cs = get_node_or_null("CollisionPolygon2D")
+		if cs != null and cs is CollisionShape2D:
+			var det_shape := CollisionShape2D.new()
+			if cs.shape != null:
+				det_shape.shape = cs.shape.duplicate()
+			# copy transform (position/scale) so detector matches visual collider
+			det_shape.position = cs.position
+			det_shape.scale = cs.scale
+			detector.add_child(det_shape)
+		add_child(detector)
+		# detector should detect bodies on the comet's collision layer
+		detector.collision_layer = collision_layer
+		detector.collision_mask = collision_layer
+		detector.monitoring = true
+		detector.connect("body_entered", Callable(self, "_on_detector_body_entered"))
+
+	# --- BONUS: apontar para o centro da câmara no spawn ---
+	var camera := get_viewport().get_camera_2d()
+	if camera != null:
+		direction = (camera.global_position - global_position).normalized()
+	# se camera for null, mantém a direction que já tinhas
 
 func _apply_comet_data() -> void:
 	var data := CometDatabase.get_data(comet_id)
@@ -46,36 +76,28 @@ func take_damage(amount: int) -> void:
 	if health <= 0:
 		explode()
 
-
-
-
 func explode() -> void:
+	if _exploded:
+		return
+	_exploded = true
 	if explosion_scene != null:
 		var fx = explosion_scene.instantiate()
 		get_tree().current_scene.add_child(fx)
 		if fx is Node2D:
 			(fx as Node2D).global_position = global_position
 
-	#if explosion_scene != null:
-		#var fx = explosion_scene.instantiate()
-
-		# 1) adicionar como filho do MESMO parent (nó "comets" dentro de Zone1)
-		#var parent := get_parent()      # isto é o nó "comets"
-		#parent.add_child(fx)
-
-		# 2) usar posição GLOBAL para ficar certinho, mesmo com camera
-		#fx.global_position = global_position
-		#fx.global_rotation = global_rotation
-		#fx.global_scale = global_scale
-
-		#print("Comet GLOBAL:", global_position,
-		#	  " | FX GLOBAL:", fx.global_position,
-		#	  " | FX parent:", fx.get_parent().name)
-
 	_spawn_loot()
 	queue_free()
 
-
+func _on_detector_body_entered(body: Node) -> void:
+	if _exploded:
+		return
+	if body == self:
+		return
+	if body is Node and body.is_in_group("comet"):
+		if body.has_method("explode"):
+			body.explode()
+		explode()
 
 func _spawn_loot() -> void:
 	var pickup_scene: PackedScene = load("res://pickups/Pickup.tscn") # adapta o caminho
