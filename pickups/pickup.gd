@@ -30,7 +30,7 @@ func _magnet_to_player(delta: float) -> void:
 	if magnet_range <= 0.0 or magnet_speed <= 0.0:
 		return
 
-	if _player == null or not is_instance_valid(_player):
+	if _player == null or not is_instance_valid(_player) or not _player.is_in_group("player"):
 		_player = get_tree().get_first_node_in_group("player") as Node2D
 	if _player == null:
 		return

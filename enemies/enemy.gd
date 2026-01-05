@@ -5,6 +5,7 @@ const SHIP_FORWARD := Vector2.UP   # ponta da nave na textura
 const EnemyDatabase := preload("res://enemies/EnemyDatabase.gd")
 
 @export var enemy_id: String = "basic"
+@export var difficulty_multiplier: float = 1.0
 
 @export var move_speed: float = 250.0
 @export var desired_distance: float = 300.0   # distância “ideal” ao player
@@ -55,7 +56,7 @@ func _apply_texture() -> void:
 		sprite.texture = enemy_data.texture
 
 func _physics_process(delta: float) -> void:
-	if player == null or not is_instance_valid(player):
+	if player == null or not is_instance_valid(player) or not player.is_in_group("player"):
 		player = get_tree().get_first_node_in_group("player") as CharacterBody2D
 		if player == null:
 			return

@@ -24,7 +24,6 @@ position = Vector2(-24, 4)
 
 [node name="comet" parent="comets" instance=ExtResource("2_htqom")]
 position = Vector2(87, 132)
-comet_id = "meteor_01"
 
 [node name="comet2" parent="comets" instance=ExtResource("2_htqom")]
 position = Vector2(540, 250)

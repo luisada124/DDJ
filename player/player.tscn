@@ -42,7 +42,7 @@ position = Vector2(-34, -41)
 [node name="GunRight" type="Marker2D" parent="."]
 position = Vector2(34, -41)
 
-[node name="player" type="Node2D" parent="." groups=["player"]]
+[node name="player" type="Node2D" parent="."]
 
 [node name="Camera2D" type="Camera2D" parent="."]
 script = ExtResource("4_yw30f")

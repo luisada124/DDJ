@@ -14,21 +14,35 @@ static func get_data(enemy_id: String) -> EnemyData:
 
 	return _data_cache.get("basic") as EnemyData
 
-static func apply_to(enemy: Node, enemy_id: String) -> void:
+static func apply_to(enemy: Node, enemy_id: String, difficulty_multiplier: float = 1.0) -> void:
 	var data := get_data(enemy_id)
 	if data == null:
 		return
 
-	enemy.set("move_speed", data.move_speed)
+	var diff: float = difficulty_multiplier
+	if diff < 0.25:
+		diff = 0.25
+
+	var speed_mult: float = float(pow(diff, 0.25)) # aumenta pouco a velocidade
+
+	enemy.set("move_speed", data.move_speed * speed_mult)
 	enemy.set("desired_distance", data.desired_distance)
 	enemy.set("distance_tolerance", data.distance_tolerance)
 	enemy.set("chase_range", data.chase_range)
 
-	enemy.set("max_health", data.max_health)
-	enemy.set("contact_damage", data.contact_damage)
+	enemy.set("max_health", int(round(data.max_health * diff)))
+	enemy.set("contact_damage", int(round(data.contact_damage * diff)))
 
-	enemy.set("fire_interval", data.fire_interval)
-	enemy.set("laser_damage", data.laser_damage)
+	var fire_factor: float = 1.0 + 0.25 * (diff - 1.0) # mais diff = dispara mais rápido
+	if fire_factor < 0.1:
+		fire_factor = 0.1
+
+	var fire_interval: float = data.fire_interval / fire_factor
+	if fire_interval < 0.12:
+		fire_interval = 0.12
+
+	enemy.set("fire_interval", fire_interval)
+	enemy.set("laser_damage", int(round(data.laser_damage * diff)))
 
 	if data.laser_scene_path != "":
 		var laser_scene = load(data.laser_scene_path)
