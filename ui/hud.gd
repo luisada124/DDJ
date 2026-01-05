@@ -18,6 +18,10 @@ extends Control
 @onready var reset_button: Button = $UpgradeMenu/Panel/Margin/VBox/ResetButton
 @onready var close_button: Button = $UpgradeMenu/Panel/Margin/VBox/CloseButton
 
+@onready var map_menu: Control = $MapMenu
+@onready var map_zone_list: VBoxContainer = $MapMenu/Panel/Margin/VBox/ZoneList
+@onready var close_map_button: Button = $MapMenu/Panel/Margin/VBox/CloseMapButton
+
 var _upgrade_buttons: Dictionary
 
 func _ready() -> void:
@@ -39,6 +43,7 @@ func _ready() -> void:
 
 	reset_button.pressed.connect(_on_reset_pressed)
 	close_button.pressed.connect(_on_close_pressed)
+	close_map_button.pressed.connect(_on_close_map_pressed)
 
 	GameState.state_changed.connect(_update_hud)
 	_update_hud()
@@ -49,15 +54,38 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 
+	if event is InputEventKey and (event as InputEventKey).pressed and not (event as InputEventKey).echo:
+		var key_event := event as InputEventKey
+		if key_event.keycode == KEY_M:
+			_set_map_menu_visible(not map_menu.visible)
+			get_viewport().set_input_as_handled()
+			return
+
 	if upgrade_menu.visible and event.is_action_pressed("ui_cancel"):
 		_set_upgrade_menu_visible(false)
 		get_viewport().set_input_as_handled()
+		return
+
+	if map_menu.visible and event.is_action_pressed("ui_cancel"):
+		_set_map_menu_visible(false)
+		get_viewport().set_input_as_handled()
+		return
 
 func _set_upgrade_menu_visible(visible: bool) -> void:
 	upgrade_menu.visible = visible
+	if visible:
+		_set_map_menu_visible(false)
 	get_tree().paused = visible
 	if visible:
 		_on_upgrade_unhovered()
+	_update_hud()
+
+func _set_map_menu_visible(visible: bool) -> void:
+	map_menu.visible = visible
+	if visible:
+		_set_upgrade_menu_visible(false)
+		_rebuild_map_zone_list()
+	get_tree().paused = visible
 	_update_hud()
 
 func _update_hud() -> void:
@@ -77,6 +105,9 @@ func _update_hud() -> void:
 
 	if upgrade_menu.visible:
 		_update_upgrade_menu(scrap, mineral)
+
+	if map_menu.visible:
+		_rebuild_map_zone_list()
 
 func _update_upgrade_menu(scrap: int, mineral: int) -> void:
 	upgrade_info.text = "Scrap: %d | Mineral: %d | (U) Fechar" % [scrap, mineral]
@@ -123,3 +154,49 @@ func _on_reset_pressed() -> void:
 
 func _on_close_pressed() -> void:
 	_set_upgrade_menu_visible(false)
+
+func _on_close_map_pressed() -> void:
+	_set_map_menu_visible(false)
+
+func _rebuild_map_zone_list() -> void:
+	if map_zone_list == null:
+		return
+
+	for child in map_zone_list.get_children():
+		map_zone_list.remove_child(child)
+		child.queue_free()
+
+	for zone_id in ZoneCatalog.get_zone_ids_sorted_outer_to_core():
+		var title := ZoneCatalog.get_zone_title(zone_id)
+		var required := ZoneCatalog.get_required_artifact_parts(zone_id)
+
+		var button := Button.new()
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+		var is_current := (GameState.current_zone_id == zone_id)
+		var can_access := GameState.can_access_zone(zone_id)
+
+		if is_current:
+			button.text = "%s  [ATUAL]" % title
+			button.disabled = true
+		elif can_access:
+			button.text = "Viajar: %s" % title
+			button.disabled = false
+		else:
+			button.text = "%s  (Bloqueado: %d/%d partes)" % [
+				title,
+				GameState.artifact_parts_collected,
+				required
+			]
+			button.disabled = true
+
+		if can_access and not is_current:
+			button.pressed.connect(_on_zone_selected.bind(zone_id))
+
+		map_zone_list.add_child(button)
+
+func _on_zone_selected(zone_id: String) -> void:
+	var manager := get_tree().get_first_node_in_group("zone_manager")
+	if manager != null and manager.has_method("switch_to_zone"):
+		manager.switch_to_zone(zone_id)
+	_set_map_menu_visible(false)

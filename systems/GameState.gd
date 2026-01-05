@@ -30,6 +30,9 @@ const ARTIFACT_PARTS_REQUIRED := 4
 var artifact_parts_collected: int = 0
 var artifact_completed: bool = false
 
+var current_zone_id: String = "outer"
+var unlocked_zones: PackedStringArray = PackedStringArray(["outer"])
+
 const UPGRADE_DEFS := {
 	"hull": {
 		"title": "Hull",
@@ -201,6 +204,24 @@ func collect_artifact_part() -> void:
 		resources["scrap"] = int(resources.get("scrap", 0)) + 25
 		resources["mineral"] = int(resources.get("mineral", 0)) + 25
 
+	_recalculate_zone_unlocks()
+	emit_signal("state_changed")
+	_queue_save()
+
+func can_access_zone(zone_id: String) -> bool:
+	if not ZoneCatalog.is_valid_zone(zone_id):
+		return false
+
+	if unlocked_zones.has(zone_id):
+		return true
+
+	var required_parts := ZoneCatalog.get_required_artifact_parts(zone_id)
+	return artifact_parts_collected >= required_parts
+
+func set_current_zone(zone_id: String) -> void:
+	if not can_access_zone(zone_id):
+		return
+	current_zone_id = zone_id
 	emit_signal("state_changed")
 	_queue_save()
 
@@ -217,6 +238,8 @@ func save_game() -> void:
 		"player_health": player_health,
 		"artifact_parts_collected": artifact_parts_collected,
 		"artifact_completed": artifact_completed,
+		"current_zone_id": current_zone_id,
+		"unlocked_zones": unlocked_zones,
 	}
 
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
@@ -260,6 +283,19 @@ func load_game() -> void:
 	player_health = int(data.get("player_health", player_max_health))
 	artifact_parts_collected = int(data.get("artifact_parts_collected", 0))
 	artifact_completed = bool(data.get("artifact_completed", false))
+	current_zone_id = str(data.get("current_zone_id", "outer"))
+
+	var loaded_unlocked = data.get("unlocked_zones")
+	if typeof(loaded_unlocked) == TYPE_ARRAY:
+		unlocked_zones = PackedStringArray(loaded_unlocked)
+	elif typeof(loaded_unlocked) == TYPE_PACKED_STRING_ARRAY:
+		unlocked_zones = loaded_unlocked
+	else:
+		unlocked_zones = PackedStringArray(["outer"])
+
+	_recalculate_zone_unlocks()
+	if not can_access_zone(current_zone_id):
+		current_zone_id = "outer"
 	_recalculate_player_stats()
 
 func _apply_defaults() -> void:
@@ -276,8 +312,20 @@ func _apply_defaults() -> void:
 	}
 	artifact_parts_collected = 0
 	artifact_completed = false
+	current_zone_id = "outer"
+	unlocked_zones = PackedStringArray(["outer"])
 	_recalculate_player_stats()
 	player_health = player_max_health
+
+func _recalculate_zone_unlocks() -> void:
+	# Base: sempre podes ir para a zona exterior.
+	if not unlocked_zones.has("outer"):
+		unlocked_zones.append("outer")
+
+	for zone_id in ZoneCatalog.get_zone_ids_sorted_outer_to_core():
+		var required_parts := ZoneCatalog.get_required_artifact_parts(zone_id)
+		if artifact_parts_collected >= required_parts and not unlocked_zones.has(zone_id):
+			unlocked_zones.append(zone_id)
 
 func _recalculate_player_stats() -> void:
 	player_max_health = BASE_PLAYER_MAX_HEALTH + get_upgrade_level("hull") * 10
