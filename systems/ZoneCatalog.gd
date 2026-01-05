@@ -49,8 +49,7 @@ static func get_zone_ids_sorted_outer_to_core() -> Array[String]:
 	var ids: Array[String] = []
 	for k in ZONES.keys():
 		ids.append(str(k))
-	ids.sort_custom(func(a: String, b: String) -> bool:
+	ids.sort_custom(func(a, b):
 		return int(ZONES[a].get("ring", 0)) > int(ZONES[b].get("ring", 0))
 	)
 	return ids
-
