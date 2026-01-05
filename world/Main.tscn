@@ -19,21 +19,25 @@ scale = Vector2(0.5, 0.5)
 position = Vector2(518, 195)
 rotation = 2.8501227
 scale = Vector2(0.4, 0.4)
+enemy_id = "basic"
 
 [node name="Enemy2" parent="." instance=ExtResource("4_rqm65")]
 position = Vector2(946.99994, 704.99994)
 rotation = 2.8501227
 scale = Vector2(0.4, 0.4)
+enemy_id = "sniper"
 
 [node name="Enemy3" parent="." instance=ExtResource("4_rqm65")]
 position = Vector2(1142, 259)
 rotation = 2.8501227
 scale = Vector2(0.4, 0.4)
+enemy_id = "tank"
 
 [node name="Enemy4" parent="." instance=ExtResource("4_rqm65")]
 position = Vector2(143.00002, 459)
 rotation = 2.8501227
 scale = Vector2(0.4, 0.4)
+enemy_id = "basic"
 
 [node name="HUDLayer" type="CanvasLayer" parent="."]
 
