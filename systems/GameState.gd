@@ -26,33 +26,42 @@ var upgrades := {
 	"magnet": 0,    # maior range/velocidade do magnet
 }
 
+const ARTIFACT_PARTS_REQUIRED := 4
+var artifact_parts_collected: int = 0
+var artifact_completed: bool = false
+
 const UPGRADE_DEFS := {
 	"hull": {
 		"title": "Hull",
+		"description": "+10 HP máximo por nível.",
 		"max_level": 10,
 		"base_cost": {"scrap": 10, "mineral": 0},
 		"growth": 1.35,
 	},
 	"blaster": {
 		"title": "Blaster",
+		"description": "Dispara mais rápido (reduz o intervalo entre tiros).",
 		"max_level": 10,
 		"base_cost": {"scrap": 12, "mineral": 2},
 		"growth": 1.35,
 	},
 	"engine": {
 		"title": "Engine",
+		"description": "Mais aceleração (+12% por nível).",
 		"max_level": 10,
 		"base_cost": {"scrap": 14, "mineral": 4},
 		"growth": 1.35,
 	},
 	"thrusters": {
 		"title": "Thrusters",
+		"description": "Mais velocidade máxima (+10% por nível).",
 		"max_level": 10,
 		"base_cost": {"scrap": 14, "mineral": 4},
 		"growth": 1.35,
 	},
 	"magnet": {
 		"title": "Magnet",
+		"description": "Aumenta o magnet dos drops (+20% range e +15% speed por nível).",
 		"max_level": 10,
 		"base_cost": {"scrap": 8, "mineral": 6},
 		"growth": 1.35,
@@ -119,6 +128,24 @@ func get_upgrade_title(upgrade_id: String) -> String:
 		return upgrade_id
 	return str(def.get("title", upgrade_id))
 
+func get_upgrade_description(upgrade_id: String) -> String:
+	match upgrade_id:
+		"hull":
+			return "+10 HP m\\u00e1ximo por n\\u00edvel."
+		"blaster":
+			return "Dispara mais r\\u00e1pido (reduz o intervalo entre tiros)."
+		"engine":
+			return "Mais acelera\\u00e7\\u00e3o (+12% por n\\u00edvel)."
+		"thrusters":
+			return "Mais velocidade m\\u00e1xima (+10% por n\\u00edvel)."
+		"magnet":
+			return "Aumenta o magnet dos drops (+20% range e +15% speed por n\\u00edvel)."
+
+	var def = UPGRADE_DEFS.get(upgrade_id)
+	if def == null:
+		return ""
+	return str(def.get("description", ""))
+
 func get_upgrade_cost(upgrade_id: String) -> Dictionary:
 	var def = UPGRADE_DEFS.get(upgrade_id)
 	if def == null:
@@ -163,6 +190,20 @@ func buy_upgrade(upgrade_id: String) -> bool:
 	_queue_save()
 	return true
 
+func collect_artifact_part() -> void:
+	if artifact_completed:
+		return
+
+	artifact_parts_collected = min(artifact_parts_collected + 1, ARTIFACT_PARTS_REQUIRED)
+	if artifact_parts_collected >= ARTIFACT_PARTS_REQUIRED:
+		artifact_completed = true
+		# Recompensa simples (ajusta quando tiveres balanceamento)
+		resources["scrap"] = int(resources.get("scrap", 0)) + 25
+		resources["mineral"] = int(resources.get("mineral", 0)) + 25
+
+	emit_signal("state_changed")
+	_queue_save()
+
 func reset_save() -> void:
 	_apply_defaults()
 	save_game()
@@ -174,6 +215,8 @@ func save_game() -> void:
 		"resources": resources,
 		"upgrades": upgrades,
 		"player_health": player_health,
+		"artifact_parts_collected": artifact_parts_collected,
+		"artifact_completed": artifact_completed,
 	}
 
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
@@ -215,6 +258,8 @@ func load_game() -> void:
 			upgrades[upgrade_id] = int(loaded_upgrades[upgrade_id])
 
 	player_health = int(data.get("player_health", player_max_health))
+	artifact_parts_collected = int(data.get("artifact_parts_collected", 0))
+	artifact_completed = bool(data.get("artifact_completed", false))
 	_recalculate_player_stats()
 
 func _apply_defaults() -> void:
@@ -229,6 +274,8 @@ func _apply_defaults() -> void:
 		"thrusters": 0,
 		"magnet": 0,
 	}
+	artifact_parts_collected = 0
+	artifact_completed = false
 	_recalculate_player_stats()
 	player_health = player_max_health
 
