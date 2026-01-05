@@ -14,6 +14,12 @@ func _ready() -> void:
 	add_to_group("comet")
 	health = max_health
 
+	# --- BONUS: apontar para o centro da câmara no spawn ---
+	var camera := get_viewport().get_camera_2d()
+	if camera != null:
+		direction = (camera.global_position - global_position).normalized()
+	# se camera for null, mantém a direction que já tinhas
+
 func _process(delta: float) -> void:
 	position += direction * speed * delta
 
@@ -23,9 +29,6 @@ func take_damage(amount: int) -> void:
 	if health <= 0:
 		explode()
 
-
-
-
 func explode() -> void:
 	if explosion_scene != null:
 		var fx = explosion_scene.instantiate()
@@ -33,26 +36,8 @@ func explode() -> void:
 		if fx is Node2D:
 			(fx as Node2D).global_transform = global_transform
 
-	#if explosion_scene != null:
-		#var fx = explosion_scene.instantiate()
-
-		# 1) adicionar como filho do MESMO parent (nó "comets" dentro de Zone1)
-		#var parent := get_parent()      # isto é o nó "comets"
-		#parent.add_child(fx)
-
-		# 2) usar posição GLOBAL para ficar certinho, mesmo com camera
-		#fx.global_position = global_position
-		#fx.global_rotation = global_rotation
-		#fx.global_scale = global_scale
-
-		#print("Comet GLOBAL:", global_position,
-		#	  " | FX GLOBAL:", fx.global_position,
-		#	  " | FX parent:", fx.get_parent().name)
-
 	_spawn_loot()
 	queue_free()
-
-
 
 func _spawn_loot() -> void:
 	var pickup_scene: PackedScene = load("res://pickups/Pickup.tscn") # adapta o caminho

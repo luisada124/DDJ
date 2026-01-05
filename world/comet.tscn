@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://c1rl01lb04knc" path="res://world/comet.gd" id="1_ehe2o"]
 [ext_resource type="Texture2D" uid="uid://dhhae4nwhuxjp" path="res://textures/Crystal_03.png" id="2_ehe2o"]
-[ext_resource type="PackedScene" path="res://world/explosion.tscn" id="2_rf2k4"]
+[ext_resource type="PackedScene" uid="uid://cvddfy1hkpwcr" path="res://world/explosion.tscn" id="2_rf2k4"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ehe2o"]
 radius = 176.67422
