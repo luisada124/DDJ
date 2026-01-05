@@ -10,6 +10,13 @@ func _ready():
 	# começa com o zoom atual
 	target_zoom = zoom
 
+func set_target_zoom_immediate(new_zoom: Vector2) -> void:
+	target_zoom = new_zoom
+	zoom = new_zoom
+
+func get_target_zoom() -> Vector2:
+	return target_zoom
+
 func _unhandled_input(event):
 	# Scroll do rato
 	if event is InputEventMouseButton and event.pressed:

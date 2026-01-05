@@ -41,4 +41,3 @@ func switch_to_zone(zone_id: String) -> void:
 		return
 	GameState.set_current_zone(zone_id)
 	load_zone(zone_id)
-

@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://player/alien.gd" id="1_alien"]
+[ext_resource type="Texture2D" uid="uid://dav1hvcsxqb66" path="res://textures/Crystal_01.png" id="2_tex"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_alien"]
+radius = 14.0
+
+[node name="Alien" type="CharacterBody2D"]
+collision_layer = 1
+collision_mask = 14
+script = ExtResource("1_alien")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.09, 0.09)
+texture = ExtResource("2_tex")
+modulate = Color(0.4, 1, 0.55, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_alien")
+
+[node name="TetherLine" type="Line2D" parent="."]
+top_level = true
+width = 2.0
+default_color = Color(0.9, 0.9, 1, 0.9)

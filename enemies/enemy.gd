@@ -5,6 +5,7 @@ const SHIP_FORWARD := Vector2.UP   # ponta da nave na textura
 const EnemyDatabase := preload("res://enemies/EnemyDatabase.gd")
 
 @export var enemy_id: String = "basic"
+@export var difficulty_multiplier: float = 1.0
 
 @export var move_speed: float = 250.0
 @export var desired_distance: float = 300.0   # distância “ideal” ao player
@@ -31,7 +32,7 @@ var fire_cooldown: float = 0.0
 
 
 func _ready() -> void:
-	EnemyDatabase.apply_to(self, enemy_id)
+	EnemyDatabase.apply_to(self, enemy_id, difficulty_multiplier)
 	current_health = max_health
 	add_to_group("enemy")
 	player = get_tree().get_first_node_in_group("player") as CharacterBody2D
@@ -53,7 +54,7 @@ func _apply_debug_color() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if player == null or not is_instance_valid(player):
+	if player == null or not is_instance_valid(player) or not player.is_in_group("player"):
 		player = get_tree().get_first_node_in_group("player") as CharacterBody2D
 		if player == null:
 			return

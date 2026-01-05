@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://cn7tfg61pg54m"]
+[gd_scene load_steps=8 format=3 uid="uid://cn7tfg61pg54m"]
 
 [ext_resource type="PackedScene" uid="uid://dlsssxy4tf0b8" path="res://player/player.tscn" id="1_oxuid"]
 [ext_resource type="Script" path="res://world/ZoneManager.gd" id="2_zone_manager"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://enemies/Enemy.tscn" id="4_rqm65"]
 [ext_resource type="PackedScene" path="res://pickups/Pickup.tscn" id="5_pickup"]
 [ext_resource type="PackedScene" path="res://pickups/ArtifactPart.tscn" id="6_artifact"]
+[ext_resource type="Script" path="res://world/enemy_spawner.gd" id="7_enemy_spawner"]
 
 [node name="Main" type="Node2D"]
 
@@ -16,29 +17,7 @@ script = ExtResource("2_zone_manager")
 position = Vector2(659, 544)
 scale = Vector2(0.5, 0.5)
 
-[node name="Enemy" parent="." instance=ExtResource("4_rqm65")]
-position = Vector2(500, 450)
-rotation = 0.0
-scale = Vector2(0.4, 0.4)
-enemy_id = "basic"
-
-[node name="Enemy2" parent="." instance=ExtResource("4_rqm65")]
-position = Vector2(850, 450)
-rotation = 0.0
-scale = Vector2(0.4, 0.4)
-enemy_id = "sniper"
-
-[node name="Enemy3" parent="." instance=ExtResource("4_rqm65")]
-position = Vector2(500, 680)
-rotation = 0.0
-scale = Vector2(0.4, 0.4)
-enemy_id = "tank"
-
-[node name="Enemy4" parent="." instance=ExtResource("4_rqm65")]
-position = Vector2(850, 680)
-rotation = 0.0
-scale = Vector2(0.4, 0.4)
-enemy_id = "basic"
+[node name="Enemies" type="Node2D" parent="."]
 
 [node name="TestSetup" type="Node2D" parent="."]
 
@@ -78,6 +57,16 @@ keep_visible_when_completed = true
 position = Vector2(820, 660)
 keep_visible_when_completed = true
 
+[node name="EnemySpawner" type="Node2D" parent="."]
+script = ExtResource("7_enemy_spawner")
+enemy_scene = ExtResource("4_rqm65")
+
+[node name="SpawnTimer" type="Timer" parent="EnemySpawner"]
+wait_time = 3.0
+autostart = true
+
 [node name="HUDLayer" type="CanvasLayer" parent="."]
 
 [node name="hud" parent="HUDLayer" instance=ExtResource("3_hh730")]
+
+[connection signal="timeout" from="EnemySpawner/SpawnTimer" to="EnemySpawner" method="_on_spawn_timer_timeout"]
