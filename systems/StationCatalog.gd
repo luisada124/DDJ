@@ -20,9 +20,11 @@ const STATIONS: Dictionary = {
 		"trades": {
 			"scrap_to_mineral": {"give": {"scrap": 8}, "receive": {"mineral": 1}},
 			"mineral_to_scrap": {"give": {"mineral": 1}, "receive": {"scrap": 10}},
+			"ametista_to_mineral": {"give": {"ametista": 1}, "receive": {"mineral": 30}},
+			"ametista_to_scrap": {"give": {"ametista": 1}, "receive": {"scrap": 45}},
 		},
-		"artifact_part_cost": {"scrap": 60, "mineral": 40},
-		"offered_quests": ["kill_10_sniper"],
+		"artifact_part_cost": {"scrap": 60, "mineral": 40, "ametista": 1},
+		"offered_quests": ["kill_10_sniper", "kill_25_sniper_ametista"],
 	},
 	"station_gamma": {
 		"title": "Base Gamma",
@@ -31,9 +33,11 @@ const STATIONS: Dictionary = {
 		"trades": {
 			"scrap_to_mineral": {"give": {"scrap": 12}, "receive": {"mineral": 2}},
 			"mineral_to_scrap": {"give": {"mineral": 2}, "receive": {"scrap": 15}},
+			"ametista_to_mineral": {"give": {"ametista": 1}, "receive": {"mineral": 40}},
+			"ametista_to_scrap": {"give": {"ametista": 1}, "receive": {"scrap": 60}},
 		},
-		"artifact_part_cost": {"scrap": 110, "mineral": 55},
-		"offered_quests": ["kill_5_tank"],
+		"artifact_part_cost": {"scrap": 110, "mineral": 55, "ametista": 2},
+		"offered_quests": ["kill_5_tank", "kill_12_tank_ametista"],
 	},
 	"station_delta": {
 		"title": "Mercador Delta",

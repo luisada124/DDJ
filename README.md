@@ -1,5 +1,8 @@
 todo:
 
+Resolver problema da descrição das missões. Não estará a aparecer quando se compra. 
+
+
 meter mais vida na nave e menos inimigos a spawnar
 Meter os artefactos fora do minimapa só estarão disponíveis com mapas depois de os desbloquear. 
 Temos de trocar a corda para só recolher com um upgrade específico. 

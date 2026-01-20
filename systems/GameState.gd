@@ -20,11 +20,14 @@ var alien_health: int = BASE_ALIEN_MAX_HEALTH
 var resources := {
 	"scrap": 0,
 	"mineral": 0,
+	"ametista": 0,
 }
 
 const QUEST_KILL_15_BASIC := "kill_15_basic"
 const QUEST_KILL_10_SNIPER := "kill_10_sniper"
 const QUEST_KILL_5_TANK := "kill_5_tank"
+const QUEST_KILL_25_SNIPER_AMETISTA := "kill_25_sniper_ametista"
+const QUEST_KILL_12_TANK_AMETISTA := "kill_12_tank_ametista"
 const QUEST_DEFS := {
 	QUEST_KILL_15_BASIC: {
 		"title": "Limpar o Setor",
@@ -46,6 +49,20 @@ const QUEST_DEFS := {
 		"enemy_id": "tank",
 		"goal": 5,
 		"reward": {"scrap": 80, "mineral": 60},
+	},
+	QUEST_KILL_25_SNIPER_AMETISTA: {
+		"title": "Olho Roxo",
+		"description": "Mata 25 inimigos sniper (missao dificil).",
+		"enemy_id": "sniper",
+		"goal": 25,
+		"reward": {"scrap": 140, "mineral": 120, "ametista": 1},
+	},
+	QUEST_KILL_12_TANK_AMETISTA: {
+		"title": "Quebra-Cascos",
+		"description": "Mata 12 inimigos tank (missao dificil).",
+		"enemy_id": "tank",
+		"goal": 12,
+		"reward": {"scrap": 220, "mineral": 180, "ametista": 2},
 	},
 }
 
@@ -548,6 +565,7 @@ func _apply_defaults() -> void:
 		"scrap": 0,
 		"mineral": 0,
 		"artifact": 0,
+		"ametista": 0,
 	}
 	quests = {}
 	_ensure_quests_initialized()

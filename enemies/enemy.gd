@@ -23,6 +23,7 @@ const EnemyDatabase := preload("res://enemies/EnemyDatabase.gd")
 @export var min_drops: int = 1
 @export var max_drops: int = 3
 @export var mineral_drop_chance: float = 0.25
+@export var ametista_drop_chance: float = 0.015
 @export var scrap_amount: int = 1
 @export var mineral_amount: int = 1
 var enemy_data: EnemyData
@@ -163,4 +164,9 @@ func _spawn_loot() -> void:
 		else:
 			loot.set("resource_type", "scrap")
 			loot.set("amount", scrap_amount)
+
+		var in_zone2 := GameState.current_zone_id == "mid"
+		if in_zone2 and randf() < ametista_drop_chance:
+			loot.set("resource_type", "ametista")
+			loot.set("amount", 1)
 		get_tree().current_scene.add_child(loot)

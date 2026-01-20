@@ -4,6 +4,7 @@ extends Control
 @onready var alien_health_label: Label = $AlienHealthContainer/AlienHealthLabel
 @onready var scrap_label: Label = $ResourcesContainer/ResourcesBox/ScrapLabel
 @onready var mineral_label: Label = $ResourcesContainer/ResourcesBox/MineralLabel
+@onready var ametista_label: Label = $ResourcesContainer/ResourcesBox/AmetistaLabel
 
 @onready var upgrade_menu: Control = $UpgradeMenu
 @onready var upgrade_info: Label = $UpgradeMenu/Panel/Margin/VBox/Info
@@ -27,6 +28,8 @@ extends Control
 @onready var scrap_to_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/ScrapToMineralButton
 @onready var mineral_to_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/MineralToScrapButton
 @onready var buy_artifact_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyArtifactPartButton
+@onready var ametista_to_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/AmetistaToMineralButton
+@onready var ametista_to_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/AmetistaToScrapButton
 
 @onready var npc1_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/NPC1Button
 @onready var npc2_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/NPC2Button
@@ -84,6 +87,8 @@ func _ready() -> void:
 	scrap_to_mineral_button.pressed.connect(_on_trade_scrap_to_mineral)
 	mineral_to_scrap_button.pressed.connect(_on_trade_mineral_to_scrap)
 	buy_artifact_part_button.pressed.connect(_on_buy_artifact_part)
+	ametista_to_mineral_button.pressed.connect(_on_trade_ametista_to_mineral)
+	ametista_to_scrap_button.pressed.connect(_on_trade_ametista_to_scrap)
 	npc1_button.pressed.connect(_on_npc_pressed.bind(0))
 	npc2_button.pressed.connect(_on_npc_pressed.bind(1))
 	npc3_button.pressed.connect(_on_npc_pressed.bind(2))
@@ -225,8 +230,10 @@ func _update_hud() -> void:
 
 	var scrap: int = int(GameState.resources.get("scrap", 0))
 	var mineral: int = int(GameState.resources.get("mineral", 0))
+	var ametista: int = int(GameState.resources.get("ametista", 0))
 	scrap_label.text = "Scrap: %d" % scrap
-	mineral_label.text = "Mineral: %d" % mineral
+	mineral_label.text = " | Mineral: %d" % mineral
+	ametista_label.text = " | Ametista: %d" % ametista
 
 	if upgrade_menu.visible:
 		_update_upgrade_menu(scrap, mineral)
@@ -266,6 +273,8 @@ func _format_cost(cost: Dictionary) -> String:
 		parts.append("Scrap:%d" % int(cost["scrap"]))
 	if cost.has("mineral"):
 		parts.append("Mineral:%d" % int(cost["mineral"]))
+	if cost.has("ametista"):
+		parts.append("Ametista:%d" % int(cost["ametista"]))
 	return " | ".join(parts)
 
 func _on_upgrade_pressed(upgrade_id: String) -> void:
@@ -338,6 +347,8 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 
 	var s2m: Dictionary = trades.get("scrap_to_mineral", {}) as Dictionary
 	var m2s: Dictionary = trades.get("mineral_to_scrap", {}) as Dictionary
+	var a2m: Dictionary = trades.get("ametista_to_mineral", {}) as Dictionary
+	var a2s: Dictionary = trades.get("ametista_to_scrap", {}) as Dictionary
 	var s2m_give: Dictionary = s2m.get("give", {}) as Dictionary
 	var s2m_recv: Dictionary = s2m.get("receive", {}) as Dictionary
 	var m2s_give: Dictionary = m2s.get("give", {}) as Dictionary
@@ -346,6 +357,22 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	scrap_to_mineral_button.text = "Trocar %s -> %s" % [_format_cost(s2m_give), _format_cost(s2m_recv)]
 	mineral_to_scrap_button.text = "Trocar %s -> %s" % [_format_cost(m2s_give), _format_cost(m2s_recv)]
 	buy_artifact_part_button.text = "Comprar parte (%s)" % _format_cost(artifact_cost)
+
+	var a2m_give: Dictionary = a2m.get("give", {}) as Dictionary
+	var a2m_recv: Dictionary = a2m.get("receive", {}) as Dictionary
+	var a2s_give: Dictionary = a2s.get("give", {}) as Dictionary
+	var a2s_recv: Dictionary = a2s.get("receive", {}) as Dictionary
+
+	var has_a2m := not a2m_give.is_empty() and not a2m_recv.is_empty()
+	var has_a2s := not a2s_give.is_empty() and not a2s_recv.is_empty()
+	ametista_to_mineral_button.visible = has_a2m
+	ametista_to_scrap_button.visible = has_a2s
+	if has_a2m:
+		ametista_to_mineral_button.text = "Trocar %s -> %s" % [_format_cost(a2m_give), _format_cost(a2m_recv)]
+		ametista_to_mineral_button.disabled = not GameState.can_afford(a2m_give)
+	if has_a2s:
+		ametista_to_scrap_button.text = "Trocar %s -> %s" % [_format_cost(a2s_give), _format_cost(a2s_recv)]
+		ametista_to_scrap_button.disabled = not GameState.can_afford(a2s_give)
 
 	scrap_to_mineral_button.disabled = not GameState.can_afford(s2m_give)
 	mineral_to_scrap_button.disabled = not GameState.can_afford(m2s_give)
@@ -386,6 +413,26 @@ func _on_buy_artifact_part() -> void:
 		station_id = DEFAULT_STATION_ID
 	var cost: Dictionary = StationCatalog.get_artifact_part_cost(station_id)
 	GameState.try_buy_artifact_part(cost)
+
+func _on_trade_ametista_to_mineral() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var trades: Dictionary = StationCatalog.get_trades(station_id)
+	var t: Dictionary = trades.get("ametista_to_mineral", {}) as Dictionary
+	var give: Dictionary = t.get("give", {}) as Dictionary
+	var receive: Dictionary = t.get("receive", {}) as Dictionary
+	_apply_trade(give, receive)
+
+func _on_trade_ametista_to_scrap() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var trades: Dictionary = StationCatalog.get_trades(station_id)
+	var t: Dictionary = trades.get("ametista_to_scrap", {}) as Dictionary
+	var give: Dictionary = t.get("give", {}) as Dictionary
+	var receive: Dictionary = t.get("receive", {}) as Dictionary
+	_apply_trade(give, receive)
 
 func _on_npc_pressed(index: int) -> void:
 	if index < 0 or index >= _station_npcs.size():

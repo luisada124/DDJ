@@ -36,7 +36,11 @@ text = "Text = \"Scrap: 0\""
 
 [node name="MineralLabel" type="Label" parent="ResourcesContainer/ResourcesBox"]
 layout_mode = 2
-text = "Text = \" | Mineral: 0\""
+text = "Mineral: 0"
+
+[node name="AmetistaLabel" type="Label" parent="ResourcesContainer/ResourcesBox"]
+layout_mode = 2
+text = "Ametista: 0"
 
 [node name="HealthContainer" type="MarginContainer" parent="."]
 layout_mode = 0
@@ -285,6 +289,14 @@ text = "Trocar"
 [node name="BuyArtifactPartButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
 layout_mode = 2
 text = "Comprar parte de artefacto"
+
+[node name="AmetistaToMineralButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
+layout_mode = 2
+text = "Trocar"
+
+[node name="AmetistaToScrapButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
+layout_mode = 2
+text = "Trocar"
 
 [node name="TavernInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
 layout_mode = 2
