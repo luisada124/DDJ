@@ -25,6 +25,17 @@ position = Vector2(-24, 4)
 
 [node name="TraderPlanet" parent="." instance=ExtResource("4_trader")]
 position = Vector2(-700, 650)
+prompt_text = "E - Taberna"
+station_id = "tavern_giver"
+station_title = "Planeta (Caçador) - Taberna"
+tint = Color(0.35, 0.7, 1, 1)
+
+[node name="BanditPlanet" parent="." instance=ExtResource("4_trader")]
+position = Vector2(-700, -650)
+prompt_text = "E - Taberna"
+station_id = "tavern_bandit"
+station_title = "Planeta (Bandido) - Taberna"
+tint = Color(1, 0.45, 0.45, 1)
 
 [node name="comet" parent="comets" instance=ExtResource("2_htqom")]
 position = Vector2(87, 132)

@@ -24,6 +24,7 @@ extends Control
 @onready var close_map_button: Button = $MapMenu/Panel/Margin/VBox/CloseMapButton
 
 @onready var trader_menu: Control = $TraderMenu
+@onready var trader_title: Label = $TraderMenu/Panel/Margin/VBox/Title
 @onready var trader_info: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/Info
 @onready var scrap_to_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/ScrapToMineralButton
 @onready var mineral_to_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/MineralToScrapButton
@@ -248,7 +249,33 @@ func register_trader_in_range(trader: Node, in_range: bool) -> void:
 			if trader_menu.visible:
 				_set_trader_menu_visible(false)
 
+func _get_active_station_id() -> String:
+	if _active_trader == null or not is_instance_valid(_active_trader):
+		return ""
+	if _active_trader.has_method("get_station_id"):
+		return str(_active_trader.call("get_station_id"))
+	var v = _active_trader.get("station_id")
+	if v == null:
+		return ""
+	return str(v)
+
+func _get_active_station_title() -> String:
+	if _active_trader == null or not is_instance_valid(_active_trader):
+		return ""
+	if _active_trader.has_method("get_station_title"):
+		return str(_active_trader.call("get_station_title"))
+	var v = _active_trader.get("station_title")
+	if v == null:
+		return ""
+	return str(v)
+
 func _update_trader_menu(scrap: int, mineral: int) -> void:
+	var station_title := _get_active_station_title()
+	if not station_title.is_empty():
+		trader_title.text = station_title
+	else:
+		trader_title.text = "Planeta - Estacao"
+
 	var parts := "%d/%d" % [GameState.artifact_parts_collected, GameState.ARTIFACT_PARTS_REQUIRED]
 	trader_info.text = "Scrap: %d | Mineral: %d | Partes: %s" % [scrap, mineral, parts]
 
@@ -274,51 +301,119 @@ func _on_buy_artifact_part() -> void:
 	GameState.try_buy_artifact_part(ARTIFACT_PART_COST)
 
 func _on_npc1_pressed() -> void:
-	# Placeholder: por agora so existe 1 NPC com 1 missao.
+	var quest_id := GameState.QUEST_TAVERN_DUEL_BANDIT
+	var def := GameState.QUEST_DEFS.get(quest_id, {}) as Dictionary
+	var giver_station_id := str(def.get("giver_station_id", ""))
+	var station_id := _get_active_station_id()
+
+	# Falar com o NPC do planeta que deu a missao entrega a recompensa.
+	if not giver_station_id.is_empty() and station_id == giver_station_id:
+		if GameState.can_claim_quest(quest_id):
+			GameState.claim_quest(quest_id)
 	_update_missions_ui()
 
 func _on_accept_kill_quest() -> void:
-	GameState.accept_quest(GameState.QUEST_KILL_15_BASIC)
+	var quest_id := GameState.QUEST_TAVERN_DUEL_BANDIT
+	var def := GameState.QUEST_DEFS.get(quest_id, {}) as Dictionary
+	var giver_station_id := str(def.get("giver_station_id", ""))
+	var target_station_id := str(def.get("target_station_id", ""))
+	var station_id := _get_active_station_id()
+
+	if not giver_station_id.is_empty() and station_id == giver_station_id:
+		GameState.accept_quest(quest_id)
+	elif not target_station_id.is_empty() and station_id == target_station_id:
+		GameState.complete_quest(quest_id)
 	_update_missions_ui()
 
 func _on_claim_kill_quest() -> void:
-	GameState.claim_quest(GameState.QUEST_KILL_15_BASIC)
+	var quest_id := GameState.QUEST_TAVERN_DUEL_BANDIT
+	var def := GameState.QUEST_DEFS.get(quest_id, {}) as Dictionary
+	var giver_station_id := str(def.get("giver_station_id", ""))
+	var station_id := _get_active_station_id()
+	if not giver_station_id.is_empty() and station_id == giver_station_id:
+		GameState.claim_quest(quest_id)
 	_update_missions_ui()
 
 func _update_missions_ui() -> void:
-	var q := GameState.get_quest_state(GameState.QUEST_KILL_15_BASIC)
-	if q.is_empty() or not bool(q.get("accepted", false)):
-		active_quest_label.text = "Nenhuma missao ativa.\n\nFala com o NPC na Taberna para aceitar uma."
-		claim_quest_button.disabled = true
-		accept_kill_quest_button.disabled = false
-		accept_kill_quest_button.text = "Aceitar missao: Matar 15 inimigos basicos"
-		return
+	var quest_id := GameState.QUEST_TAVERN_DUEL_BANDIT
+	var def := GameState.QUEST_DEFS.get(quest_id, {}) as Dictionary
+	var giver_station_id := str(def.get("giver_station_id", ""))
+	var target_station_id := str(def.get("target_station_id", ""))
 
-	var def := GameState.QUEST_DEFS.get(GameState.QUEST_KILL_15_BASIC, {}) as Dictionary
-	var goal: int = int(def.get("goal", 15))
-	var progress: int = int(q.get("progress", 0))
+	var station_id := _get_active_station_id()
+
+	var q := GameState.get_quest_state(quest_id)
+	var accepted := bool(q.get("accepted", false))
 	var completed := bool(q.get("completed", false))
 	var claimed := bool(q.get("claimed", false))
-	var reward := def.get("reward", {}) as Dictionary
+	var progress: int = int(q.get("progress", 0))
+	var goal: int = int(def.get("goal", 1))
 
-	var status := "Em progresso"
-	if claimed:
-		status = "Concluida (recompensa recebida)"
-	elif completed:
+	var status := "Disponivel"
+	if accepted:
+		status = "Em progresso"
+	if completed:
 		status = "Concluida"
+	if claimed:
+		status = "Recompensa recebida"
 
-	active_quest_label.text = "[b]%s[/b]\n%s\n\nProgresso: %d / %d\nEstado: %s\nRecompensa: %s" % [
+	active_quest_label.text = "[b]%s[/b]\n%s\n\nProgresso: %d / %d\nEstado: %s\nRecompensa: 3 partes do Thruster Reverso" % [
 		str(def.get("title", "Missao")),
 		str(def.get("description", "")),
 		progress,
 		goal,
 		status,
-		_format_cost(reward)
 	]
 
-	accept_kill_quest_button.disabled = true
-	accept_kill_quest_button.text = "Missao ja aceite"
-	claim_quest_button.disabled = not GameState.can_claim_quest(GameState.QUEST_KILL_15_BASIC)
+	# Taberna (NPCs / acao) muda conforme o planeta.
+	if station_id == giver_station_id:
+		npc1_button.text = "NPC: Caçador (missoes)"
+
+		if claimed:
+			accept_kill_quest_button.disabled = true
+			accept_kill_quest_button.text = "Missao concluida"
+		elif completed:
+			accept_kill_quest_button.disabled = true
+			accept_kill_quest_button.text = "Missao completa — fala com o Caçador"
+		elif accepted:
+			accept_kill_quest_button.disabled = true
+			accept_kill_quest_button.text = "Missao em progresso — vai ao outro planeta"
+		else:
+			accept_kill_quest_button.disabled = false
+			accept_kill_quest_button.text = "Aceitar missao: Derrotar Bandido"
+
+	elif station_id == target_station_id:
+		npc1_button.text = "NPC: Bandido (alvo)"
+
+		if claimed or completed:
+			accept_kill_quest_button.disabled = true
+			accept_kill_quest_button.text = "Bandido ja foi derrotado"
+		elif accepted:
+			accept_kill_quest_button.disabled = false
+			accept_kill_quest_button.text = "Derrotar Bandido (placeholder)"
+		else:
+			accept_kill_quest_button.disabled = true
+			accept_kill_quest_button.text = "Sem missao ativa"
+
+	else:
+		npc1_button.text = "NPC: (indisponivel)"
+		accept_kill_quest_button.disabled = true
+		accept_kill_quest_button.text = "Sem NPCs nesta estacao"
+
+	# Reclamar recompensa so no planeta do Caçador.
+	if claimed:
+		claim_quest_button.disabled = true
+		claim_quest_button.text = "Recompensa recebida"
+	elif completed:
+		var can_claim_here := GameState.can_claim_quest(quest_id) and station_id == giver_station_id
+		claim_quest_button.disabled = not can_claim_here
+		if can_claim_here:
+			claim_quest_button.text = "Receber recompensa (Thruster Reverso)"
+		else:
+			claim_quest_button.text = "Volta ao Caçador para receber recompensa"
+	else:
+		claim_quest_button.disabled = true
+		claim_quest_button.text = "Recompensa ainda bloqueada"
 
 func _rebuild_map_zone_list() -> void:
 	if map_zone_list == null:

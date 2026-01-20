@@ -67,21 +67,6 @@ position = Vector2(760, 470)
 keep_visible_when_completed = true
 artifact_id = "vacuum"
 
-[node name="ReverseThrusterPart1" parent="TestSetup" instance=ExtResource("6_artifact")]
-position = Vector2(660, 720)
-keep_visible_when_completed = true
-artifact_id = "reverse_thruster"
-
-[node name="ReverseThrusterPart2" parent="TestSetup" instance=ExtResource("6_artifact")]
-position = Vector2(710, 720)
-keep_visible_when_completed = true
-artifact_id = "reverse_thruster"
-
-[node name="ReverseThrusterPart3" parent="TestSetup" instance=ExtResource("6_artifact")]
-position = Vector2(760, 720)
-keep_visible_when_completed = true
-artifact_id = "reverse_thruster"
-
 [node name="EnemySpawner" type="Node2D" parent="."]
 script = ExtResource("7_enemy_spawner")
 enemy_scene = ExtResource("4_rqm65")
