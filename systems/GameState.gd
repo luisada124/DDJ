@@ -37,6 +37,10 @@ var artifact_completed: bool = false
 var current_zone_id: String = "outer"
 var unlocked_zones: PackedStringArray = PackedStringArray(["outer"])
 
+# Runtime data (nao vai para o save): usado pelo minimapa/POIs.
+var zone_bounds_world: Rect2 = Rect2(-512, -512, 1024, 1024)
+var zone_pois_world: Array = []
+
 const UPGRADE_DEFS := {
 	"hull": {
 		"title": "Hull",
@@ -241,6 +245,11 @@ func set_current_zone(zone_id: String) -> void:
 	current_zone_id = zone_id
 	emit_signal("state_changed")
 	_queue_save()
+
+func set_zone_runtime_data(bounds_world: Rect2, pois_world: Array) -> void:
+	zone_bounds_world = bounds_world
+	zone_pois_world = pois_world
+	emit_signal("state_changed")
 
 func reset_save() -> void:
 	_apply_defaults()

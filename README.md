@@ -1,6 +1,7 @@
 todo:
 
-alien a sair da nave e a pegar recursos por la
+meter mais vida na nave e menos inimigos a spawnar
+
 mecanicas a adicionar:
 
 upgrade para aspirador na nave, assim nao e necessario sair da nave para apanhar materiais

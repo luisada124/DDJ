@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bhyk7leudmqo"]
+[gd_scene load_steps=3 format=3 uid="uid://bhyk7leudmqo"]
 
 [ext_resource type="Script" uid="uid://cwxyih27hxbjv" path="res://ui/hud.gd" id="1_1x8ju"]
+[ext_resource type="Script" path="res://ui/minimap.gd" id="2_minimap"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -71,6 +72,17 @@ theme_override_constants/margin_top = 16
 [node name="ArtifactLabel" type="Label" parent="ArtifactContainer"]
 layout_mode = 2
 text = "Artefacto: 0 / 4"
+
+[node name="MiniMap" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -196.0
+offset_right = 196.0
+offset_bottom = -16.0
+script = ExtResource("2_minimap")
 
 [node name="UpgradeMenu" type="Control" parent="."]
 process_mode = 3
