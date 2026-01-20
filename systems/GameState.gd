@@ -23,6 +23,8 @@ var resources := {
 }
 
 const QUEST_KILL_15_BASIC := "kill_15_basic"
+const QUEST_KILL_10_SNIPER := "kill_10_sniper"
+const QUEST_KILL_5_TANK := "kill_5_tank"
 const QUEST_DEFS := {
 	QUEST_KILL_15_BASIC: {
 		"title": "Limpar o Setor",
@@ -30,6 +32,20 @@ const QUEST_DEFS := {
 		"enemy_id": "basic",
 		"goal": 15,
 		"reward": {"scrap": 60, "mineral": 25},
+	},
+	QUEST_KILL_10_SNIPER: {
+		"title": "Atiradores",
+		"description": "Mata 10 inimigos sniper.",
+		"enemy_id": "sniper",
+		"goal": 10,
+		"reward": {"scrap": 50, "mineral": 45},
+	},
+	QUEST_KILL_5_TANK: {
+		"title": "Blindados",
+		"description": "Mata 5 inimigos tank.",
+		"enemy_id": "tank",
+		"goal": 5,
+		"reward": {"scrap": 80, "mineral": 60},
 	},
 }
 

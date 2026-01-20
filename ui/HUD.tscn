@@ -278,7 +278,7 @@ layout_mode = 2
 [node name="Taberna" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
 layout_mode = 2
 
-[node name="Missoes" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
+[node name="Mecanico" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
 layout_mode = 2
 
 [node name="Info" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
@@ -307,30 +307,105 @@ text = "Taberna: fala com NPCs para obter missoes."
 layout_mode = 2
 text = "NPC: Cacador (missoes)"
 
+[node name="NPC2Button" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+layout_mode = 2
+text = "NPC 2"
+
+[node name="NPC3Button" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+layout_mode = 2
+text = "NPC 3"
+
 [node name="AcceptKillQuestButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
 layout_mode = 2
 text = "Aceitar missao"
 
-[node name="MissionsInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Missoes"]
+[node name="ClaimStationQuestButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
 layout_mode = 2
-autowrap_mode = 3
-text = "Missoes ativas"
+text = "Entregar missao (recompensa)"
 
-[node name="ActiveQuestLabel" type="RichTextLabel" parent="TraderMenu/Panel/Margin/VBox/Tabs/Missoes"]
+[node name="DialogueText" type="RichTextLabel" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 110)
+custom_minimum_size = Vector2(0, 140)
 fit_content = false
 scroll_active = false
 autowrap_mode = 3
-text = "Nenhuma missao ativa."
+text = "..."
 
-[node name="ClaimQuestButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Missoes"]
+[node name="DialogueChoices" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
 layout_mode = 2
-text = "Receber recompensa"
+
+[node name="EndDialogueButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+layout_mode = 2
+text = "Sair da conversa"
+visible = false
+
+[node name="MechanicInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mecanico"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Mecanico: upgrades so podem ser feitos nas estacoes."
+
+[node name="OpenUpgradesButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mecanico"]
+layout_mode = 2
+text = "Abrir upgrades (U)"
 
 [node name="ButtonsSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox"]
 layout_mode = 2
 
 [node name="CloseTraderButton" type="Button" parent="TraderMenu/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Fechar"
+
+[node name="MissionsMenu" type="Control" parent="."]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+visible = false
+
+[node name="Dim" type="ColorRect" parent="MissionsMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.55)
+
+[node name="Panel" type="PanelContainer" parent="MissionsMenu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -320.0
+offset_right = 360.0
+offset_bottom = 320.0
+
+[node name="Margin" type="MarginContainer" parent="MissionsMenu/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="MissionsMenu/Panel/Margin"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="MissionsMenu/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Missoes"
+
+[node name="Info" type="Label" parent="MissionsMenu/Panel/Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 3
+text = "(TAB) fecha | Recompensas sao entregues nas estacoes"
+
+[node name="MissionList" type="VBoxContainer" parent="MissionsMenu/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="CloseMissionsButton" type="Button" parent="MissionsMenu/Panel/Margin/VBox"]
 layout_mode = 2
 text = "Fechar"

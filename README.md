@@ -3,6 +3,16 @@ todo:
 meter mais vida na nave e menos inimigos a spawnar
 Meter os artefactos fora do minimapa só estarão disponíveis com mapas depois de os desbloquear. 
 
+
+BOSSES
+
+TEXTURAS:
+
+meter no artefactos
+mudar a cor da explosao
+
+
+
 mecanicas a adicionar:
 
 upgrade para aspirador na nave, assim nao e necessario sair da nave para apanhar materiais
@@ -28,7 +38,3 @@ inimigo - 4  | 1,2,3,4
 
 promps:
 
-Meter o menu das missões para a tecla tab em vez de ser na estacao. 
-Meter um mecânico e só permitir os upgrades que estão para serem feitos nas estações.
-
-cria tambem outros planetas com diferentes missoes e trocas

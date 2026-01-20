@@ -22,7 +22,12 @@ region_rect = Rect2(0, 0, 4096, 4096)
 [node name="comets" type="Node2D" parent="."]
 
 [node name="TraderPlanet" parent="." instance=ExtResource("4_trader")]
-position = Vector2(-700, 650)
+position = Vector2(2400, 1600)
+station_id = "station_beta"
+
+[node name="TraderPlanet2" parent="." instance=ExtResource("4_trader")]
+position = Vector2(-2600, -1800)
+station_id = "station_alpha"
 
 [node name="CometSpawner" type="Node2D" parent="."]
 script = ExtResource("3_spawner")

@@ -24,7 +24,16 @@ region_rect = Rect2(0, 0, 4096, 4096)
 position = Vector2(-24, 4)
 
 [node name="TraderPlanet" parent="." instance=ExtResource("4_trader")]
-position = Vector2(-700, 650)
+position = Vector2(-2200, 1800)
+station_id = "station_alpha"
+
+[node name="TraderPlanet2" parent="." instance=ExtResource("4_trader")]
+position = Vector2(2700, -2500)
+station_id = "station_delta"
+
+[node name="TraderPlanet3" parent="." instance=ExtResource("4_trader")]
+position = Vector2(2500, 2600)
+station_id = "station_epsilon"
 
 [node name="comet" parent="comets" instance=ExtResource("2_htqom")]
 position = Vector2(87, 132)

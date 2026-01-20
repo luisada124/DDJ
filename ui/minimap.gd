@@ -72,7 +72,11 @@ func _draw() -> void:
 	var trader_nodes: Array[Node] = get_tree().get_nodes_in_group("trader")
 	for n: Node in trader_nodes:
 		if n is Node2D:
-			draw_circle(to_map.call((n as Node2D).global_position), 4.0, trader_color)
+			var c := trader_color
+			var sid = n.get("station_id")
+			if sid != null:
+				c = StationCatalog.get_station_color(str(sid))
+			draw_circle(to_map.call((n as Node2D).global_position), 4.0, c)
 
 	# Jogador
 	if _player != null and is_instance_valid(_player):
