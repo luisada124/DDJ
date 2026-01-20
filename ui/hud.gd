@@ -36,6 +36,11 @@ extends Control
 @onready var dialogue_text: RichTextLabel = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/DialogueText
 @onready var dialogue_choices: VBoxContainer = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/DialogueChoices
 @onready var end_dialogue_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/EndDialogueButton
+@onready var knife_game_high_score: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/KnifeGameHighScore
+@onready var knife_game_score: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/KnifeGameScore
+@onready var knife_game_prompt: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/KnifeGamePrompt
+@onready var knife_game_result: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/KnifeGameResult
+@onready var knife_game_start_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/KnifeGameStartButton
 @onready var open_upgrades_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mecanico/OpenUpgradesButton
 
 @onready var close_trader_button: Button = $TraderMenu/Panel/Margin/VBox/CloseTraderButton
@@ -47,6 +52,7 @@ extends Control
 @onready var close_missions_button: Button = $MissionsMenu/Panel/Margin/VBox/CloseMissionsButton
 
 const DEFAULT_STATION_ID := "station_alpha"
+const QuestDatabase := preload("res://systems/QuestDatabase.gd")
 
 var _upgrade_buttons: Dictionary
 var _active_trader: Node = null
@@ -55,6 +61,15 @@ var _active_station_id: String = ""
 var _offered_quest_id: String = ""
 var _dialogue_state: Dictionary = {}
 var _station_npcs: Array = []
+var _active_npc_id: String = ""
+var _active_npc_type: String = ""
+var _knife_game_active: bool = false
+var _knife_game_score: int = 0
+var _knife_game_expected_keycode: int = KEY_A
+var _knife_game_time_left: float = 0.0
+var _knife_game_base_time: float = 1.2
+var _knife_game_min_time: float = 0.35
+var _knife_game_rng := RandomNumberGenerator.new()
 var _menu_guard: bool = false
 
 func _ready() -> void:
@@ -91,15 +106,28 @@ func _ready() -> void:
 	claim_station_quest_button.pressed.connect(_on_claim_station_quest)
 	open_upgrades_button.pressed.connect(_on_open_upgrades_pressed)
 	end_dialogue_button.pressed.connect(_end_dialogue)
+	knife_game_start_button.pressed.connect(_on_knife_game_start_pressed)
 
 	GameState.state_changed.connect(_update_hud)
 	_update_hud()
+	_knife_game_rng.randomize()
 
-func _process(_delta: float) -> void:
-	# fallback: nada aqui (TAB é capturado em _input)
-	pass
+func _process(delta: float) -> void:
+	if _knife_game_active:
+		_knife_game_time_left -= delta
+		if _knife_game_time_left <= 0.0:
+			_knife_game_fail("Miss: too slow.")
+		else:
+			_update_knife_game_prompt_text()
+
 
 func _input(event: InputEvent) -> void:
+	if _knife_game_active and trader_menu.visible and event is InputEventKey and (event as InputEventKey).pressed and not (event as InputEventKey).echo:
+		var key_event := event as InputEventKey
+		if _handle_knife_game_input(key_event):
+			get_viewport().set_input_as_handled()
+			return
+
 	# TAB direto (funciona mesmo sem InputMap)
 	if event is InputEventKey and (event as InputEventKey).pressed and not (event as InputEventKey).echo:
 		var key_event := event as InputEventKey
@@ -193,6 +221,8 @@ func _set_trader_menu_visible(visible: bool) -> void:
 	_menu_guard = false
 	_apply_pause_from_menus()
 	_update_hud()
+	if not visible:
+		_stop_knife_game()
 	if visible:
 		_end_dialogue()
 
@@ -327,12 +357,18 @@ func register_trader_in_range(trader: Node, in_range: bool) -> void:
 
 func register_station_in_range(station: Node, station_id: String, in_range: bool) -> void:
 	if in_range:
+		if _active_station_id != station_id:
+			_active_npc_id = ""
+			_active_npc_type = ""
 		_active_station = station
 		_active_station_id = station_id
 	else:
 		if _active_station == station:
 			_active_station = null
 			_active_station_id = ""
+			_active_npc_id = ""
+			_active_npc_type = ""
+			_stop_knife_game()
 			if upgrade_menu.visible:
 				_set_upgrade_menu_visible(false)
 			if trader_menu.visible:
@@ -371,12 +407,9 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	var can_buy_part := (not GameState.artifact_completed) and GameState.can_afford(artifact_cost)
 	buy_artifact_part_button.disabled = not can_buy_part
 
-	var offered: Array = StationCatalog.get_offered_quests(station_id)
-	_offered_quest_id = ""
-	if offered.size() > 0:
-		_offered_quest_id = str(offered[0])
-	_update_station_quest_buttons()
 	_update_npc_button_text()
+	_refresh_offered_quest()
+	_update_knife_game_ui()
 
 func _on_trade_scrap_to_mineral() -> void:
 	var station_id := _active_station_id
@@ -409,6 +442,7 @@ func _on_npc_pressed(index: int) -> void:
 	if index < 0 or index >= _station_npcs.size():
 		return
 	var npc: Dictionary = _station_npcs[index] as Dictionary
+	_set_active_npc(npc)
 	_start_dialogue(_active_station_id, str(npc.get("id", "")))
 
 func _update_npc_button_text() -> void:
@@ -416,7 +450,27 @@ func _update_npc_button_text() -> void:
 	if station_id.is_empty():
 		station_id = DEFAULT_STATION_ID
 	var title := StationCatalog.get_station_title(station_id)
-	_station_npcs = _get_npcs_for_station(station_id)
+	_station_npcs = StationCatalog.get_station_npcs(station_id)
+	if _station_npcs.is_empty():
+		_station_npcs = _get_npcs_for_station(station_id)
+
+	if _station_npcs.is_empty():
+		_active_npc_id = ""
+		_active_npc_type = ""
+	else:
+		var found := false
+		for npc_variant in _station_npcs:
+			if typeof(npc_variant) != TYPE_DICTIONARY:
+				continue
+			var npc: Dictionary = npc_variant
+			if str(npc.get("id", "")) == _active_npc_id:
+				_active_npc_type = str(npc.get("type", ""))
+				found = true
+				break
+		if not found:
+			var first_npc: Dictionary = _station_npcs[0] as Dictionary
+			_active_npc_id = str(first_npc.get("id", ""))
+			_active_npc_type = str(first_npc.get("type", ""))
 
 	var buttons: Array[Button] = [npc1_button, npc2_button, npc3_button]
 	for i in range(buttons.size()):
@@ -429,30 +483,168 @@ func _update_npc_button_text() -> void:
 		else:
 			b.visible = false
 
+func _set_active_npc(npc: Dictionary) -> void:
+	_active_npc_id = str(npc.get("id", ""))
+	_active_npc_type = str(npc.get("type", ""))
+	_refresh_offered_quest()
+
+func _refresh_offered_quest() -> void:
+	_offered_quest_id = _pick_offered_quest_for_npc()
+	_update_station_quest_buttons()
+
+func _pick_offered_quest_for_npc() -> String:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	if _active_npc_type.is_empty():
+		return ""
+
+	var pool := QuestDatabase.get_quest_pool(_active_npc_type)
+	if pool.is_empty():
+		return ""
+
+	var candidates: Array[String] = []
+	for quest_id_variant in pool:
+		var quest_id := str(quest_id_variant)
+		if not QuestDatabase.is_quest_available_in_station(quest_id, station_id):
+			continue
+		candidates.append(quest_id)
+
+	if candidates.is_empty():
+		return ""
+
+	var unclaimed: Array[String] = []
+	for quest_id in candidates:
+		var q: Dictionary = GameState.get_quest_state(quest_id)
+		if bool(q.get("claimed", false)):
+			continue
+		unclaimed.append(quest_id)
+		if bool(q.get("accepted", false)):
+			return quest_id
+
+	if unclaimed.is_empty():
+		return ""
+	return unclaimed[0]
+
+func _on_knife_game_start_pressed() -> void:
+	_start_knife_game()
+
+func _start_knife_game() -> void:
+	_knife_game_active = true
+	_knife_game_score = 0
+	_knife_game_time_left = 0.0
+	knife_game_result.text = ""
+	knife_game_start_button.text = "Restart Knife Game"
+	_set_next_knife_prompt()
+	_update_knife_game_ui()
+
+func _stop_knife_game() -> void:
+	_knife_game_active = false
+	_knife_game_score = 0
+	_knife_game_time_left = 0.0
+	knife_game_result.text = ""
+	knife_game_start_button.text = "Start Knife Game"
+	_update_knife_game_ui()
+
+func _handle_knife_game_input(key_event: InputEventKey) -> bool:
+	if not _knife_game_active:
+		return false
+
+	var keycode := key_event.keycode
+	if keycode != KEY_A and keycode != KEY_D:
+		return false
+
+	if keycode != _knife_game_expected_keycode:
+		_knife_game_fail("Miss: wrong key.")
+		return true
+
+	_knife_game_score += 1
+	_update_knife_game_ui()
+
+	var station_id := _get_tavern_station_id()
+	if GameState.record_tavern_score(station_id, _knife_game_score):
+		knife_game_result.text = "New hi-score!"
+		_update_knife_game_ui()
+
+	_set_next_knife_prompt()
+	return true
+
+func _set_next_knife_prompt() -> void:
+	if _knife_game_score <= 0:
+		_knife_game_expected_keycode = KEY_A if _knife_game_rng.randi_range(0, 1) == 0 else KEY_D
+	else:
+		_knife_game_expected_keycode = KEY_D if _knife_game_expected_keycode == KEY_A else KEY_A
+
+	var time_window := _knife_game_base_time - float(_knife_game_score) * 0.06
+	_knife_game_time_left = max(_knife_game_min_time, time_window)
+	_update_knife_game_prompt_text()
+
+func _update_knife_game_prompt_text() -> void:
+	if knife_game_prompt == null:
+		return
+	if not _knife_game_active:
+		knife_game_prompt.text = "Press: -"
+		return
+	var key_name := "A" if _knife_game_expected_keycode == KEY_A else "D"
+	knife_game_prompt.text = "Press: %s (%.1fs)" % [key_name, max(_knife_game_time_left, 0.0)]
+
+func _knife_game_fail(reason: String) -> void:
+	_knife_game_active = false
+	knife_game_result.text = reason
+	knife_game_start_button.text = "Start Knife Game"
+	_update_knife_game_prompt_text()
+
+func _update_knife_game_ui() -> void:
+	if knife_game_high_score == null or knife_game_score == null:
+		return
+	var station_id := _get_tavern_station_id()
+	var hi := GameState.get_tavern_hi_score(station_id)
+	knife_game_high_score.text = "Hi-score: %d" % hi
+	knife_game_score.text = "Score: %d" % _knife_game_score
+	_update_knife_game_prompt_text()
+
+func _get_tavern_station_id() -> String:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	return station_id
+
 func _get_npcs_for_station(station_id: String) -> Array:
 	match station_id:
 		"station_alpha":
 			return [
-				{"id": "glip", "name": "Glip-Glop"},
-				{"id": "zorbo", "name": "Zorbo o Pegajoso"},
-				{"id": "mnem", "name": "Mnem-8"},
+				{"id": "glip", "name": "Glip-Glop", "type": "scavenger"},
+				{"id": "zorbo", "name": "Zorbo o Pegajoso", "type": "bruiser"},
+				{"id": "mnem", "name": "Mnem-8", "type": "bounty"},
+			]
+		"station_beta":
+			return [
+				{"id": "bloop", "name": "Bloop", "type": "scavenger"},
+				{"id": "krrth", "name": "Krr'th", "type": "marksman"},
+				{"id": "snee", "name": "Snee-Snack", "type": "bounty"},
+			]
+		"station_gamma":
+			return [
+				{"id": "vexa", "name": "Vexa", "type": "bounty"},
+				{"id": "oomu", "name": "Oomu", "type": "scavenger"},
+				{"id": "rrrl", "name": "Rrrl", "type": "bruiser"},
 			]
 		"station_delta":
 			return [
-				{"id": "bandit", "name": "Bandido"},
-				{"id": "krrth", "name": "Krr'th"},
-				{"id": "snee", "name": "Snee-Snack"},
+				{"id": "bandit", "name": "Bandido", "type": "hunter"},
+				{"id": "krrth", "name": "Krr'th", "type": "marksman"},
+				{"id": "snee", "name": "Snee-Snack", "type": "scavenger"},
 			]
 		"station_epsilon":
 			return [
-				{"id": "hunter", "name": "Cacador"},
-				{"id": "vexa", "name": "Vexa"},
-				{"id": "rrrl", "name": "Rrrl"},
+				{"id": "hunter", "name": "Cacador", "type": "hunter"},
+				{"id": "vexa", "name": "Vexa", "type": "bounty"},
+				{"id": "rrrl", "name": "Rrrl", "type": "bruiser"},
 			]
 		_:
 			return [
-				{"id": "alien1", "name": "Alien Aleatorio"},
-				{"id": "alien2", "name": "Alien Aleatorio 2"},
+				{"id": "alien1", "name": "Alien Aleatorio", "type": "bounty"},
+				{"id": "alien2", "name": "Alien Aleatorio 2", "type": "bounty"},
 			]
 
 func _start_dialogue(station_id_in: String, npc_id: String) -> void:
@@ -997,7 +1189,7 @@ func _rebuild_missions_list() -> void:
 			goal,
 			status,
 			deliver,
-			_format_cost(reward)
+			_format_quest_rewards(def)
 		]
 		box.add_child(label)
 
