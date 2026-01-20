@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://bhyk7leudmqo"]
+[gd_scene load_steps=3 format=3 uid="uid://bhyk7leudmqo"]
 
 [ext_resource type="Script" uid="uid://cwxyih27hxbjv" path="res://ui/hud.gd" id="1_1x8ju"]
+[ext_resource type="Script" path="res://ui/minimap.gd" id="2_minimap"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -71,6 +72,17 @@ theme_override_constants/margin_top = 16
 [node name="ArtifactLabel" type="Label" parent="ArtifactContainer"]
 layout_mode = 2
 text = "Artefacto: 0 / 4"
+
+[node name="MiniMap" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -196.0
+offset_right = 196.0
+offset_bottom = -16.0
+script = ExtResource("2_minimap")
 
 [node name="UpgradeMenu" type="Control" parent="."]
 process_mode = 3
@@ -210,5 +222,115 @@ text = "Escolhe uma zona. (M) fecha"
 layout_mode = 2
 
 [node name="CloseMapButton" type="Button" parent="MapMenu/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Fechar"
+
+[node name="TraderMenu" type="Control" parent="."]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+visible = false
+
+[node name="Dim" type="ColorRect" parent="TraderMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.55)
+
+[node name="Panel" type="PanelContainer" parent="TraderMenu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -440.0
+offset_top = -300.0
+offset_right = 440.0
+offset_bottom = 300.0
+
+[node name="Margin" type="MarginContainer" parent="TraderMenu/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="TraderMenu/Panel/Margin"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="TraderMenu/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Planeta - Estacao"
+
+[node name="Tabs" type="TabContainer" parent="TraderMenu/Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Mercado" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
+layout_mode = 2
+
+[node name="Taberna" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
+layout_mode = 2
+
+[node name="Missoes" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
+layout_mode = 2
+
+[node name="Info" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Trocas"
+
+[node name="ScrapToMineralButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
+layout_mode = 2
+text = "Trocar"
+
+[node name="MineralToScrapButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
+layout_mode = 2
+text = "Trocar"
+
+[node name="BuyArtifactPartButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
+layout_mode = 2
+text = "Comprar parte de artefacto"
+
+[node name="TavernInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Taberna: fala com NPCs para obter missoes."
+
+[node name="NPC1Button" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+layout_mode = 2
+text = "NPC: Cacador (missoes)"
+
+[node name="AcceptKillQuestButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+layout_mode = 2
+text = "Aceitar missao"
+
+[node name="MissionsInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Missoes"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Missoes ativas"
+
+[node name="ActiveQuestLabel" type="RichTextLabel" parent="TraderMenu/Panel/Margin/VBox/Tabs/Missoes"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 110)
+fit_content = false
+scroll_active = false
+autowrap_mode = 3
+text = "Nenhuma missao ativa."
+
+[node name="ClaimQuestButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Missoes"]
+layout_mode = 2
+text = "Receber recompensa"
+
+[node name="ButtonsSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="CloseTraderButton" type="Button" parent="TraderMenu/Panel/Margin/VBox"]
 layout_mode = 2
 text = "Fechar"

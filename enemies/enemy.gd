@@ -140,6 +140,7 @@ func take_damage(amount: int) -> void:
 func die() -> void:
 	print("Enemy morreu!")
 	_spawn_loot()
+	GameState.record_enemy_kill(enemy_id)
 	queue_free()
 
 
