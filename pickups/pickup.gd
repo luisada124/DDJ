@@ -7,9 +7,13 @@ extends Area2D
 @export var magnet_speed: float = 420.0
 
 var _player: Node2D
+var _default_texture: Texture2D
+const AMETISTA_TEXTURE: Texture2D = preload("res://textures/material - ametista.webp")
 
 func _ready() -> void:
 	add_to_group("pickup")
+	if has_node("Sprite2D"):
+		_default_texture = ($Sprite2D as Sprite2D).texture
 	_update_visuals()
 
 func _process(delta: float) -> void:
@@ -21,9 +25,13 @@ func _update_visuals() -> void:
 		return
 
 	var sprite := $Sprite2D as Sprite2D
+	sprite.texture = _default_texture
+	sprite.modulate = Color(1, 1, 1)
+
 	if resource_type == "mineral":
 		sprite.modulate = Color(0.45, 0.85, 1.0)
-	else:
+	elif resource_type == "ametista":
+		sprite.texture = AMETISTA_TEXTURE
 		sprite.modulate = Color(1, 1, 1)
 
 func _magnet_to_player(delta: float) -> void:

@@ -1,5 +1,8 @@
 todo:
 
+Resolver problema da descrição das missões. Não estará a aparecer quando se compra. 
+
+
 meter mais vida na nave e menos inimigos a spawnar
 Meter os artefactos fora do minimapa só estarão disponíveis com mapas depois de os desbloquear. 
 Temos de trocar a corda para só recolher com um upgrade específico. 
@@ -9,7 +12,6 @@ Nave auxiliar com gadget.
 Mapa ser obtido como recompensa. 
 Estações têm de ser ou compradas a localização ou encontradas. 
 Ter cofres em estações para guardar recursos e não perder quando se morre. 
-Mais um mineração. 
 
 BALANCEAMENTO:
 
@@ -53,6 +55,15 @@ player - 1   | 2,3,4
 cometa -2    | 1,3,4
 laser - 3    | 2,4
 inimigo - 4  | 1,2,3,4
+
+
+
+Lista de artefactos e gadgets:
+
+
+vacuum
+reverse_thruster
+side_dash
 
 
 

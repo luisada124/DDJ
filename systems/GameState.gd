@@ -1,11 +1,13 @@
 extends Node
 
 signal state_changed
+signal player_died
+signal alien_died
 
 const SAVE_PATH := "user://save.json"
 const SAVE_VERSION := 1
 
-const BASE_PLAYER_MAX_HEALTH := 100
+const BASE_PLAYER_MAX_HEALTH := 10000000000
 const BASE_ALIEN_MAX_HEALTH := 50
 const BASE_FIRE_INTERVAL := 0.2
 const BASE_ACCELERATION := 700.0
@@ -20,7 +22,12 @@ var alien_health: int = BASE_ALIEN_MAX_HEALTH
 var resources := {
 	"scrap": 0,
 	"mineral": 0,
+	"ametista": 0,
 }
+
+# Cofres por estacao: recursos guardados nao se perdem na morte.
+var vault_unlocked: Dictionary = {} # station_id -> bool
+var vault_resources: Dictionary = {} # station_id -> {res_type -> int}
 
 const QuestDatabase := preload("res://systems/QuestDatabase.gd")
 const QUEST_KILL_15_BASIC := QuestDatabase.QUEST_KILL_15_BASIC
@@ -107,6 +114,76 @@ func add_resource(type: String, amount: int) -> void:
 	emit_signal("state_changed")
 	_queue_save()
 
+func is_vault_unlocked(station_id: String) -> bool:
+	return bool(vault_unlocked.get(station_id, false))
+
+func buy_vault(station_id: String, cost: Dictionary) -> bool:
+	if station_id.is_empty():
+		return false
+	if is_vault_unlocked(station_id):
+		return false
+	if not can_afford(cost):
+		return false
+
+	for res_type_variant in cost.keys():
+		var res_type := str(res_type_variant)
+		resources[res_type] = int(resources.get(res_type, 0)) - int(cost[res_type])
+
+	vault_unlocked[station_id] = true
+	if not vault_resources.has(station_id):
+		vault_resources[station_id] = {}
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
+func get_vault_balance(station_id: String, res_type: String) -> int:
+	var station_vault := vault_resources.get(station_id, {}) as Dictionary
+	return int(station_vault.get(res_type, 0))
+
+func deposit_to_vault(station_id: String, res_type: String, amount: int) -> bool:
+	if amount <= 0:
+		return false
+	if not is_vault_unlocked(station_id):
+		return false
+	var have := int(resources.get(res_type, 0))
+	if have <= 0:
+		return false
+	amount = min(amount, have)
+
+	resources[res_type] = have - amount
+	var station_vault := vault_resources.get(station_id, {}) as Dictionary
+	station_vault[res_type] = int(station_vault.get(res_type, 0)) + amount
+	vault_resources[station_id] = station_vault
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
+func withdraw_from_vault(station_id: String, res_type: String, amount: int) -> bool:
+	if amount <= 0:
+		return false
+	if not is_vault_unlocked(station_id):
+		return false
+	var station_vault := vault_resources.get(station_id, {}) as Dictionary
+	var have := int(station_vault.get(res_type, 0))
+	if have <= 0:
+		return false
+	amount = min(amount, have)
+
+	station_vault[res_type] = have - amount
+	vault_resources[station_id] = station_vault
+	resources[res_type] = int(resources.get(res_type, 0)) + amount
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
+func _lose_carried_resources_on_death() -> void:
+	# Perde apenas recursos "no inventario" (o que esta no cofre fica).
+	resources["scrap"] = 0
+	resources["mineral"] = 0
+	resources["ametista"] = 0
+	emit_signal("state_changed")
+	_queue_save()
+
 func accept_quest(quest_id: String) -> bool:
 	if not QUEST_DEFS.has(quest_id):
 		return false
@@ -114,6 +191,9 @@ func accept_quest(quest_id: String) -> bool:
 	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
 	if q.is_empty():
 		q = _make_default_quest_state()
+
+	if bool(q.get("archived", false)) or bool(q.get("claimed", false)):
+		return false
 
 	if bool(q.get("accepted", false)):
 		return false
@@ -218,6 +298,20 @@ func record_tavern_score(station_id: String, score: int) -> bool:
 	_queue_save()
 	return true
 
+func clear_completed_quest(quest_id: String) -> bool:
+	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
+	if q.is_empty():
+		return false
+	if not bool(q.get("completed", false)) or not bool(q.get("claimed", false)):
+		return false
+
+	q["accepted"] = false
+	q["archived"] = true
+	quests[quest_id] = q
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
 func get_quest_state(quest_id: String) -> Dictionary:
 	return quests.get(quest_id, {}) as Dictionary
 
@@ -227,6 +321,7 @@ func _make_default_quest_state() -> Dictionary:
 		"progress": 0,
 		"completed": false,
 		"claimed": false,
+		"archived": false,
 	}
 
 func try_exchange(give_type: String, give_amount: int, receive_type: String, receive_amount: int) -> bool:
@@ -261,6 +356,10 @@ func damage_player(amount: int) -> void:
 	player_health = max(player_health - amount, 0)
 	emit_signal("state_changed")
 	_queue_save()
+	if player_health <= 0:
+		_lose_carried_resources_on_death()
+		player_health = player_max_health
+		emit_signal("player_died")
 
 func heal_player(amount: int) -> void:
 	player_health = min(player_health + amount, player_max_health)
@@ -274,6 +373,10 @@ func reset_alien_health() -> void:
 func damage_alien(amount: int) -> void:
 	alien_health = max(alien_health - amount, 0)
 	emit_signal("state_changed")
+	if alien_health <= 0:
+		_lose_carried_resources_on_death()
+		alien_health = alien_max_health
+		emit_signal("alien_died")
 
 func heal_alien(amount: int) -> void:
 	alien_health = min(alien_health + amount, alien_max_health)
@@ -479,6 +582,8 @@ func save_game() -> void:
 	var data := {
 		"version": SAVE_VERSION,
 		"resources": resources,
+		"vault_unlocked": vault_unlocked,
+		"vault_resources": vault_resources,
 		"quests": quests,
 		"tavern_hi_scores": tavern_hi_scores,
 		"upgrades": upgrades,
@@ -523,6 +628,17 @@ func load_game() -> void:
 	if typeof(loaded_resources) == TYPE_DICTIONARY:
 		for res_type in (loaded_resources as Dictionary).keys():
 			resources[res_type] = int(loaded_resources[res_type])
+	# garantir que ametista existe em saves antigos
+	if not resources.has("ametista"):
+		resources["ametista"] = 0
+
+	var loaded_vault_unlocked = data.get("vault_unlocked")
+	if typeof(loaded_vault_unlocked) == TYPE_DICTIONARY:
+		vault_unlocked = loaded_vault_unlocked
+
+	var loaded_vault_resources = data.get("vault_resources")
+	if typeof(loaded_vault_resources) == TYPE_DICTIONARY:
+		vault_resources = loaded_vault_resources
 
 	var loaded_quests = data.get("quests")
 	if typeof(loaded_quests) == TYPE_DICTIONARY:
@@ -576,7 +692,10 @@ func _apply_defaults() -> void:
 		"scrap": 0,
 		"mineral": 0,
 		"artifact": 0,
+		"ametista": 0,
 	}
+	vault_unlocked = {}
+	vault_resources = {}
 	quests = {}
 	_ensure_quests_initialized()
 	tavern_hi_scores = {}

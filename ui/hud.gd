@@ -4,6 +4,7 @@ extends Control
 @onready var alien_health_label: Label = $AlienHealthContainer/AlienHealthLabel
 @onready var scrap_label: Label = $ResourcesContainer/ResourcesBox/ScrapLabel
 @onready var mineral_label: Label = $ResourcesContainer/ResourcesBox/MineralLabel
+@onready var ametista_label: Label = $ResourcesContainer/ResourcesBox/AmetistaLabel
 
 @onready var upgrade_menu: Control = $UpgradeMenu
 @onready var upgrade_info: Label = $UpgradeMenu/Panel/Margin/VBox/Info
@@ -27,12 +28,16 @@ extends Control
 @onready var scrap_to_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/ScrapToMineralButton
 @onready var mineral_to_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/MineralToScrapButton
 @onready var buy_artifact_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyArtifactPartButton
+@onready var ametista_to_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/AmetistaToMineralButton
+@onready var ametista_to_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/AmetistaToScrapButton
 
 @onready var npc1_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/NPC1Button
 @onready var npc2_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/NPC2Button
 @onready var npc3_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/NPC3Button
 @onready var accept_kill_quest_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/AcceptKillQuestButton
 @onready var claim_station_quest_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/ClaimStationQuestButton
+@onready var station_quest_list: VBoxContainer = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/QuestList
+@onready var station_quest_details: RichTextLabel = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/QuestDetails
 @onready var dialogue_text: RichTextLabel = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/DialogueText
 @onready var dialogue_choices: VBoxContainer = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/DialogueChoices
 @onready var end_dialogue_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/EndDialogueButton
@@ -43,12 +48,31 @@ extends Control
 @onready var knife_game_start_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/KnifeGameStartButton
 @onready var open_upgrades_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mecanico/OpenUpgradesButton
 
+@onready var buy_vault_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/BuyVaultButton
+@onready var vault_status: RichTextLabel = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultStatus
+@onready var deposit_all_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/DepositAllButton
+@onready var withdraw_all_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/WithdrawAllButton
+@onready var scrap_slider: HSlider = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow/ScrapControls/ScrapSlider
+@onready var scrap_percent_label: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow/ScrapControls/ScrapPercent
+@onready var deposit_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow/ScrapControls/DepositScrapButton
+@onready var withdraw_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow/ScrapControls/WithdrawScrapButton
+
+@onready var mineral_slider: HSlider = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow/MineralControls/MineralSlider
+@onready var mineral_percent_label: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow/MineralControls/MineralPercent
+@onready var deposit_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow/MineralControls/DepositMineralButton
+@onready var withdraw_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow/MineralControls/WithdrawMineralButton
+
+@onready var ametista_slider: HSlider = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow/AmetistaControls/AmetistaSlider
+@onready var ametista_percent_label: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow/AmetistaControls/AmetistaPercent
+@onready var deposit_ametista_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow/AmetistaControls/DepositAmetistaButton
+@onready var withdraw_ametista_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow/AmetistaControls/WithdrawAmetistaButton
+
 @onready var close_trader_button: Button = $TraderMenu/Panel/Margin/VBox/CloseTraderButton
 
 @onready var missions_menu: Control = $MissionsMenu
 @onready var missions_tabs: TabContainer = $MissionsMenu/Panel/Margin/VBox/Tabs
 @onready var missions_list: VBoxContainer = $MissionsMenu/Panel/Margin/VBox/Tabs/Missoes/MissionList
-@onready var inventory_list: VBoxContainer = $MissionsMenu/Panel/Margin/VBox/Tabs/Inventario/InventoryList
+@onready var inventory_list: VBoxContainer = $MissionsMenu/Panel/Margin/VBox/Tabs/Inventario/InventoryScroll/InventoryList
 @onready var close_missions_button: Button = $MissionsMenu/Panel/Margin/VBox/CloseMissionsButton
 
 const DEFAULT_STATION_ID := "station_alpha"
@@ -99,16 +123,32 @@ func _ready() -> void:
 	scrap_to_mineral_button.pressed.connect(_on_trade_scrap_to_mineral)
 	mineral_to_scrap_button.pressed.connect(_on_trade_mineral_to_scrap)
 	buy_artifact_part_button.pressed.connect(_on_buy_artifact_part)
+	ametista_to_mineral_button.pressed.connect(_on_trade_ametista_to_mineral)
+	ametista_to_scrap_button.pressed.connect(_on_trade_ametista_to_scrap)
 	npc1_button.pressed.connect(_on_npc_pressed.bind(0))
 	npc2_button.pressed.connect(_on_npc_pressed.bind(1))
 	npc3_button.pressed.connect(_on_npc_pressed.bind(2))
 	accept_kill_quest_button.pressed.connect(_on_accept_kill_quest)
 	claim_station_quest_button.pressed.connect(_on_claim_station_quest)
 	open_upgrades_button.pressed.connect(_on_open_upgrades_pressed)
+	buy_vault_button.pressed.connect(_on_buy_vault_pressed)
+	deposit_all_button.pressed.connect(_on_deposit_all_pressed)
+	withdraw_all_button.pressed.connect(_on_withdraw_all_pressed)
+	scrap_slider.value_changed.connect(_on_vault_percent_changed)
+	mineral_slider.value_changed.connect(_on_vault_percent_changed)
+	ametista_slider.value_changed.connect(_on_vault_percent_changed)
+	deposit_scrap_button.pressed.connect(_on_deposit_percent.bind("scrap"))
+	withdraw_scrap_button.pressed.connect(_on_withdraw_percent.bind("scrap"))
+	deposit_mineral_button.pressed.connect(_on_deposit_percent.bind("mineral"))
+	withdraw_mineral_button.pressed.connect(_on_withdraw_percent.bind("mineral"))
+	deposit_ametista_button.pressed.connect(_on_deposit_percent.bind("ametista"))
+	withdraw_ametista_button.pressed.connect(_on_withdraw_percent.bind("ametista"))
 	end_dialogue_button.pressed.connect(_end_dialogue)
 	knife_game_start_button.pressed.connect(_on_knife_game_start_pressed)
 
 	GameState.state_changed.connect(_update_hud)
+	GameState.player_died.connect(_on_player_died)
+	GameState.alien_died.connect(_on_alien_died)
 	_update_hud()
 	_knife_game_rng.randomize()
 
@@ -255,8 +295,10 @@ func _update_hud() -> void:
 
 	var scrap: int = int(GameState.resources.get("scrap", 0))
 	var mineral: int = int(GameState.resources.get("mineral", 0))
+	var ametista: int = int(GameState.resources.get("ametista", 0))
 	scrap_label.text = "Scrap: %d" % scrap
-	mineral_label.text = "Mineral: %d" % mineral
+	mineral_label.text = " | Mineral: %d" % mineral
+	ametista_label.text = " | Ametista: %d" % ametista
 
 	if upgrade_menu.visible:
 		_update_upgrade_menu(scrap, mineral)
@@ -296,6 +338,8 @@ func _format_cost(cost: Dictionary) -> String:
 		parts.append("Scrap:%d" % int(cost["scrap"]))
 	if cost.has("mineral"):
 		parts.append("Mineral:%d" % int(cost["mineral"]))
+	if cost.has("ametista"):
+		parts.append("Ametista:%d" % int(cost["ametista"]))
 	return " | ".join(parts)
 
 func _format_quest_rewards(def: Dictionary) -> String:
@@ -392,6 +436,8 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 
 	var s2m: Dictionary = trades.get("scrap_to_mineral", {}) as Dictionary
 	var m2s: Dictionary = trades.get("mineral_to_scrap", {}) as Dictionary
+	var a2m: Dictionary = trades.get("ametista_to_mineral", {}) as Dictionary
+	var a2s: Dictionary = trades.get("ametista_to_scrap", {}) as Dictionary
 	var s2m_give: Dictionary = s2m.get("give", {}) as Dictionary
 	var s2m_recv: Dictionary = s2m.get("receive", {}) as Dictionary
 	var m2s_give: Dictionary = m2s.get("give", {}) as Dictionary
@@ -401,13 +447,156 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	mineral_to_scrap_button.text = "Trocar %s -> %s" % [_format_cost(m2s_give), _format_cost(m2s_recv)]
 	buy_artifact_part_button.text = "Comprar parte (%s)" % _format_cost(artifact_cost)
 
+	var a2m_give: Dictionary = a2m.get("give", {}) as Dictionary
+	var a2m_recv: Dictionary = a2m.get("receive", {}) as Dictionary
+	var a2s_give: Dictionary = a2s.get("give", {}) as Dictionary
+	var a2s_recv: Dictionary = a2s.get("receive", {}) as Dictionary
+
+	var has_a2m := not a2m_give.is_empty() and not a2m_recv.is_empty()
+	var has_a2s := not a2s_give.is_empty() and not a2s_recv.is_empty()
+	ametista_to_mineral_button.visible = has_a2m
+	ametista_to_scrap_button.visible = has_a2s
+	if has_a2m:
+		ametista_to_mineral_button.text = "Trocar %s -> %s" % [_format_cost(a2m_give), _format_cost(a2m_recv)]
+		ametista_to_mineral_button.disabled = not GameState.can_afford(a2m_give)
+	if has_a2s:
+		ametista_to_scrap_button.text = "Trocar %s -> %s" % [_format_cost(a2s_give), _format_cost(a2s_recv)]
+		ametista_to_scrap_button.disabled = not GameState.can_afford(a2s_give)
+
 	scrap_to_mineral_button.disabled = not GameState.can_afford(s2m_give)
 	mineral_to_scrap_button.disabled = not GameState.can_afford(m2s_give)
 
 	var can_buy_part := (not GameState.artifact_completed) and GameState.can_afford(artifact_cost)
 	buy_artifact_part_button.disabled = not can_buy_part
 
+	var offered: Array = StationCatalog.get_offered_quests(station_id)
+	_offered_quest_id = ""
+	if offered.size() > 0:
+		_offered_quest_id = str(offered[0])
+	_rebuild_station_quest_list(offered)
+	_update_station_quest_buttons()
 	_update_npc_button_text()
+	_update_vault_ui()
+
+func _update_vault_ui() -> void:
+	if vault_status == null:
+		return
+
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+
+	var unlocked := GameState.is_vault_unlocked(station_id)
+	var cost: Dictionary = StationCatalog.get_vault_cost(station_id)
+
+	buy_vault_button.visible = not unlocked
+	buy_vault_button.disabled = unlocked or not GameState.can_afford(cost)
+	buy_vault_button.text = "Comprar cofre (%s)" % _format_cost(cost)
+
+	deposit_all_button.disabled = not unlocked
+	withdraw_all_button.disabled = not unlocked
+	deposit_scrap_button.disabled = not unlocked
+	withdraw_scrap_button.disabled = not unlocked
+	deposit_mineral_button.disabled = not unlocked
+	withdraw_mineral_button.disabled = not unlocked
+	deposit_ametista_button.disabled = not unlocked
+	withdraw_ametista_button.disabled = not unlocked
+
+	_on_vault_percent_changed(0.0)
+
+	var carried_scrap := int(GameState.resources.get("scrap", 0))
+	var carried_mineral := int(GameState.resources.get("mineral", 0))
+	var carried_ametista := int(GameState.resources.get("ametista", 0))
+
+	var vault_scrap := GameState.get_vault_balance(station_id, "scrap")
+	var vault_mineral := GameState.get_vault_balance(station_id, "mineral")
+	var vault_ametista := GameState.get_vault_balance(station_id, "ametista")
+
+	vault_status.bbcode_enabled = true
+	if not unlocked:
+		vault_status.text = "Cofre bloqueado nesta estacao.\nCompra para poderes guardar recursos."
+		return
+
+	vault_status.text = "[b]Contigo[/b]\nScrap: %d | Mineral: %d | Ametista: %d\n\n[b]No Cofre (%s)[/b]\nScrap: %d | Mineral: %d | Ametista: %d" % [
+		carried_scrap,
+		carried_mineral,
+		carried_ametista,
+		StationCatalog.get_station_title(station_id),
+		vault_scrap,
+		vault_mineral,
+		vault_ametista,
+	]
+
+func _on_buy_vault_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var cost: Dictionary = StationCatalog.get_vault_cost(station_id)
+	GameState.buy_vault(station_id, cost)
+
+func _on_deposit_all_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	GameState.deposit_to_vault(station_id, "scrap", int(GameState.resources.get("scrap", 0)))
+	GameState.deposit_to_vault(station_id, "mineral", int(GameState.resources.get("mineral", 0)))
+	GameState.deposit_to_vault(station_id, "ametista", int(GameState.resources.get("ametista", 0)))
+
+func _on_withdraw_all_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	GameState.withdraw_from_vault(station_id, "scrap", GameState.get_vault_balance(station_id, "scrap"))
+	GameState.withdraw_from_vault(station_id, "mineral", GameState.get_vault_balance(station_id, "mineral"))
+	GameState.withdraw_from_vault(station_id, "ametista", GameState.get_vault_balance(station_id, "ametista"))
+
+func _on_vault_percent_changed(_value: float) -> void:
+	if scrap_percent_label != null:
+		scrap_percent_label.text = "%d%%" % int(scrap_slider.value)
+	if mineral_percent_label != null:
+		mineral_percent_label.text = "%d%%" % int(mineral_slider.value)
+	if ametista_percent_label != null:
+		ametista_percent_label.text = "%d%%" % int(ametista_slider.value)
+
+func _get_percent_for_res(res_type: String) -> float:
+	match res_type:
+		"scrap":
+			return float(scrap_slider.value)
+		"mineral":
+			return float(mineral_slider.value)
+		"ametista":
+			return float(ametista_slider.value)
+	return 100.0
+
+func _on_deposit_percent(res_type: String) -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var pct := _get_percent_for_res(res_type)
+	var have := int(GameState.resources.get(res_type, 0))
+	var amount := int(floor(have * pct / 100.0))
+	if amount <= 0:
+		return
+	GameState.deposit_to_vault(station_id, res_type, amount)
+
+func _on_withdraw_percent(res_type: String) -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var pct := _get_percent_for_res(res_type)
+	var have := GameState.get_vault_balance(station_id, res_type)
+	var amount := int(floor(have * pct / 100.0))
+	if amount <= 0:
+		return
+	GameState.withdraw_from_vault(station_id, res_type, amount)
+
+func _on_player_died() -> void:
+	get_tree().paused = false
+	get_tree().reload_current_scene()
+
+func _on_alien_died() -> void:
+	get_tree().paused = false
+	get_tree().reload_current_scene()
 	_refresh_offered_quest()
 	_update_knife_game_ui()
 
@@ -437,6 +626,26 @@ func _on_buy_artifact_part() -> void:
 		station_id = DEFAULT_STATION_ID
 	var cost: Dictionary = StationCatalog.get_artifact_part_cost(station_id)
 	GameState.try_buy_artifact_part(cost)
+
+func _on_trade_ametista_to_mineral() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var trades: Dictionary = StationCatalog.get_trades(station_id)
+	var t: Dictionary = trades.get("ametista_to_mineral", {}) as Dictionary
+	var give: Dictionary = t.get("give", {}) as Dictionary
+	var receive: Dictionary = t.get("receive", {}) as Dictionary
+	_apply_trade(give, receive)
+
+func _on_trade_ametista_to_scrap() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var trades: Dictionary = StationCatalog.get_trades(station_id)
+	var t: Dictionary = trades.get("ametista_to_scrap", {}) as Dictionary
+	var give: Dictionary = t.get("give", {}) as Dictionary
+	var receive: Dictionary = t.get("receive", {}) as Dictionary
+	_apply_trade(give, receive)
 
 func _on_npc_pressed(index: int) -> void:
 	if index < 0 or index >= _station_npcs.size():
@@ -1054,6 +1263,9 @@ func _update_station_quest_buttons() -> void:
 	claim_station_quest_button.text = "Entregar missao (recompensa)"
 
 	if _offered_quest_id.is_empty():
+		if station_quest_details != null:
+			station_quest_details.bbcode_enabled = true
+			station_quest_details.text = "Seleciona uma missao na lista."
 		return
 
 	if _offered_quest_id == GameState.QUEST_TAVERN_BANDIT:
@@ -1078,20 +1290,24 @@ func _update_station_quest_buttons() -> void:
 			if not accepted:
 				accept_kill_quest_button.text = "Aceitar: %s" % title
 				accept_kill_quest_button.disabled = false
+				_set_station_quest_details(_offered_quest_id)
 				return
 
 			if not completed:
 				accept_kill_quest_button.text = "%s: vai ao Mercador Delta" % title
 				accept_kill_quest_button.disabled = true
+				_set_station_quest_details(_offered_quest_id)
 				return
 
 			if completed and not claimed:
 				accept_kill_quest_button.text = "%s: fala com o Cacador" % title
 				accept_kill_quest_button.disabled = true
+				_set_station_quest_details(_offered_quest_id)
 				return
 
 			accept_kill_quest_button.text = "%s: concluida" % title
 			accept_kill_quest_button.disabled = true
+			_set_station_quest_details(_offered_quest_id)
 			return
 
 		if station_id == target_station_id:
@@ -1103,10 +1319,12 @@ func _update_station_quest_buttons() -> void:
 			if accepted and not completed:
 				accept_kill_quest_button.text = "Derrotar Bandido (placeholder)"
 				accept_kill_quest_button.disabled = false
+				_set_station_quest_details(_offered_quest_id)
 				return
 
 			accept_kill_quest_button.text = "%s: volta ao Cacador" % title
 			accept_kill_quest_button.disabled = true
+			_set_station_quest_details(_offered_quest_id)
 			return
 
 		return
@@ -1120,6 +1338,7 @@ func _update_station_quest_buttons() -> void:
 		accept_kill_quest_button.text = "Aceitar: %s" % title
 		accept_kill_quest_button.disabled = false
 		claim_station_quest_button.disabled = true
+		_set_station_quest_details(_offered_quest_id)
 		return
 
 	var goal: int = int(def.get("goal", 0))
@@ -1127,6 +1346,94 @@ func _update_station_quest_buttons() -> void:
 	accept_kill_quest_button.text = "%s: %d/%d" % [title, progress, goal]
 	accept_kill_quest_button.disabled = true
 	claim_station_quest_button.disabled = not GameState.can_claim_quest(_offered_quest_id)
+	_set_station_quest_details(_offered_quest_id)
+	_set_station_quest_details(_offered_quest_id)
+
+func _rebuild_station_quest_list(offered: Array) -> void:
+	if station_quest_list == null:
+		return
+
+	for child in station_quest_list.get_children():
+		station_quest_list.remove_child(child)
+		child.queue_free()
+
+	if offered.is_empty():
+		var l := Label.new()
+		l.text = "Sem missoes nesta taberna."
+		station_quest_list.add_child(l)
+		return
+
+	var any := false
+	for quest_id_variant in offered:
+		var quest_id := str(quest_id_variant)
+		if not GameState.QUEST_DEFS.has(quest_id):
+			continue
+		any = true
+
+		var def: Dictionary = GameState.QUEST_DEFS.get(quest_id, {}) as Dictionary
+		var title := str(def.get("title", quest_id))
+		var q: Dictionary = GameState.get_quest_state(quest_id)
+		var accepted := bool(q.get("accepted", false))
+		var completed := bool(q.get("completed", false))
+		var claimed := bool(q.get("claimed", false))
+
+		var status := ""
+		if claimed:
+			status = " (entregue)"
+		elif completed:
+			status = " (pronta)"
+		elif accepted:
+			status = " (em progresso)"
+
+		var b := Button.new()
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.text = title + status
+		b.pressed.connect(_on_select_station_quest.bind(quest_id))
+		station_quest_list.add_child(b)
+
+	if not any:
+		var l2 := Label.new()
+		l2.text = "Sem missoes validas aqui."
+		station_quest_list.add_child(l2)
+
+func _on_select_station_quest(quest_id: String) -> void:
+	_offered_quest_id = quest_id
+	_update_station_quest_buttons()
+
+func _set_station_quest_details(quest_id: String) -> void:
+	if station_quest_details == null:
+		return
+	station_quest_details.bbcode_enabled = true
+
+	var def: Dictionary = GameState.QUEST_DEFS.get(quest_id, {}) as Dictionary
+	var q: Dictionary = GameState.get_quest_state(quest_id)
+	var goal: int = int(def.get("goal", 0))
+	var progress: int = int(q.get("progress", 0))
+	var accepted := bool(q.get("accepted", false))
+	var completed := bool(q.get("completed", false))
+	var claimed := bool(q.get("claimed", false))
+
+	var status := "Disponivel"
+	if claimed:
+		status = "Entregue"
+	elif completed:
+		status = "Concluida"
+	elif accepted:
+		status = "Em progresso"
+
+	var delivery_hint := "Entrega em: %s" % StationCatalog.get_station_titles_offering_quest(quest_id)
+	if quest_id == GameState.QUEST_TAVERN_BANDIT:
+		delivery_hint = "Entrega: fala com o Cacador (Refugio Epsilon)"
+
+	station_quest_details.text = "[b]%s[/b]\n%s\n\nProgresso: %d/%d\nEstado: %s\n%s\nRecompensa: %s" % [
+		str(def.get("title", quest_id)),
+		str(def.get("description", "")),
+		progress,
+		goal,
+		status,
+		delivery_hint,
+		_format_quest_rewards(def),
+	]
 
 func _on_open_upgrades_pressed() -> void:
 	if _active_station == null:
@@ -1193,6 +1500,12 @@ func _rebuild_missions_list() -> void:
 		]
 		box.add_child(label)
 
+		if claimed:
+			var clear := Button.new()
+			clear.text = "Limpar missao"
+			clear.pressed.connect(_on_clear_quest.bind(quest_id))
+			box.add_child(clear)
+
 		var sep := HSeparator.new()
 		missions_list.add_child(box)
 		missions_list.add_child(sep)
@@ -1203,6 +1516,9 @@ func _rebuild_missions_list() -> void:
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		missions_list.add_child(l)
 
+func _on_clear_quest(quest_id: String) -> void:
+	GameState.clear_completed_quest(quest_id)
+
 func _rebuild_inventory_list() -> void:
 	if inventory_list == null:
 		return
@@ -1211,29 +1527,46 @@ func _rebuild_inventory_list() -> void:
 		inventory_list.remove_child(child)
 		child.queue_free()
 
-	var artifacts_title := Label.new()
-	artifacts_title.text = "Artefactos"
-	inventory_list.add_child(artifacts_title)
+	var travel_title := Label.new()
+	travel_title.text = "Viagem (Relic)"
+	inventory_list.add_child(travel_title)
 
-	# Relic (artefacto "principal" antigo)
+	# Relic = chave para viajar entre zonas (2/4 desbloqueia Zona 2)
+	var relic_progress := GameState.artifact_parts_collected
+	var relic_goal := GameState.ARTIFACT_PARTS_REQUIRED
+	var req_mid := ZoneCatalog.get_required_artifact_parts("mid")
+	var req_core := ZoneCatalog.get_required_artifact_parts("core")
+
 	var relic := RichTextLabel.new()
 	relic.bbcode_enabled = true
 	relic.scroll_active = false
 	relic.fit_content = false
-	relic.custom_minimum_size = Vector2(0, 90)
+	relic.custom_minimum_size = Vector2(0, 140)
 	relic.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	var relic_progress := GameState.artifact_parts_collected
-	var relic_goal := GameState.ARTIFACT_PARTS_REQUIRED
-	var relic_done := GameState.artifact_completed
-	relic.text = "[b]Relic[/b]\nProgresso: %d/%d\nEstado: %s" % [
+
+	var unlocked: Array[String] = []
+	if relic_progress >= req_mid:
+		unlocked.append("- Zona 2")
+	if relic_progress >= req_core:
+		unlocked.append("- Centro")
+
+	var unlocked_text := "Nenhuma zona desbloqueada ainda."
+	if not unlocked.is_empty():
+		unlocked_text = "\n".join(unlocked)
+
+	relic.text = "[b]Relic (chave de viagem)[/b]\nPartes: %d/%d\n\nDesbloqueado:\n%s" % [
 		relic_progress,
 		relic_goal,
-		("Completo" if relic_done else "Incompleto"),
+		unlocked_text,
 	]
 	inventory_list.add_child(relic)
 
 	var sep1 := HSeparator.new()
 	inventory_list.add_child(sep1)
+
+	var gadgets_header := Label.new()
+	gadgets_header.text = "Gadgets (artefactos)"
+	inventory_list.add_child(gadgets_header)
 
 	# Outros artefactos (gadgets)
 	for artifact_id_variant in ArtifactDatabase.ARTIFACTS.keys():
