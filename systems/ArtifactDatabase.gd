@@ -28,4 +28,3 @@ static func get_parts_required(artifact_id: String) -> int:
 static func get_reverse_thrust_factor() -> float:
 	var def: Dictionary = ARTIFACTS.get("reverse_thruster", {})
 	return float(def.get("reverse_thrust_factor", 0.45))
-

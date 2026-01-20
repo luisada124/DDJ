@@ -44,7 +44,7 @@ const STATIONS: Dictionary = {
 			"mineral_to_scrap": {"give": {"mineral": 1}, "receive": {"scrap": 6}},
 		},
 		"artifact_part_cost": {"scrap": 95, "mineral": 20},
-		"offered_quests": [],
+		"offered_quests": ["tavern_bandit"],
 	},
 	"station_epsilon": {
 		"title": "Refugio Epsilon",
@@ -55,7 +55,7 @@ const STATIONS: Dictionary = {
 			"mineral_to_scrap": {"give": {"mineral": 2}, "receive": {"scrap": 14}},
 		},
 		"artifact_part_cost": {"scrap": 70, "mineral": 45},
-		"offered_quests": [],
+		"offered_quests": ["tavern_bandit"],
 	},
 }
 

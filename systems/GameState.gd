@@ -25,6 +25,7 @@ var resources := {
 const QUEST_KILL_15_BASIC := "kill_15_basic"
 const QUEST_KILL_10_SNIPER := "kill_10_sniper"
 const QUEST_KILL_5_TANK := "kill_5_tank"
+const QUEST_TAVERN_BANDIT := "tavern_bandit"
 const QUEST_DEFS := {
 	QUEST_KILL_15_BASIC: {
 		"title": "Limpar o Setor",
@@ -46,6 +47,15 @@ const QUEST_DEFS := {
 		"enemy_id": "tank",
 		"goal": 5,
 		"reward": {"scrap": 80, "mineral": 60},
+	},
+	QUEST_TAVERN_BANDIT: {
+		"title": "Acerto de Contas",
+		"description": "Derrota o Bandido na taberna do Mercador Delta e volta ao Cacador no Refugio Epsilon para receber a recompensa.",
+		"goal": 1,
+		"giver_station_id": "station_epsilon",
+		"target_station_id": "station_delta",
+		"reward": {},
+		"artifact_parts_reward": {"reverse_thruster": 3},
 	},
 }
 
@@ -171,6 +181,29 @@ func record_enemy_kill(enemy_id: String) -> void:
 		emit_signal("state_changed")
 		_queue_save()
 
+func complete_quest(quest_id: String) -> bool:
+	if not QUEST_DEFS.has(quest_id):
+		return false
+
+	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
+	if q.is_empty():
+		q = _make_default_quest_state()
+
+	if not bool(q.get("accepted", false)):
+		return false
+	if bool(q.get("completed", false)):
+		return false
+
+	var def: Dictionary = QUEST_DEFS.get(quest_id, {}) as Dictionary
+	var goal: int = int(def.get("goal", 0))
+	q["progress"] = goal
+	q["completed"] = true
+	quests[quest_id] = q
+
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
 func can_claim_quest(quest_id: String) -> bool:
 	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
 	if q.is_empty():
@@ -186,6 +219,13 @@ func claim_quest(quest_id: String) -> bool:
 	for res_type_variant in reward.keys():
 		var res_type := str(res_type_variant)
 		resources[res_type] = int(resources.get(res_type, 0)) + int(reward[res_type])
+
+	var artifact_reward: Dictionary = def.get("artifact_parts_reward", {}) as Dictionary
+	for artifact_id_variant in artifact_reward.keys():
+		var artifact_id := str(artifact_id_variant)
+		var count := int(artifact_reward[artifact_id_variant])
+		for _i in range(max(count, 0)):
+			collect_artifact_part(artifact_id)
 
 	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
 	q["claimed"] = true
