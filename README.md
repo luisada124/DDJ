@@ -6,7 +6,8 @@ mecanicas a adicionar:
 
 upgrade para aspirador na nave, assim nao e necessario sair da nave para apanhar materiais
 upgrade turbo a sair da parte da frente da nave para ir para tras 
-
+Upgrade dash com o mouse 1 e mouse 2 para a esquerda e para a direita quando ele está a disparar. 
+fazer cometas spawnarem fora da visao do player
 
 upgrades:
 

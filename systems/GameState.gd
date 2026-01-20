@@ -94,6 +94,34 @@ func add_resource(type: String, amount: int) -> void:
 	emit_signal("state_changed")
 	_queue_save()
 
+func try_exchange(give_type: String, give_amount: int, receive_type: String, receive_amount: int) -> bool:
+	if give_amount <= 0 or receive_amount <= 0:
+		return false
+
+	var have := int(resources.get(give_type, 0))
+	if have < give_amount:
+		return false
+
+	resources[give_type] = have - give_amount
+	resources[receive_type] = int(resources.get(receive_type, 0)) + receive_amount
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
+func try_buy_artifact_part(cost: Dictionary) -> bool:
+	if artifact_completed:
+		return false
+	if artifact_parts_collected >= ARTIFACT_PARTS_REQUIRED:
+		return false
+	if not can_afford(cost):
+		return false
+
+	for res_type in cost.keys():
+		resources[res_type] = int(resources.get(res_type, 0)) - int(cost[res_type])
+
+	collect_artifact_part()
+	return true
+
 func damage_player(amount: int) -> void:
 	player_health = max(player_health - amount, 0)
 	emit_signal("state_changed")

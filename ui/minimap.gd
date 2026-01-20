@@ -68,6 +68,12 @@ func _draw() -> void:
 		if n is Node2D:
 			draw_circle(to_map.call((n as Node2D).global_position), 4.0, artifact_color)
 
+	# Traders reais (planeta/loja)
+	var trader_nodes: Array[Node] = get_tree().get_nodes_in_group("trader")
+	for n: Node in trader_nodes:
+		if n is Node2D:
+			draw_circle(to_map.call((n as Node2D).global_position), 4.0, trader_color)
+
 	# Jogador
 	if _player != null and is_instance_valid(_player):
 		draw_circle(to_map.call(_player.global_position), 3.5, player_color)

@@ -23,10 +23,26 @@ extends Control
 @onready var map_zone_list: VBoxContainer = $MapMenu/Panel/Margin/VBox/ZoneList
 @onready var close_map_button: Button = $MapMenu/Panel/Margin/VBox/CloseMapButton
 
+@onready var trader_menu: Control = $TraderMenu
+@onready var trader_info: Label = $TraderMenu/Panel/Margin/VBox/Info
+@onready var scrap_to_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/ScrapToMineralButton
+@onready var mineral_to_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/MineralToScrapButton
+@onready var buy_artifact_part_button: Button = $TraderMenu/Panel/Margin/VBox/BuyArtifactPartButton
+@onready var close_trader_button: Button = $TraderMenu/Panel/Margin/VBox/CloseTraderButton
+
+const TRADE_SCRAP_FOR_MINERAL_SCRAP := 10
+const TRADE_SCRAP_FOR_MINERAL_MINERAL := 1
+const TRADE_MINERAL_FOR_SCRAP_MINERAL := 1
+const TRADE_MINERAL_FOR_SCRAP_SCRAP := 8
+const ARTIFACT_PART_COST := {"scrap": 80, "mineral": 30}
+
 var _upgrade_buttons: Dictionary
+var _active_trader: Node = null
+var _menu_guard: bool = false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	add_to_group("hud")
 
 	_upgrade_buttons = {
 		"hull": hull_button,
@@ -45,11 +61,21 @@ func _ready() -> void:
 	reset_button.pressed.connect(_on_reset_pressed)
 	close_button.pressed.connect(_on_close_pressed)
 	close_map_button.pressed.connect(_on_close_map_pressed)
+	close_trader_button.pressed.connect(_on_close_trader_pressed)
+
+	scrap_to_mineral_button.pressed.connect(_on_trade_scrap_to_mineral)
+	mineral_to_scrap_button.pressed.connect(_on_trade_mineral_to_scrap)
+	buy_artifact_part_button.pressed.connect(_on_buy_artifact_part)
 
 	GameState.state_changed.connect(_update_hud)
 	_update_hud()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("interact") and _active_trader != null and not trader_menu.visible:
+		_set_trader_menu_visible(true)
+		get_viewport().set_input_as_handled()
+		return
+
 	if event.is_action_pressed("open_upgrades"):
 		_set_upgrade_menu_visible(not upgrade_menu.visible)
 		get_viewport().set_input_as_handled()
@@ -72,22 +98,52 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		return
 
+	if trader_menu.visible and event.is_action_pressed("ui_cancel"):
+		_set_trader_menu_visible(false)
+		get_viewport().set_input_as_handled()
+		return
+
 func _set_upgrade_menu_visible(visible: bool) -> void:
+	if _menu_guard:
+		return
+	_menu_guard = true
 	upgrade_menu.visible = visible
 	if visible:
-		_set_map_menu_visible(false)
-	get_tree().paused = visible
+		map_menu.visible = false
+		trader_menu.visible = false
+	_menu_guard = false
+	_apply_pause_from_menus()
 	if visible:
 		_on_upgrade_unhovered()
 	_update_hud()
 
 func _set_map_menu_visible(visible: bool) -> void:
+	if _menu_guard:
+		return
+	_menu_guard = true
 	map_menu.visible = visible
 	if visible:
-		_set_upgrade_menu_visible(false)
+		upgrade_menu.visible = false
+		trader_menu.visible = false
 		_rebuild_map_zone_list()
-	get_tree().paused = visible
+	_menu_guard = false
+	_apply_pause_from_menus()
 	_update_hud()
+
+func _set_trader_menu_visible(visible: bool) -> void:
+	if _menu_guard:
+		return
+	_menu_guard = true
+	trader_menu.visible = visible
+	if visible:
+		upgrade_menu.visible = false
+		map_menu.visible = false
+	_menu_guard = false
+	_apply_pause_from_menus()
+	_update_hud()
+
+func _apply_pause_from_menus() -> void:
+	get_tree().paused = upgrade_menu.visible or map_menu.visible or trader_menu.visible
 
 func _update_hud() -> void:
 	var hp: int = GameState.player_health
@@ -114,6 +170,9 @@ func _update_hud() -> void:
 
 	if map_menu.visible:
 		_rebuild_map_zone_list()
+
+	if trader_menu.visible:
+		_update_trader_menu(scrap, mineral)
 
 func _update_upgrade_menu(scrap: int, mineral: int) -> void:
 	upgrade_info.text = "Scrap: %d | Mineral: %d | (U) Fechar" % [scrap, mineral]
@@ -165,6 +224,41 @@ func _on_close_pressed() -> void:
 
 func _on_close_map_pressed() -> void:
 	_set_map_menu_visible(false)
+
+func _on_close_trader_pressed() -> void:
+	_set_trader_menu_visible(false)
+
+func register_trader_in_range(trader: Node, in_range: bool) -> void:
+	if in_range:
+		_active_trader = trader
+	else:
+		if _active_trader == trader:
+			_active_trader = null
+			if trader_menu.visible:
+				_set_trader_menu_visible(false)
+
+func _update_trader_menu(scrap: int, mineral: int) -> void:
+	var parts := "%d/%d" % [GameState.artifact_parts_collected, GameState.ARTIFACT_PARTS_REQUIRED]
+	trader_info.text = "Scrap: %d | Mineral: %d | Partes: %s" % [scrap, mineral, parts]
+
+	scrap_to_mineral_button.text = "Trocar %d Scrap -> %d Mineral" % [TRADE_SCRAP_FOR_MINERAL_SCRAP, TRADE_SCRAP_FOR_MINERAL_MINERAL]
+	mineral_to_scrap_button.text = "Trocar %d Mineral -> %d Scrap" % [TRADE_MINERAL_FOR_SCRAP_MINERAL, TRADE_MINERAL_FOR_SCRAP_SCRAP]
+	buy_artifact_part_button.text = "Comprar parte (%s)" % _format_cost(ARTIFACT_PART_COST)
+
+	scrap_to_mineral_button.disabled = int(GameState.resources.get("scrap", 0)) < TRADE_SCRAP_FOR_MINERAL_SCRAP
+	mineral_to_scrap_button.disabled = int(GameState.resources.get("mineral", 0)) < TRADE_MINERAL_FOR_SCRAP_MINERAL
+
+	var can_buy_part := (not GameState.artifact_completed) and GameState.can_afford(ARTIFACT_PART_COST)
+	buy_artifact_part_button.disabled = not can_buy_part
+
+func _on_trade_scrap_to_mineral() -> void:
+	GameState.try_exchange("scrap", TRADE_SCRAP_FOR_MINERAL_SCRAP, "mineral", TRADE_SCRAP_FOR_MINERAL_MINERAL)
+
+func _on_trade_mineral_to_scrap() -> void:
+	GameState.try_exchange("mineral", TRADE_MINERAL_FOR_SCRAP_MINERAL, "scrap", TRADE_MINERAL_FOR_SCRAP_SCRAP)
+
+func _on_buy_artifact_part() -> void:
+	GameState.try_buy_artifact_part(ARTIFACT_PART_COST)
 
 func _rebuild_map_zone_list() -> void:
 	if map_zone_list == null:

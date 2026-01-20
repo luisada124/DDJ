@@ -224,3 +224,70 @@ layout_mode = 2
 [node name="CloseMapButton" type="Button" parent="MapMenu/Panel/Margin/VBox"]
 layout_mode = 2
 text = "Fechar"
+
+[node name="TraderMenu" type="Control" parent="."]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+visible = false
+
+[node name="Dim" type="ColorRect" parent="TraderMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.55)
+
+[node name="Panel" type="PanelContainer" parent="TraderMenu"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -170.0
+offset_right = 260.0
+offset_bottom = 170.0
+
+[node name="Margin" type="MarginContainer" parent="TraderMenu/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="TraderMenu/Panel/Margin"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="TraderMenu/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Mercado"
+
+[node name="Info" type="Label" parent="TraderMenu/Panel/Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Trocas"
+
+[node name="ScrapToMineralButton" type="Button" parent="TraderMenu/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Trocar"
+
+[node name="MineralToScrapButton" type="Button" parent="TraderMenu/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Trocar"
+
+[node name="BuyArtifactPartButton" type="Button" parent="TraderMenu/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Comprar parte de artefacto"
+
+[node name="ButtonsSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="CloseTraderButton" type="Button" parent="TraderMenu/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Fechar"
