@@ -43,6 +43,7 @@ func shoot() -> void:
 		var laser = LaserScene.instantiate()
 		laser.global_position = muzzle.global_position
 		laser.direction = dir
+		laser.inherited_velocity = velocity
 		laser.from_player = true  # <- garante que é tiro do player
 		get_tree().current_scene.add_child(laser)
 
@@ -77,14 +78,19 @@ func _physics_process(delta: float) -> void:
 
 	# 2) Thrust (motor)
 	var thrust_pressed := Input.is_action_pressed("ui_up")
+	var reverse_pressed: bool = Input.is_action_pressed("ui_down") and GameState.has_reverse_thruster()
+	var engine_pressed: bool = thrust_pressed or reverse_pressed
+	var forward_dir := SHIP_FORWARD.rotated(rotation)
 
 	if has_node("ThrusterParticles"):
-		$ThrusterParticles.emitting = thrust_pressed
+		$ThrusterParticles.emitting = engine_pressed
 
 	if thrust_pressed:
-		var forward_dir := SHIP_FORWARD.rotated(rotation)
 		velocity += forward_dir * GameState.get_acceleration() * delta
-	else:
+	if reverse_pressed:
+		velocity += -forward_dir * GameState.get_acceleration() * GameState.get_reverse_thrust_factor() * delta
+
+	if not engine_pressed:
 		if velocity.length() > 0.0:
 			velocity = velocity.lerp(Vector2.ZERO, DRAG * delta)
 

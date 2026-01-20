@@ -4,6 +4,7 @@ extends Area2D
 @export var damage: int = 5
 
 var direction: Vector2 = Vector2.UP
+var inherited_velocity: Vector2 = Vector2.ZERO
 var lifetime: float = 2.0
 
 # true = tiro do player, false = tiro de inimigo
@@ -22,7 +23,7 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	global_position += direction * speed * delta
+	global_position += (direction * speed + inherited_velocity) * delta
 
 	lifetime -= delta
 	if lifetime <= 0.0:

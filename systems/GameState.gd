@@ -47,6 +47,9 @@ const ARTIFACT_PARTS_REQUIRED := 4
 var artifact_parts_collected: int = 0
 var artifact_completed: bool = false
 
+var artifact_parts: Dictionary = {}
+var unlocked_artifacts: PackedStringArray = PackedStringArray([])
+
 var current_zone_id: String = "outer"
 var unlocked_zones: PackedStringArray = PackedStringArray(["outer"])
 
@@ -237,6 +240,26 @@ func heal_alien(amount: int) -> void:
 	alien_health = min(alien_health + amount, alien_max_health)
 	emit_signal("state_changed")
 
+func has_artifact(artifact_id: String) -> bool:
+	return unlocked_artifacts.has(artifact_id)
+
+func get_artifact_parts(artifact_id: String) -> int:
+	return int(artifact_parts.get(artifact_id, 0))
+
+func is_artifact_completed(artifact_id: String) -> bool:
+	if artifact_id == "relic":
+		return artifact_completed
+	return has_artifact(artifact_id)
+
+func can_ship_collect_pickups() -> bool:
+	return has_artifact("vacuum")
+
+func has_reverse_thruster() -> bool:
+	return has_artifact("reverse_thruster")
+
+func get_reverse_thrust_factor() -> float:
+	return ArtifactDatabase.get_reverse_thrust_factor()
+
 func get_fire_interval() -> float:
 	var level := get_upgrade_level("blaster")
 	return max(0.06, BASE_FIRE_INTERVAL * pow(0.92, level))
@@ -334,19 +357,43 @@ func buy_upgrade(upgrade_id: String) -> bool:
 	_queue_save()
 	return true
 
-func collect_artifact_part() -> void:
-	if artifact_completed:
+func collect_artifact_part(artifact_id: String = "relic") -> void:
+	if artifact_id == "relic":
+		if artifact_completed:
+			return
+
+		artifact_parts_collected = min(artifact_parts_collected + 1, ARTIFACT_PARTS_REQUIRED)
+		if artifact_parts_collected >= ARTIFACT_PARTS_REQUIRED:
+			artifact_completed = true
+			resources["artifact"] = int(resources.get("artifact", 0)) + 1
+			# Recompensa simples (ajusta quando tiveres balanceamento)
+			resources["scrap"] = int(resources.get("scrap", 0)) + 25
+			resources["mineral"] = int(resources.get("mineral", 0)) + 25
+
+		_recalculate_zone_unlocks()
+		emit_signal("state_changed")
+		_queue_save()
 		return
 
-	artifact_parts_collected = min(artifact_parts_collected + 1, ARTIFACT_PARTS_REQUIRED)
-	if artifact_parts_collected >= ARTIFACT_PARTS_REQUIRED:
-		artifact_completed = true
-		resources["artifact"] = int(resources.get("artifact", 0)) + 1
-		# Recompensa simples (ajusta quando tiveres balanceamento)
-		resources["scrap"] = int(resources.get("scrap", 0)) + 25
-		resources["mineral"] = int(resources.get("mineral", 0)) + 25
+	if not ArtifactDatabase.is_valid_artifact(artifact_id):
+		return
 
-	_recalculate_zone_unlocks()
+	if unlocked_artifacts.has(artifact_id):
+		return
+
+	var required: int = ArtifactDatabase.get_parts_required(artifact_id)
+	if required <= 0:
+		return
+
+	var current: int = int(artifact_parts.get(artifact_id, 0))
+	current += 1
+	if current > required:
+		current = required
+	artifact_parts[artifact_id] = current
+
+	if current >= required:
+		unlocked_artifacts.append(artifact_id)
+
 	emit_signal("state_changed")
 	_queue_save()
 
@@ -386,6 +433,8 @@ func save_game() -> void:
 		"player_health": player_health,
 		"artifact_parts_collected": artifact_parts_collected,
 		"artifact_completed": artifact_completed,
+		"artifact_parts": artifact_parts,
+		"unlocked_artifacts": unlocked_artifacts,
 		"current_zone_id": current_zone_id,
 		"unlocked_zones": unlocked_zones,
 	}
@@ -435,6 +484,21 @@ func load_game() -> void:
 	player_health = int(data.get("player_health", player_max_health))
 	artifact_parts_collected = int(data.get("artifact_parts_collected", 0))
 	artifact_completed = bool(data.get("artifact_completed", false))
+
+	var loaded_artifact_parts = data.get("artifact_parts")
+	if typeof(loaded_artifact_parts) == TYPE_DICTIONARY:
+		artifact_parts.clear()
+		for artifact_id in (loaded_artifact_parts as Dictionary).keys():
+			artifact_parts[str(artifact_id)] = int(loaded_artifact_parts[artifact_id])
+
+	var loaded_unlocked_artifacts = data.get("unlocked_artifacts")
+	if typeof(loaded_unlocked_artifacts) == TYPE_ARRAY:
+		unlocked_artifacts = PackedStringArray(loaded_unlocked_artifacts)
+	elif typeof(loaded_unlocked_artifacts) == TYPE_PACKED_STRING_ARRAY:
+		unlocked_artifacts = loaded_unlocked_artifacts
+	else:
+		unlocked_artifacts = PackedStringArray([])
+
 	current_zone_id = str(data.get("current_zone_id", "outer"))
 
 	var loaded_unlocked = data.get("unlocked_zones")
@@ -468,6 +532,11 @@ func _apply_defaults() -> void:
 	}
 	artifact_parts_collected = 0
 	artifact_completed = false
+	artifact_parts = {
+		"vacuum": 0,
+		"reverse_thruster": 0,
+	}
+	unlocked_artifacts = PackedStringArray([])
 	current_zone_id = "outer"
 	unlocked_zones = PackedStringArray(["outer"])
 	_recalculate_player_stats()
