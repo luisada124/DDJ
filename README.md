@@ -12,7 +12,6 @@ Nave auxiliar com gadget.
 Mapa ser obtido como recompensa. 
 Estações têm de ser ou compradas a localização ou encontradas. 
 Ter cofres em estações para guardar recursos e não perder quando se morre. 
-Mais um mineração. 
 
 BALANCEAMENTO:
 

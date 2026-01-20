@@ -273,6 +273,9 @@ layout_mode = 2
 [node name="Mecanico" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
 layout_mode = 2
 
+[node name="Cofre" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
+layout_mode = 2
+
 [node name="Info" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
 layout_mode = 2
 autowrap_mode = 3
@@ -358,6 +361,132 @@ text = "Mecanico: upgrades so podem ser feitos nas estacoes."
 [node name="OpenUpgradesButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mecanico"]
 layout_mode = 2
 text = "Abrir upgrades (U)"
+
+[node name="VaultInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Cofre: compra e guarda recursos (nao perdes na morte)."
+
+[node name="BuyVaultButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre"]
+layout_mode = 2
+text = "Comprar cofre"
+
+[node name="VaultStatus" type="RichTextLabel" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 150)
+fit_content = false
+scroll_active = false
+autowrap_mode = 3
+text = "..."
+
+[node name="VaultButtons" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre"]
+layout_mode = 2
+
+[node name="DepositAllButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons"]
+layout_mode = 2
+text = "Depositar tudo (Scrap/Mineral/Ametista)"
+
+[node name="WithdrawAllButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons"]
+layout_mode = 2
+text = "Levantar tudo (Scrap/Mineral/Ametista)"
+
+[node name="PercentSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons"]
+layout_mode = 2
+
+[node name="PercentInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Depositar/levantar por percentagem (0–100%)"
+
+[node name="ScrapRow" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons"]
+layout_mode = 2
+
+[node name="ScrapHeader" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow"]
+layout_mode = 2
+text = "Scrap"
+
+[node name="ScrapControls" type="HBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow"]
+layout_mode = 2
+
+[node name="ScrapPercent" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow/ScrapControls"]
+layout_mode = 2
+text = "100%"
+
+[node name="ScrapSlider" type="HSlider" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow/ScrapControls"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 100.0
+step = 5.0
+value = 100.0
+
+[node name="DepositScrapButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow/ScrapControls"]
+layout_mode = 2
+text = "Depositar"
+
+[node name="WithdrawScrapButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow/ScrapControls"]
+layout_mode = 2
+text = "Levantar"
+
+[node name="MineralRow" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons"]
+layout_mode = 2
+
+[node name="MineralHeader" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow"]
+layout_mode = 2
+text = "Mineral"
+
+[node name="MineralControls" type="HBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow"]
+layout_mode = 2
+
+[node name="MineralPercent" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow/MineralControls"]
+layout_mode = 2
+text = "100%"
+
+[node name="MineralSlider" type="HSlider" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow/MineralControls"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 100.0
+step = 5.0
+value = 100.0
+
+[node name="DepositMineralButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow/MineralControls"]
+layout_mode = 2
+text = "Depositar"
+
+[node name="WithdrawMineralButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow/MineralControls"]
+layout_mode = 2
+text = "Levantar"
+
+[node name="AmetistaRow" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons"]
+layout_mode = 2
+
+[node name="AmetistaHeader" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow"]
+layout_mode = 2
+text = "Ametista"
+
+[node name="AmetistaControls" type="HBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow"]
+layout_mode = 2
+
+[node name="AmetistaPercent" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow/AmetistaControls"]
+layout_mode = 2
+text = "100%"
+
+[node name="AmetistaSlider" type="HSlider" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow/AmetistaControls"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 100.0
+step = 5.0
+value = 100.0
+
+[node name="DepositAmetistaButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow/AmetistaControls"]
+layout_mode = 2
+text = "Depositar"
+
+[node name="WithdrawAmetistaButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow/AmetistaControls"]
+layout_mode = 2
+text = "Levantar"
 
 [node name="ButtonsSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox"]
 layout_mode = 2

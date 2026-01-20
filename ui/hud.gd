@@ -43,6 +43,25 @@ extends Control
 @onready var end_dialogue_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/EndDialogueButton
 @onready var open_upgrades_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mecanico/OpenUpgradesButton
 
+@onready var buy_vault_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/BuyVaultButton
+@onready var vault_status: RichTextLabel = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultStatus
+@onready var deposit_all_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/DepositAllButton
+@onready var withdraw_all_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/WithdrawAllButton
+@onready var scrap_slider: HSlider = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow/ScrapControls/ScrapSlider
+@onready var scrap_percent_label: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow/ScrapControls/ScrapPercent
+@onready var deposit_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow/ScrapControls/DepositScrapButton
+@onready var withdraw_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow/ScrapControls/WithdrawScrapButton
+
+@onready var mineral_slider: HSlider = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow/MineralControls/MineralSlider
+@onready var mineral_percent_label: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow/MineralControls/MineralPercent
+@onready var deposit_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow/MineralControls/DepositMineralButton
+@onready var withdraw_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow/MineralControls/WithdrawMineralButton
+
+@onready var ametista_slider: HSlider = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow/AmetistaControls/AmetistaSlider
+@onready var ametista_percent_label: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow/AmetistaControls/AmetistaPercent
+@onready var deposit_ametista_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow/AmetistaControls/DepositAmetistaButton
+@onready var withdraw_ametista_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow/AmetistaControls/WithdrawAmetistaButton
+
 @onready var close_trader_button: Button = $TraderMenu/Panel/Margin/VBox/CloseTraderButton
 
 @onready var missions_menu: Control = $MissionsMenu
@@ -97,9 +116,23 @@ func _ready() -> void:
 	accept_kill_quest_button.pressed.connect(_on_accept_kill_quest)
 	claim_station_quest_button.pressed.connect(_on_claim_station_quest)
 	open_upgrades_button.pressed.connect(_on_open_upgrades_pressed)
+	buy_vault_button.pressed.connect(_on_buy_vault_pressed)
+	deposit_all_button.pressed.connect(_on_deposit_all_pressed)
+	withdraw_all_button.pressed.connect(_on_withdraw_all_pressed)
+	scrap_slider.value_changed.connect(_on_vault_percent_changed)
+	mineral_slider.value_changed.connect(_on_vault_percent_changed)
+	ametista_slider.value_changed.connect(_on_vault_percent_changed)
+	deposit_scrap_button.pressed.connect(_on_deposit_percent.bind("scrap"))
+	withdraw_scrap_button.pressed.connect(_on_withdraw_percent.bind("scrap"))
+	deposit_mineral_button.pressed.connect(_on_deposit_percent.bind("mineral"))
+	withdraw_mineral_button.pressed.connect(_on_withdraw_percent.bind("mineral"))
+	deposit_ametista_button.pressed.connect(_on_deposit_percent.bind("ametista"))
+	withdraw_ametista_button.pressed.connect(_on_withdraw_percent.bind("ametista"))
 	end_dialogue_button.pressed.connect(_end_dialogue)
 
 	GameState.state_changed.connect(_update_hud)
+	GameState.player_died.connect(_on_player_died)
+	GameState.alien_died.connect(_on_alien_died)
 	_update_hud()
 
 func _process(_delta: float) -> void:
@@ -407,6 +440,127 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	_rebuild_station_quest_list(offered)
 	_update_station_quest_buttons()
 	_update_npc_button_text()
+	_update_vault_ui()
+
+func _update_vault_ui() -> void:
+	if vault_status == null:
+		return
+
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+
+	var unlocked := GameState.is_vault_unlocked(station_id)
+	var cost: Dictionary = StationCatalog.get_vault_cost(station_id)
+
+	buy_vault_button.visible = not unlocked
+	buy_vault_button.disabled = unlocked or not GameState.can_afford(cost)
+	buy_vault_button.text = "Comprar cofre (%s)" % _format_cost(cost)
+
+	deposit_all_button.disabled = not unlocked
+	withdraw_all_button.disabled = not unlocked
+	deposit_scrap_button.disabled = not unlocked
+	withdraw_scrap_button.disabled = not unlocked
+	deposit_mineral_button.disabled = not unlocked
+	withdraw_mineral_button.disabled = not unlocked
+	deposit_ametista_button.disabled = not unlocked
+	withdraw_ametista_button.disabled = not unlocked
+
+	_on_vault_percent_changed(0.0)
+
+	var carried_scrap := int(GameState.resources.get("scrap", 0))
+	var carried_mineral := int(GameState.resources.get("mineral", 0))
+	var carried_ametista := int(GameState.resources.get("ametista", 0))
+
+	var vault_scrap := GameState.get_vault_balance(station_id, "scrap")
+	var vault_mineral := GameState.get_vault_balance(station_id, "mineral")
+	var vault_ametista := GameState.get_vault_balance(station_id, "ametista")
+
+	vault_status.bbcode_enabled = true
+	if not unlocked:
+		vault_status.text = "Cofre bloqueado nesta estacao.\nCompra para poderes guardar recursos."
+		return
+
+	vault_status.text = "[b]Contigo[/b]\nScrap: %d | Mineral: %d | Ametista: %d\n\n[b]No Cofre (%s)[/b]\nScrap: %d | Mineral: %d | Ametista: %d" % [
+		carried_scrap,
+		carried_mineral,
+		carried_ametista,
+		StationCatalog.get_station_title(station_id),
+		vault_scrap,
+		vault_mineral,
+		vault_ametista,
+	]
+
+func _on_buy_vault_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var cost: Dictionary = StationCatalog.get_vault_cost(station_id)
+	GameState.buy_vault(station_id, cost)
+
+func _on_deposit_all_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	GameState.deposit_to_vault(station_id, "scrap", int(GameState.resources.get("scrap", 0)))
+	GameState.deposit_to_vault(station_id, "mineral", int(GameState.resources.get("mineral", 0)))
+	GameState.deposit_to_vault(station_id, "ametista", int(GameState.resources.get("ametista", 0)))
+
+func _on_withdraw_all_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	GameState.withdraw_from_vault(station_id, "scrap", GameState.get_vault_balance(station_id, "scrap"))
+	GameState.withdraw_from_vault(station_id, "mineral", GameState.get_vault_balance(station_id, "mineral"))
+	GameState.withdraw_from_vault(station_id, "ametista", GameState.get_vault_balance(station_id, "ametista"))
+
+func _on_vault_percent_changed(_value: float) -> void:
+	if scrap_percent_label != null:
+		scrap_percent_label.text = "%d%%" % int(scrap_slider.value)
+	if mineral_percent_label != null:
+		mineral_percent_label.text = "%d%%" % int(mineral_slider.value)
+	if ametista_percent_label != null:
+		ametista_percent_label.text = "%d%%" % int(ametista_slider.value)
+
+func _get_percent_for_res(res_type: String) -> float:
+	match res_type:
+		"scrap":
+			return float(scrap_slider.value)
+		"mineral":
+			return float(mineral_slider.value)
+		"ametista":
+			return float(ametista_slider.value)
+	return 100.0
+
+func _on_deposit_percent(res_type: String) -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var pct := _get_percent_for_res(res_type)
+	var have := int(GameState.resources.get(res_type, 0))
+	var amount := int(floor(have * pct / 100.0))
+	if amount <= 0:
+		return
+	GameState.deposit_to_vault(station_id, res_type, amount)
+
+func _on_withdraw_percent(res_type: String) -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var pct := _get_percent_for_res(res_type)
+	var have := GameState.get_vault_balance(station_id, res_type)
+	var amount := int(floor(have * pct / 100.0))
+	if amount <= 0:
+		return
+	GameState.withdraw_from_vault(station_id, res_type, amount)
+
+func _on_player_died() -> void:
+	get_tree().paused = false
+	get_tree().reload_current_scene()
+
+func _on_alien_died() -> void:
+	get_tree().paused = false
+	get_tree().reload_current_scene()
 
 func _on_trade_scrap_to_mineral() -> void:
 	var station_id := _active_station_id

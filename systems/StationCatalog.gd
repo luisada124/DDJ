@@ -10,6 +10,7 @@ const STATIONS: Dictionary = {
 			"scrap_to_mineral": {"give": {"scrap": 10}, "receive": {"mineral": 1}},
 			"mineral_to_scrap": {"give": {"mineral": 1}, "receive": {"scrap": 8}},
 		},
+		"vault_cost": {"scrap": 60, "mineral": 25},
 		"artifact_part_cost": {"scrap": 80, "mineral": 30},
 		"offered_quests": ["kill_15_basic"],
 	},
@@ -23,6 +24,7 @@ const STATIONS: Dictionary = {
 			"ametista_to_mineral": {"give": {"ametista": 1}, "receive": {"mineral": 30}},
 			"ametista_to_scrap": {"give": {"ametista": 1}, "receive": {"scrap": 45}},
 		},
+		"vault_cost": {"scrap": 80, "mineral": 45},
 		"artifact_part_cost": {"scrap": 60, "mineral": 40, "ametista": 1},
 		"offered_quests": ["kill_10_sniper", "kill_25_sniper_ametista"],
 	},
@@ -36,6 +38,7 @@ const STATIONS: Dictionary = {
 			"ametista_to_mineral": {"give": {"ametista": 1}, "receive": {"mineral": 40}},
 			"ametista_to_scrap": {"give": {"ametista": 1}, "receive": {"scrap": 60}},
 		},
+		"vault_cost": {"scrap": 120, "mineral": 80, "ametista": 1},
 		"artifact_part_cost": {"scrap": 110, "mineral": 55, "ametista": 2},
 		"offered_quests": ["kill_5_tank", "kill_12_tank_ametista"],
 	},
@@ -47,6 +50,7 @@ const STATIONS: Dictionary = {
 			"scrap_to_mineral": {"give": {"scrap": 14}, "receive": {"mineral": 2}},
 			"mineral_to_scrap": {"give": {"mineral": 1}, "receive": {"scrap": 6}},
 		},
+		"vault_cost": {"scrap": 70, "mineral": 15},
 		"artifact_part_cost": {"scrap": 95, "mineral": 20},
 		"offered_quests": [],
 	},
@@ -58,6 +62,7 @@ const STATIONS: Dictionary = {
 			"scrap_to_mineral": {"give": {"scrap": 6}, "receive": {"mineral": 1}},
 			"mineral_to_scrap": {"give": {"mineral": 2}, "receive": {"scrap": 14}},
 		},
+		"vault_cost": {"scrap": 55, "mineral": 35},
 		"artifact_part_cost": {"scrap": 70, "mineral": 45},
 		"offered_quests": [],
 	},
@@ -83,6 +88,9 @@ static func get_trades(station_id: String) -> Dictionary:
 
 static func get_artifact_part_cost(station_id: String) -> Dictionary:
 	return get_station_def(station_id).get("artifact_part_cost", {}) as Dictionary
+
+static func get_vault_cost(station_id: String) -> Dictionary:
+	return get_station_def(station_id).get("vault_cost", {}) as Dictionary
 
 static func get_offered_quests(station_id: String) -> Array:
 	return get_station_def(station_id).get("offered_quests", []) as Array
