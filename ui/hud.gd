@@ -4,7 +4,6 @@ extends Control
 @onready var alien_health_label: Label = $AlienHealthContainer/AlienHealthLabel
 @onready var scrap_label: Label = $ResourcesContainer/ResourcesBox/ScrapLabel
 @onready var mineral_label: Label = $ResourcesContainer/ResourcesBox/MineralLabel
-@onready var artifact_label: Label = $ArtifactContainer/ArtifactLabel
 
 @onready var upgrade_menu: Control = $UpgradeMenu
 @onready var upgrade_info: Label = $UpgradeMenu/Panel/Margin/VBox/Info
@@ -42,7 +41,9 @@ extends Control
 @onready var close_trader_button: Button = $TraderMenu/Panel/Margin/VBox/CloseTraderButton
 
 @onready var missions_menu: Control = $MissionsMenu
-@onready var missions_list: VBoxContainer = $MissionsMenu/Panel/Margin/VBox/MissionList
+@onready var missions_tabs: TabContainer = $MissionsMenu/Panel/Margin/VBox/Tabs
+@onready var missions_list: VBoxContainer = $MissionsMenu/Panel/Margin/VBox/Tabs/Missoes/MissionList
+@onready var inventory_list: VBoxContainer = $MissionsMenu/Panel/Margin/VBox/Tabs/Inventario/InventoryList
 @onready var close_missions_button: Button = $MissionsMenu/Panel/Margin/VBox/CloseMissionsButton
 
 const DEFAULT_STATION_ID := "station_alpha"
@@ -205,6 +206,7 @@ func _set_missions_menu_visible(visible: bool) -> void:
 		map_menu.visible = false
 		trader_menu.visible = false
 		_rebuild_missions_list()
+		_rebuild_inventory_list()
 	_menu_guard = false
 	_apply_pause_from_menus()
 	_update_hud()
@@ -226,12 +228,6 @@ func _update_hud() -> void:
 	scrap_label.text = "Scrap: %d" % scrap
 	mineral_label.text = "Mineral: %d" % mineral
 
-	if GameState.artifact_completed:
-		var artifacts := int(GameState.resources.get("artifact", 0))
-		artifact_label.text = "Artefacto: OBTIDO (%d)" % artifacts
-	else:
-		artifact_label.text = "Artefacto: %d / %d" % [GameState.artifact_parts_collected, GameState.ARTIFACT_PARTS_REQUIRED]
-
 	if upgrade_menu.visible:
 		_update_upgrade_menu(scrap, mineral)
 
@@ -243,6 +239,7 @@ func _update_hud() -> void:
 
 	if missions_menu.visible:
 		_rebuild_missions_list()
+		_rebuild_inventory_list()
 
 func _update_upgrade_menu(scrap: int, mineral: int) -> void:
 	upgrade_info.text = "Scrap: %d | Mineral: %d | (U) Fechar" % [scrap, mineral]
@@ -775,12 +772,14 @@ func _rebuild_missions_list() -> void:
 		label.fit_content = false
 		label.custom_minimum_size = Vector2(0, 140)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.text = "[b]%s[/b]\n%s\nProgresso: %d/%d | Estado: %s\nRecompensa: %s (entrega numa estacao)" % [
+		var deliver := StationCatalog.get_station_titles_offering_quest(quest_id)
+		label.text = "[b]%s[/b]\n%s\nProgresso: %d/%d | Estado: %s\nEntrega em: %s\nRecompensa: %s" % [
 			str(def.get("title", quest_id)),
 			str(def.get("description", "")),
 			progress,
 			goal,
 			status,
+			deliver,
 			_format_cost(reward)
 		]
 		box.add_child(label)
@@ -794,6 +793,95 @@ func _rebuild_missions_list() -> void:
 		l.text = "Sem missoes ativas. Aceita missoes na Taberna das estacoes."
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		missions_list.add_child(l)
+
+func _rebuild_inventory_list() -> void:
+	if inventory_list == null:
+		return
+
+	for child in inventory_list.get_children():
+		inventory_list.remove_child(child)
+		child.queue_free()
+
+	var artifacts_title := Label.new()
+	artifacts_title.text = "Artefactos"
+	inventory_list.add_child(artifacts_title)
+
+	# Relic (artefacto "principal" antigo)
+	var relic := RichTextLabel.new()
+	relic.bbcode_enabled = true
+	relic.scroll_active = false
+	relic.fit_content = false
+	relic.custom_minimum_size = Vector2(0, 90)
+	relic.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var relic_progress := GameState.artifact_parts_collected
+	var relic_goal := GameState.ARTIFACT_PARTS_REQUIRED
+	var relic_done := GameState.artifact_completed
+	relic.text = "[b]Relic[/b]\nProgresso: %d/%d\nEstado: %s" % [
+		relic_progress,
+		relic_goal,
+		("Completo" if relic_done else "Incompleto"),
+	]
+	inventory_list.add_child(relic)
+
+	var sep1 := HSeparator.new()
+	inventory_list.add_child(sep1)
+
+	# Outros artefactos (gadgets)
+	for artifact_id_variant in ArtifactDatabase.ARTIFACTS.keys():
+		var artifact_id := str(artifact_id_variant)
+		var title := ArtifactDatabase.get_artifact_title(artifact_id)
+		var goal := ArtifactDatabase.get_parts_required(artifact_id)
+		var progress := GameState.get_artifact_parts(artifact_id)
+		var done := GameState.has_artifact(artifact_id)
+
+		var item := RichTextLabel.new()
+		item.bbcode_enabled = true
+		item.scroll_active = false
+		item.fit_content = false
+		item.custom_minimum_size = Vector2(0, 110)
+		item.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+
+		var gadget_hint := ""
+		match artifact_id:
+			"vacuum":
+				gadget_hint = "Gadget: apanhar pickups automaticamente"
+			"reverse_thruster":
+				gadget_hint = "Gadget: andar para tras (S)"
+			"side_dash":
+				gadget_hint = "Gadget: dash lateral (Mouse1/Mouse2)"
+
+		item.text = "[b]%s[/b]\nProgresso: %d/%d\nEstado: %s\n%s" % [
+			title,
+			progress,
+			goal,
+			("Desbloqueado" if done else "Bloqueado"),
+			gadget_hint,
+		]
+		inventory_list.add_child(item)
+
+		var sep := HSeparator.new()
+		inventory_list.add_child(sep)
+
+	var gadgets_title := Label.new()
+	gadgets_title.text = "Gadgets desbloqueados"
+	inventory_list.add_child(gadgets_title)
+
+	var any_gadget := false
+	if GameState.can_ship_collect_pickups():
+		var l1 := Label.new()
+		l1.text = "- Aspirador (apanhar pickups)"
+		inventory_list.add_child(l1)
+		any_gadget = true
+	if GameState.has_reverse_thruster():
+		var l2 := Label.new()
+		l2.text = "- Thruster Reverso (S) x%.2f" % GameState.get_reverse_thrust_factor()
+		inventory_list.add_child(l2)
+		any_gadget = true
+
+	if not any_gadget:
+		var none := Label.new()
+		none.text = "Nenhum gadget desbloqueado ainda."
+		inventory_list.add_child(none)
 
 
 func _rebuild_map_zone_list() -> void:

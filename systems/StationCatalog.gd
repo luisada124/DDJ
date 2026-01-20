@@ -82,3 +82,23 @@ static func get_artifact_part_cost(station_id: String) -> Dictionary:
 
 static func get_offered_quests(station_id: String) -> Array:
 	return get_station_def(station_id).get("offered_quests", []) as Array
+
+static func get_station_ids_offering_quest(quest_id: String) -> Array[String]:
+	var ids: Array[String] = []
+	for station_id_variant in STATIONS.keys():
+		var station_id := str(station_id_variant)
+		var offered: Array = get_offered_quests(station_id)
+		for qid_variant in offered:
+			if str(qid_variant) == quest_id:
+				ids.append(station_id)
+				break
+	return ids
+
+static func get_station_titles_offering_quest(quest_id: String) -> String:
+	var ids := get_station_ids_offering_quest(quest_id)
+	if ids.is_empty():
+		return "Qualquer estacao"
+	var titles: Array[String] = []
+	for sid in ids:
+		titles.append(get_station_title(sid))
+	return ", ".join(titles)
