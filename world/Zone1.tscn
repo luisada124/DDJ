@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://cjlxyltpch1o"]
+[gd_scene load_steps=6 format=3 uid="uid://cjlxyltpch1o"]
 
 [ext_resource type="Texture2D" uid="uid://bjrm3amgjxcyo" path="res://textures/ChatGPT Image Jan 5, 2026, 12_57_27 AM.png" id="1_a3a3j"]
 [ext_resource type="PackedScene" uid="uid://cshejja03gcoo" path="res://world/comet.tscn" id="2_htqom"]
 [ext_resource type="Script" uid="uid://bh6ub2jiqfrcn" path="res://world/comet_spawner.gd" id="3_a3a3j"]
 [ext_resource type="PackedScene" path="res://world/TraderPlanet.tscn" id="4_trader"]
+[ext_resource type="PackedScene" path="res://pickups/ArtifactPart.tscn" id="5_artifact_part"]
 
 [node name="Zone1" type="Node2D"]
 position = Vector2(19, 0)
@@ -34,6 +35,32 @@ station_id = "station_delta"
 [node name="TraderPlanet3" parent="." instance=ExtResource("4_trader")]
 position = Vector2(2500, 2600)
 station_id = "station_epsilon"
+
+[node name="TestArtifacts" type="Node2D" parent="."]
+
+[node name="DashPart1" parent="TestArtifacts" instance=ExtResource("5_artifact_part")]
+position = Vector2(200, 200)
+artifact_id = "side_dash"
+
+[node name="DashPart2" parent="TestArtifacts" instance=ExtResource("5_artifact_part")]
+position = Vector2(-200, 220)
+artifact_id = "side_dash"
+
+[node name="DashPart3" parent="TestArtifacts" instance=ExtResource("5_artifact_part")]
+position = Vector2(0, -250)
+artifact_id = "side_dash"
+
+[node name="DashPart4" parent="TestArtifacts" instance=ExtResource("5_artifact_part")]
+position = Vector2(300, -120)
+artifact_id = "side_dash"
+
+[node name="DashPart5" parent="TestArtifacts" instance=ExtResource("5_artifact_part")]
+position = Vector2(-320, -110)
+artifact_id = "side_dash"
+
+[node name="DashPart6" parent="TestArtifacts" instance=ExtResource("5_artifact_part")]
+position = Vector2(0, 360)
+artifact_id = "side_dash"
 
 [node name="comet" parent="comets" instance=ExtResource("2_htqom")]
 position = Vector2(87, 132)

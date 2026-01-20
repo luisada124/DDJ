@@ -313,8 +313,20 @@ func can_ship_collect_pickups() -> bool:
 func has_reverse_thruster() -> bool:
 	return has_artifact("reverse_thruster")
 
+func has_side_dash() -> bool:
+	return has_artifact("side_dash")
+
 func get_reverse_thrust_factor() -> float:
 	return ArtifactDatabase.get_reverse_thrust_factor()
+
+func get_dash_speed() -> float:
+	return ArtifactDatabase.get_dash_speed()
+
+func get_dash_duration() -> float:
+	return ArtifactDatabase.get_dash_duration()
+
+func get_dash_cooldown() -> float:
+	return ArtifactDatabase.get_dash_cooldown()
 
 func get_fire_interval() -> float:
 	var level := get_upgrade_level("blaster")

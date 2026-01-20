@@ -15,6 +15,9 @@ const LaserScene := preload("res://player/lasers/Laser.tscn")
 const AlienScene: PackedScene = preload("res://player/Alien.tscn")
 
 var fire_cooldown: float = 0.0
+var dash_cooldown: float = 0.0
+var dash_time_left: float = 0.0
+var dash_dir: Vector2 = Vector2.ZERO
 var _controlling_alien: bool = false
 var _alien: CharacterBody2D = null
 
@@ -72,6 +75,28 @@ func _physics_process(delta: float) -> void:
 				invincible = false
 		return
 
+	# Dash lateral (Mouse1/Mouse2) - precisa do artefacto "side_dash"
+	dash_cooldown = maxf(0.0, dash_cooldown - delta)
+	if dash_time_left > 0.0:
+		dash_time_left = maxf(0.0, dash_time_left - delta)
+
+	if GameState.has_side_dash() and dash_time_left <= 0.0 and dash_cooldown <= 0.0:
+		if Input.is_action_just_pressed("dash_left"):
+			_start_dash(-1.0)
+		elif Input.is_action_just_pressed("dash_right"):
+			_start_dash(1.0)
+
+	if dash_time_left > 0.0:
+		velocity = dash_dir * GameState.get_dash_speed()
+		move_and_slide()
+		_check_collisions()
+
+		if invincible:
+			invincible_timer -= delta
+			if invincible_timer <= 0.0:
+				invincible = false
+		return
+
 	# 1) Rodar nave
 	var turn_dir := Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
 	rotation += turn_dir * ROTATION_SPEED * delta
@@ -116,6 +141,13 @@ func _physics_process(delta: float) -> void:
 		invincible_timer -= delta
 		if invincible_timer <= 0.0:
 			invincible = false
+
+func _start_dash(side_sign: float) -> void:
+	var forward_dir := SHIP_FORWARD.rotated(rotation)
+	var right_dir := forward_dir.rotated(PI / 2.0)
+	dash_dir = right_dir * side_sign
+	dash_time_left = GameState.get_dash_duration()
+	dash_cooldown = GameState.get_dash_cooldown()
 
 
 func _check_collisions() -> void:

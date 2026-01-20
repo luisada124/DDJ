@@ -61,18 +61,6 @@ theme_override_constants/margin_top = 16
 layout_mode = 2
 text = "Alien: 50 / 50"
 
-[node name="ArtifactContainer" type="MarginContainer" parent="."]
-layout_mode = 0
-offset_top = 80.0
-offset_right = 220.0
-offset_bottom = 120.0
-theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 16
-
-[node name="ArtifactLabel" type="Label" parent="ArtifactContainer"]
-layout_mode = 2
-text = "Artefacto: 0 / 4"
-
 [node name="MiniMap" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 2
@@ -403,7 +391,20 @@ layout_mode = 2
 autowrap_mode = 3
 text = "(TAB) fecha | Recompensas sao entregues nas estacoes"
 
-[node name="MissionList" type="VBoxContainer" parent="MissionsMenu/Panel/Margin/VBox"]
+[node name="Tabs" type="TabContainer" parent="MissionsMenu/Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Missoes" type="VBoxContainer" parent="MissionsMenu/Panel/Margin/VBox/Tabs"]
+layout_mode = 2
+
+[node name="MissionList" type="VBoxContainer" parent="MissionsMenu/Panel/Margin/VBox/Tabs/Missoes"]
+layout_mode = 2
+
+[node name="Inventario" type="VBoxContainer" parent="MissionsMenu/Panel/Margin/VBox/Tabs"]
+layout_mode = 2
+
+[node name="InventoryList" type="VBoxContainer" parent="MissionsMenu/Panel/Margin/VBox/Tabs/Inventario"]
 layout_mode = 2
 
 [node name="CloseMissionsButton" type="Button" parent="MissionsMenu/Panel/Margin/VBox"]
