@@ -249,10 +249,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -260.0
-offset_top = -170.0
-offset_right = 260.0
-offset_bottom = 170.0
+offset_left = -440.0
+offset_top = -300.0
+offset_right = 440.0
+offset_bottom = 300.0
 
 [node name="Margin" type="MarginContainer" parent="TraderMenu/Panel"]
 layout_mode = 2
@@ -266,24 +266,67 @@ layout_mode = 2
 
 [node name="Title" type="Label" parent="TraderMenu/Panel/Margin/VBox"]
 layout_mode = 2
-text = "Mercado"
+text = "Planeta - Estacao"
 
-[node name="Info" type="Label" parent="TraderMenu/Panel/Margin/VBox"]
+[node name="Tabs" type="TabContainer" parent="TraderMenu/Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Mercado" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
+layout_mode = 2
+
+[node name="Taberna" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
+layout_mode = 2
+
+[node name="Missoes" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
+layout_mode = 2
+
+[node name="Info" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
 layout_mode = 2
 autowrap_mode = 3
 text = "Trocas"
 
-[node name="ScrapToMineralButton" type="Button" parent="TraderMenu/Panel/Margin/VBox"]
+[node name="ScrapToMineralButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
 layout_mode = 2
 text = "Trocar"
 
-[node name="MineralToScrapButton" type="Button" parent="TraderMenu/Panel/Margin/VBox"]
+[node name="MineralToScrapButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
 layout_mode = 2
 text = "Trocar"
 
-[node name="BuyArtifactPartButton" type="Button" parent="TraderMenu/Panel/Margin/VBox"]
+[node name="BuyArtifactPartButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
 layout_mode = 2
 text = "Comprar parte de artefacto"
+
+[node name="TavernInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Taberna: fala com NPCs para obter missoes."
+
+[node name="NPC1Button" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+layout_mode = 2
+text = "NPC: Cacador (missoes)"
+
+[node name="AcceptKillQuestButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+layout_mode = 2
+text = "Aceitar missao"
+
+[node name="MissionsInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Missoes"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Missoes ativas"
+
+[node name="ActiveQuestLabel" type="RichTextLabel" parent="TraderMenu/Panel/Margin/VBox/Tabs/Missoes"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 110)
+fit_content = false
+scroll_active = false
+autowrap_mode = 3
+text = "Nenhuma missao ativa."
+
+[node name="ClaimQuestButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Missoes"]
+layout_mode = 2
+text = "Receber recompensa"
 
 [node name="ButtonsSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox"]
 layout_mode = 2

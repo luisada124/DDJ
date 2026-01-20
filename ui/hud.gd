@@ -24,10 +24,17 @@ extends Control
 @onready var close_map_button: Button = $MapMenu/Panel/Margin/VBox/CloseMapButton
 
 @onready var trader_menu: Control = $TraderMenu
-@onready var trader_info: Label = $TraderMenu/Panel/Margin/VBox/Info
-@onready var scrap_to_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/ScrapToMineralButton
-@onready var mineral_to_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/MineralToScrapButton
-@onready var buy_artifact_part_button: Button = $TraderMenu/Panel/Margin/VBox/BuyArtifactPartButton
+@onready var trader_info: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/Info
+@onready var scrap_to_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/ScrapToMineralButton
+@onready var mineral_to_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/MineralToScrapButton
+@onready var buy_artifact_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyArtifactPartButton
+
+@onready var npc1_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/NPC1Button
+@onready var accept_kill_quest_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/AcceptKillQuestButton
+
+@onready var active_quest_label: RichTextLabel = $TraderMenu/Panel/Margin/VBox/Tabs/Missoes/ActiveQuestLabel
+@onready var claim_quest_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Missoes/ClaimQuestButton
+
 @onready var close_trader_button: Button = $TraderMenu/Panel/Margin/VBox/CloseTraderButton
 
 const TRADE_SCRAP_FOR_MINERAL_SCRAP := 10
@@ -43,6 +50,7 @@ var _menu_guard: bool = false
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	add_to_group("hud")
+	active_quest_label.bbcode_enabled = true
 
 	_upgrade_buttons = {
 		"hull": hull_button,
@@ -66,6 +74,9 @@ func _ready() -> void:
 	scrap_to_mineral_button.pressed.connect(_on_trade_scrap_to_mineral)
 	mineral_to_scrap_button.pressed.connect(_on_trade_mineral_to_scrap)
 	buy_artifact_part_button.pressed.connect(_on_buy_artifact_part)
+	npc1_button.pressed.connect(_on_npc1_pressed)
+	accept_kill_quest_button.pressed.connect(_on_accept_kill_quest)
+	claim_quest_button.pressed.connect(_on_claim_kill_quest)
 
 	GameState.state_changed.connect(_update_hud)
 	_update_hud()
@@ -251,6 +262,8 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	var can_buy_part := (not GameState.artifact_completed) and GameState.can_afford(ARTIFACT_PART_COST)
 	buy_artifact_part_button.disabled = not can_buy_part
 
+	_update_missions_ui()
+
 func _on_trade_scrap_to_mineral() -> void:
 	GameState.try_exchange("scrap", TRADE_SCRAP_FOR_MINERAL_SCRAP, "mineral", TRADE_SCRAP_FOR_MINERAL_MINERAL)
 
@@ -259,6 +272,53 @@ func _on_trade_mineral_to_scrap() -> void:
 
 func _on_buy_artifact_part() -> void:
 	GameState.try_buy_artifact_part(ARTIFACT_PART_COST)
+
+func _on_npc1_pressed() -> void:
+	# Placeholder: por agora so existe 1 NPC com 1 missao.
+	_update_missions_ui()
+
+func _on_accept_kill_quest() -> void:
+	GameState.accept_quest(GameState.QUEST_KILL_15_BASIC)
+	_update_missions_ui()
+
+func _on_claim_kill_quest() -> void:
+	GameState.claim_quest(GameState.QUEST_KILL_15_BASIC)
+	_update_missions_ui()
+
+func _update_missions_ui() -> void:
+	var q := GameState.get_quest_state(GameState.QUEST_KILL_15_BASIC)
+	if q.is_empty() or not bool(q.get("accepted", false)):
+		active_quest_label.text = "Nenhuma missao ativa.\n\nFala com o NPC na Taberna para aceitar uma."
+		claim_quest_button.disabled = true
+		accept_kill_quest_button.disabled = false
+		accept_kill_quest_button.text = "Aceitar missao: Matar 15 inimigos basicos"
+		return
+
+	var def := GameState.QUEST_DEFS.get(GameState.QUEST_KILL_15_BASIC, {}) as Dictionary
+	var goal: int = int(def.get("goal", 15))
+	var progress: int = int(q.get("progress", 0))
+	var completed := bool(q.get("completed", false))
+	var claimed := bool(q.get("claimed", false))
+	var reward := def.get("reward", {}) as Dictionary
+
+	var status := "Em progresso"
+	if claimed:
+		status = "Concluida (recompensa recebida)"
+	elif completed:
+		status = "Concluida"
+
+	active_quest_label.text = "[b]%s[/b]\n%s\n\nProgresso: %d / %d\nEstado: %s\nRecompensa: %s" % [
+		str(def.get("title", "Missao")),
+		str(def.get("description", "")),
+		progress,
+		goal,
+		status,
+		_format_cost(reward)
+	]
+
+	accept_kill_quest_button.disabled = true
+	accept_kill_quest_button.text = "Missao ja aceite"
+	claim_quest_button.disabled = not GameState.can_claim_quest(GameState.QUEST_KILL_15_BASIC)
 
 func _rebuild_map_zone_list() -> void:
 	if map_zone_list == null:

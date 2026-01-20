@@ -1,6 +1,6 @@
 extends Area2D
 
-@export var prompt_text: String = "E - Mercado"
+@export var prompt_text: String = "E - Estacao"
 
 var _player_in_range: bool = false
 
@@ -27,4 +27,3 @@ func _on_body_exited(body: Node2D) -> void:
 	_player_in_range = false
 	prompt.visible = false
 	get_tree().call_group("hud", "register_trader_in_range", self, false)
-

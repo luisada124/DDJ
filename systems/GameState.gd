@@ -22,6 +22,19 @@ var resources := {
 	"mineral": 0,
 }
 
+const QUEST_KILL_15_BASIC := "kill_15_basic"
+const QUEST_DEFS := {
+	QUEST_KILL_15_BASIC: {
+		"title": "Limpar o Setor",
+		"description": "Mata 15 inimigos basicos.",
+		"enemy_id": "basic",
+		"goal": 15,
+		"reward": {"scrap": 60, "mineral": 25},
+	},
+}
+
+var quests: Dictionary = {}
+
 var upgrades := {
 	"hull": 0,      # +HP max
 	"blaster": 0,   # mais fire rate (menos intervalo)
@@ -93,6 +106,86 @@ func add_resource(type: String, amount: int) -> void:
 	print(type, " =", resources[type])
 	emit_signal("state_changed")
 	_queue_save()
+
+func accept_quest(quest_id: String) -> bool:
+	if not QUEST_DEFS.has(quest_id):
+		return false
+
+	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
+	if q.is_empty():
+		q = _make_default_quest_state()
+
+	if bool(q.get("accepted", false)):
+		return false
+
+	q["accepted"] = true
+	quests[quest_id] = q
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
+func record_enemy_kill(enemy_id: String) -> void:
+	var changed := false
+	for quest_id_variant in quests.keys():
+		var quest_id := str(quest_id_variant)
+		var q: Dictionary = quests.get(quest_id, {}) as Dictionary
+		if not bool(q.get("accepted", false)):
+			continue
+		if bool(q.get("completed", false)):
+			continue
+
+		var def: Dictionary = QUEST_DEFS.get(quest_id, {}) as Dictionary
+		var required_enemy_id := str(def.get("enemy_id", ""))
+		if required_enemy_id.is_empty() or required_enemy_id != enemy_id:
+			continue
+
+		var goal: int = int(def.get("goal", 0))
+		var progress: int = int(q.get("progress", 0))
+		progress = min(progress + 1, goal)
+		q["progress"] = progress
+		if progress >= goal:
+			q["completed"] = true
+		quests[quest_id] = q
+		changed = true
+
+	if changed:
+		emit_signal("state_changed")
+		_queue_save()
+
+func can_claim_quest(quest_id: String) -> bool:
+	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
+	if q.is_empty():
+		return false
+	return bool(q.get("completed", false)) and not bool(q.get("claimed", false))
+
+func claim_quest(quest_id: String) -> bool:
+	if not can_claim_quest(quest_id):
+		return false
+
+	var def: Dictionary = QUEST_DEFS.get(quest_id, {}) as Dictionary
+	var reward: Dictionary = def.get("reward", {}) as Dictionary
+	for res_type_variant in reward.keys():
+		var res_type := str(res_type_variant)
+		resources[res_type] = int(resources.get(res_type, 0)) + int(reward[res_type])
+
+	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
+	q["claimed"] = true
+	quests[quest_id] = q
+
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
+func get_quest_state(quest_id: String) -> Dictionary:
+	return quests.get(quest_id, {}) as Dictionary
+
+func _make_default_quest_state() -> Dictionary:
+	return {
+		"accepted": false,
+		"progress": 0,
+		"completed": false,
+		"claimed": false,
+	}
 
 func try_exchange(give_type: String, give_amount: int, receive_type: String, receive_amount: int) -> bool:
 	if give_amount <= 0 or receive_amount <= 0:
@@ -288,6 +381,7 @@ func save_game() -> void:
 	var data := {
 		"version": SAVE_VERSION,
 		"resources": resources,
+		"quests": quests,
 		"upgrades": upgrades,
 		"player_health": player_health,
 		"artifact_parts_collected": artifact_parts_collected,
@@ -329,6 +423,10 @@ func load_game() -> void:
 		for res_type in (loaded_resources as Dictionary).keys():
 			resources[res_type] = int(loaded_resources[res_type])
 
+	var loaded_quests = data.get("quests")
+	if typeof(loaded_quests) == TYPE_DICTIONARY:
+		quests = loaded_quests
+
 	var loaded_upgrades = data.get("upgrades")
 	if typeof(loaded_upgrades) == TYPE_DICTIONARY:
 		for upgrade_id in (loaded_upgrades as Dictionary).keys():
@@ -350,6 +448,7 @@ func load_game() -> void:
 	_recalculate_zone_unlocks()
 	if not can_access_zone(current_zone_id):
 		current_zone_id = "outer"
+	_ensure_quests_initialized()
 	_recalculate_player_stats()
 
 func _apply_defaults() -> void:
@@ -358,6 +457,8 @@ func _apply_defaults() -> void:
 		"mineral": 0,
 		"artifact": 0,
 	}
+	quests = {}
+	_ensure_quests_initialized()
 	upgrades = {
 		"hull": 0,
 		"blaster": 0,
@@ -373,6 +474,14 @@ func _apply_defaults() -> void:
 	player_health = player_max_health
 	alien_max_health = BASE_ALIEN_MAX_HEALTH
 	alien_health = alien_max_health
+
+func _ensure_quests_initialized() -> void:
+	if quests == null:
+		quests = {}
+	for quest_id_variant in QUEST_DEFS.keys():
+		var quest_id := str(quest_id_variant)
+		if not quests.has(quest_id):
+			quests[quest_id] = _make_default_quest_state()
 
 func _recalculate_zone_unlocks() -> void:
 	# Base: sempre podes ir para a zona exterior.
