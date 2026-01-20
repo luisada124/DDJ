@@ -161,6 +161,9 @@ func accept_quest(quest_id: String) -> bool:
 	if q.is_empty():
 		q = _make_default_quest_state()
 
+	if bool(q.get("archived", false)) or bool(q.get("claimed", false)):
+		return false
+
 	if bool(q.get("accepted", false)):
 		return false
 
@@ -252,6 +255,20 @@ func claim_quest(quest_id: String) -> bool:
 	_queue_save()
 	return true
 
+func clear_completed_quest(quest_id: String) -> bool:
+	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
+	if q.is_empty():
+		return false
+	if not bool(q.get("completed", false)) or not bool(q.get("claimed", false)):
+		return false
+
+	q["accepted"] = false
+	q["archived"] = true
+	quests[quest_id] = q
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
 func get_quest_state(quest_id: String) -> Dictionary:
 	return quests.get(quest_id, {}) as Dictionary
 
@@ -261,6 +278,7 @@ func _make_default_quest_state() -> Dictionary:
 		"progress": 0,
 		"completed": false,
 		"claimed": false,
+		"archived": false,
 	}
 
 func try_exchange(give_type: String, give_amount: int, receive_type: String, receive_amount: int) -> bool:

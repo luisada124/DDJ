@@ -54,6 +54,15 @@ inimigo - 4  | 1,2,3,4
 
 
 
+Lista de artefactos e gadgets:
+
+
+vacuum
+reverse_thruster
+side_dash
+
+
+
 promps:
 
 Chatini agora preciso de 

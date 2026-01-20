@@ -36,6 +36,8 @@ extends Control
 @onready var npc3_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/NPC3Button
 @onready var accept_kill_quest_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/AcceptKillQuestButton
 @onready var claim_station_quest_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/ClaimStationQuestButton
+@onready var station_quest_list: VBoxContainer = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/QuestList
+@onready var station_quest_details: RichTextLabel = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/QuestDetails
 @onready var dialogue_text: RichTextLabel = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/DialogueText
 @onready var dialogue_choices: VBoxContainer = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/DialogueChoices
 @onready var end_dialogue_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/EndDialogueButton
@@ -46,7 +48,7 @@ extends Control
 @onready var missions_menu: Control = $MissionsMenu
 @onready var missions_tabs: TabContainer = $MissionsMenu/Panel/Margin/VBox/Tabs
 @onready var missions_list: VBoxContainer = $MissionsMenu/Panel/Margin/VBox/Tabs/Missoes/MissionList
-@onready var inventory_list: VBoxContainer = $MissionsMenu/Panel/Margin/VBox/Tabs/Inventario/InventoryList
+@onready var inventory_list: VBoxContainer = $MissionsMenu/Panel/Margin/VBox/Tabs/Inventario/InventoryScroll/InventoryList
 @onready var close_missions_button: Button = $MissionsMenu/Panel/Margin/VBox/CloseMissionsButton
 
 const DEFAULT_STATION_ID := "station_alpha"
@@ -402,6 +404,7 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	_offered_quest_id = ""
 	if offered.size() > 0:
 		_offered_quest_id = str(offered[0])
+	_rebuild_station_quest_list(offered)
 	_update_station_quest_buttons()
 	_update_npc_button_text()
 
@@ -909,6 +912,9 @@ func _update_station_quest_buttons() -> void:
 	claim_station_quest_button.text = "Entregar missao (recompensa)"
 
 	if _offered_quest_id.is_empty():
+		if station_quest_details != null:
+			station_quest_details.bbcode_enabled = true
+			station_quest_details.text = "Seleciona uma missao na lista."
 		return
 
 	if _offered_quest_id == GameState.QUEST_TAVERN_BANDIT:
@@ -933,20 +939,24 @@ func _update_station_quest_buttons() -> void:
 			if not accepted:
 				accept_kill_quest_button.text = "Aceitar: %s" % title
 				accept_kill_quest_button.disabled = false
+				_set_station_quest_details(_offered_quest_id)
 				return
 
 			if not completed:
 				accept_kill_quest_button.text = "%s: vai ao Mercador Delta" % title
 				accept_kill_quest_button.disabled = true
+				_set_station_quest_details(_offered_quest_id)
 				return
 
 			if completed and not claimed:
 				accept_kill_quest_button.text = "%s: fala com o Cacador" % title
 				accept_kill_quest_button.disabled = true
+				_set_station_quest_details(_offered_quest_id)
 				return
 
 			accept_kill_quest_button.text = "%s: concluida" % title
 			accept_kill_quest_button.disabled = true
+			_set_station_quest_details(_offered_quest_id)
 			return
 
 		if station_id == target_station_id:
@@ -958,10 +968,12 @@ func _update_station_quest_buttons() -> void:
 			if accepted and not completed:
 				accept_kill_quest_button.text = "Derrotar Bandido (placeholder)"
 				accept_kill_quest_button.disabled = false
+				_set_station_quest_details(_offered_quest_id)
 				return
 
 			accept_kill_quest_button.text = "%s: volta ao Cacador" % title
 			accept_kill_quest_button.disabled = true
+			_set_station_quest_details(_offered_quest_id)
 			return
 
 		return
@@ -975,6 +987,7 @@ func _update_station_quest_buttons() -> void:
 		accept_kill_quest_button.text = "Aceitar: %s" % title
 		accept_kill_quest_button.disabled = false
 		claim_station_quest_button.disabled = true
+		_set_station_quest_details(_offered_quest_id)
 		return
 
 	var goal: int = int(def.get("goal", 0))
@@ -982,6 +995,94 @@ func _update_station_quest_buttons() -> void:
 	accept_kill_quest_button.text = "%s: %d/%d" % [title, progress, goal]
 	accept_kill_quest_button.disabled = true
 	claim_station_quest_button.disabled = not GameState.can_claim_quest(_offered_quest_id)
+	_set_station_quest_details(_offered_quest_id)
+	_set_station_quest_details(_offered_quest_id)
+
+func _rebuild_station_quest_list(offered: Array) -> void:
+	if station_quest_list == null:
+		return
+
+	for child in station_quest_list.get_children():
+		station_quest_list.remove_child(child)
+		child.queue_free()
+
+	if offered.is_empty():
+		var l := Label.new()
+		l.text = "Sem missoes nesta taberna."
+		station_quest_list.add_child(l)
+		return
+
+	var any := false
+	for quest_id_variant in offered:
+		var quest_id := str(quest_id_variant)
+		if not GameState.QUEST_DEFS.has(quest_id):
+			continue
+		any = true
+
+		var def: Dictionary = GameState.QUEST_DEFS.get(quest_id, {}) as Dictionary
+		var title := str(def.get("title", quest_id))
+		var q: Dictionary = GameState.get_quest_state(quest_id)
+		var accepted := bool(q.get("accepted", false))
+		var completed := bool(q.get("completed", false))
+		var claimed := bool(q.get("claimed", false))
+
+		var status := ""
+		if claimed:
+			status = " (entregue)"
+		elif completed:
+			status = " (pronta)"
+		elif accepted:
+			status = " (em progresso)"
+
+		var b := Button.new()
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.text = title + status
+		b.pressed.connect(_on_select_station_quest.bind(quest_id))
+		station_quest_list.add_child(b)
+
+	if not any:
+		var l2 := Label.new()
+		l2.text = "Sem missoes validas aqui."
+		station_quest_list.add_child(l2)
+
+func _on_select_station_quest(quest_id: String) -> void:
+	_offered_quest_id = quest_id
+	_update_station_quest_buttons()
+
+func _set_station_quest_details(quest_id: String) -> void:
+	if station_quest_details == null:
+		return
+	station_quest_details.bbcode_enabled = true
+
+	var def: Dictionary = GameState.QUEST_DEFS.get(quest_id, {}) as Dictionary
+	var q: Dictionary = GameState.get_quest_state(quest_id)
+	var goal: int = int(def.get("goal", 0))
+	var progress: int = int(q.get("progress", 0))
+	var accepted := bool(q.get("accepted", false))
+	var completed := bool(q.get("completed", false))
+	var claimed := bool(q.get("claimed", false))
+
+	var status := "Disponivel"
+	if claimed:
+		status = "Entregue"
+	elif completed:
+		status = "Concluida"
+	elif accepted:
+		status = "Em progresso"
+
+	var delivery_hint := "Entrega em: %s" % StationCatalog.get_station_titles_offering_quest(quest_id)
+	if quest_id == GameState.QUEST_TAVERN_BANDIT:
+		delivery_hint = "Entrega: fala com o Cacador (Refugio Epsilon)"
+
+	station_quest_details.text = "[b]%s[/b]\n%s\n\nProgresso: %d/%d\nEstado: %s\n%s\nRecompensa: %s" % [
+		str(def.get("title", quest_id)),
+		str(def.get("description", "")),
+		progress,
+		goal,
+		status,
+		delivery_hint,
+		_format_quest_rewards(def),
+	]
 
 func _on_open_upgrades_pressed() -> void:
 	if _active_station == null:
@@ -1044,9 +1145,15 @@ func _rebuild_missions_list() -> void:
 			goal,
 			status,
 			deliver,
-			_format_cost(reward)
+			_format_quest_rewards(def)
 		]
 		box.add_child(label)
+
+		if claimed:
+			var clear := Button.new()
+			clear.text = "Limpar missao"
+			clear.pressed.connect(_on_clear_quest.bind(quest_id))
+			box.add_child(clear)
 
 		var sep := HSeparator.new()
 		missions_list.add_child(box)
@@ -1058,6 +1165,9 @@ func _rebuild_missions_list() -> void:
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		missions_list.add_child(l)
 
+func _on_clear_quest(quest_id: String) -> void:
+	GameState.clear_completed_quest(quest_id)
+
 func _rebuild_inventory_list() -> void:
 	if inventory_list == null:
 		return
@@ -1066,29 +1176,46 @@ func _rebuild_inventory_list() -> void:
 		inventory_list.remove_child(child)
 		child.queue_free()
 
-	var artifacts_title := Label.new()
-	artifacts_title.text = "Artefactos"
-	inventory_list.add_child(artifacts_title)
+	var travel_title := Label.new()
+	travel_title.text = "Viagem (Relic)"
+	inventory_list.add_child(travel_title)
 
-	# Relic (artefacto "principal" antigo)
+	# Relic = chave para viajar entre zonas (2/4 desbloqueia Zona 2)
+	var relic_progress := GameState.artifact_parts_collected
+	var relic_goal := GameState.ARTIFACT_PARTS_REQUIRED
+	var req_mid := ZoneCatalog.get_required_artifact_parts("mid")
+	var req_core := ZoneCatalog.get_required_artifact_parts("core")
+
 	var relic := RichTextLabel.new()
 	relic.bbcode_enabled = true
 	relic.scroll_active = false
 	relic.fit_content = false
-	relic.custom_minimum_size = Vector2(0, 90)
+	relic.custom_minimum_size = Vector2(0, 140)
 	relic.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	var relic_progress := GameState.artifact_parts_collected
-	var relic_goal := GameState.ARTIFACT_PARTS_REQUIRED
-	var relic_done := GameState.artifact_completed
-	relic.text = "[b]Relic[/b]\nProgresso: %d/%d\nEstado: %s" % [
+
+	var unlocked: Array[String] = []
+	if relic_progress >= req_mid:
+		unlocked.append("- Zona 2")
+	if relic_progress >= req_core:
+		unlocked.append("- Centro")
+
+	var unlocked_text := "Nenhuma zona desbloqueada ainda."
+	if not unlocked.is_empty():
+		unlocked_text = "\n".join(unlocked)
+
+	relic.text = "[b]Relic (chave de viagem)[/b]\nPartes: %d/%d\n\nDesbloqueado:\n%s" % [
 		relic_progress,
 		relic_goal,
-		("Completo" if relic_done else "Incompleto"),
+		unlocked_text,
 	]
 	inventory_list.add_child(relic)
 
 	var sep1 := HSeparator.new()
 	inventory_list.add_child(sep1)
+
+	var gadgets_header := Label.new()
+	gadgets_header.text = "Gadgets (artefactos)"
+	inventory_list.add_child(gadgets_header)
 
 	# Outros artefactos (gadgets)
 	for artifact_id_variant in ArtifactDatabase.ARTIFACTS.keys():
