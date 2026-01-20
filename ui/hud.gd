@@ -277,6 +277,24 @@ func _format_cost(cost: Dictionary) -> String:
 		parts.append("Ametista:%d" % int(cost["ametista"]))
 	return " | ".join(parts)
 
+func _format_quest_rewards(def: Dictionary) -> String:
+	var parts: Array[String] = []
+
+	var reward: Dictionary = def.get("reward", {}) as Dictionary
+	var res_text := _format_cost(reward)
+	if not res_text.is_empty():
+		parts.append(res_text)
+
+	var artifact_reward: Dictionary = def.get("artifact_parts_reward", {}) as Dictionary
+	for artifact_id_variant in artifact_reward.keys():
+		var artifact_id := str(artifact_id_variant)
+		var count := int(artifact_reward[artifact_id_variant])
+		if count <= 0:
+			continue
+		parts.append("%s x%d" % [ArtifactDatabase.get_artifact_title(artifact_id), count])
+
+	return " | ".join(parts)
+
 func _on_upgrade_pressed(upgrade_id: String) -> void:
 	GameState.buy_upgrade(upgrade_id)
 
@@ -468,14 +486,14 @@ func _get_npcs_for_station(station_id: String) -> Array:
 			]
 		"station_delta":
 			return [
+				{"id": "bandit", "name": "Bandido"},
 				{"id": "krrth", "name": "Krr'th"},
-				{"id": "bloop", "name": "Bloop"},
 				{"id": "snee", "name": "Snee-Snack"},
 			]
 		"station_epsilon":
 			return [
+				{"id": "hunter", "name": "Cacador"},
 				{"id": "vexa", "name": "Vexa"},
-				{"id": "oomu", "name": "Oomu"},
 				{"id": "rrrl", "name": "Rrrl"},
 			]
 		_:
@@ -527,6 +545,31 @@ func _render_dialogue() -> void:
 		dialogue_choices.add_child(b)
 
 func _on_dialogue_choice(next_node: String) -> void:
+	if next_node.begins_with("action:"):
+		var parts := next_node.split(":", false)
+		if parts.size() >= 3:
+			var action := str(parts[1])
+			var quest_id := str(parts[2])
+			var next_after := "end"
+			if parts.size() >= 4:
+				next_after = str(parts[3])
+
+			match action:
+				"accept_quest":
+					GameState.accept_quest(quest_id)
+				"claim_quest":
+					GameState.claim_quest(quest_id)
+
+			_update_station_quest_buttons()
+
+			if next_after == "end":
+				_end_dialogue()
+				return
+
+			_dialogue_state["node"] = next_after
+			_render_dialogue()
+			return
+
 	if next_node == "end":
 		_end_dialogue()
 		return
@@ -547,6 +590,97 @@ func _end_dialogue() -> void:
 func _get_dialogue_nodes(_station_id: String, npc_id: String) -> Dictionary:
 	# Conversas engraçadas com escolhas.
 	match npc_id:
+		"hunter":
+			var hunter_q: Dictionary = GameState.get_quest_state(GameState.QUEST_TAVERN_BANDIT)
+			var hunter_accepted := bool(hunter_q.get("accepted", false))
+			var hunter_completed := bool(hunter_q.get("completed", false))
+			var hunter_claimed := bool(hunter_q.get("claimed", false))
+
+			if not hunter_accepted:
+				return {
+					"start": {
+						"text": "[b]Cacador[/b]: Preciso de ajuda. Um Bandido esta a causar problemas na taberna do Mercador Delta.\n[b]Cacador[/b]: Vai la e derrota-o. Depois volta aqui para receber 3 partes do Thruster Reverso.",
+						"choices": [
+							{"text": "Aceitar missao.", "next": "action:accept_quest:tavern_bandit:accepted"},
+							{"text": "Agora nao.", "next": "end"},
+						],
+					},
+					"accepted": {
+						"text": "[b]Cacador[/b]: Boa. Vai ao Mercador Delta e derrota o Bandido.\n[b]Cacador[/b]: A recompensa so e entregue aqui, quando voltares.",
+						"choices": [
+							{"text": "Ok.", "next": "end"},
+						],
+					},
+				}
+
+			if hunter_accepted and not hunter_completed:
+				return {
+					"start": {
+						"text": "[b]Cacador[/b]: Ainda estas aqui? O Bandido esta no Mercador Delta.\n[b]Cacador[/b]: Derrota-o e volta para receber as partes.",
+						"choices": [
+							{"text": "Vou ja.", "next": "end"},
+						],
+					},
+				}
+
+			if hunter_completed and not hunter_claimed:
+				return {
+					"start": {
+						"text": "[b]Cacador[/b]: Excelente! Sabia que conseguias.\n[b]Cacador[/b]: Queres receber a recompensa agora?",
+						"choices": [
+							{"text": "Receber partes.", "next": "action:claim_quest:tavern_bandit:rewarded"},
+							{"text": "Depois.", "next": "end"},
+						],
+					},
+					"rewarded": {
+						"text": "[b]Cacador[/b]: Aqui estao as 3 partes do Thruster Reverso.",
+						"choices": [
+							{"text": "Obrigado.", "next": "end"},
+						],
+					},
+				}
+
+			return {
+				"start": {
+					"text": "[b]Cacador[/b]: Obrigado outra vez. Se precisares de mais trabalho, passa ca mais tarde.",
+					"choices": [
+						{"text": "Ok.", "next": "end"},
+					],
+				},
+			}
+		"bandit":
+			var bandit_q: Dictionary = GameState.get_quest_state(GameState.QUEST_TAVERN_BANDIT)
+			var bandit_accepted := bool(bandit_q.get("accepted", false))
+			var bandit_completed := bool(bandit_q.get("completed", false))
+
+			if not bandit_accepted:
+				return {
+					"start": {
+						"text": "[b]Bandido[/b]: O que e que queres? Esta taberna nao e para turistas.",
+						"choices": [
+							{"text": "Ok.", "next": "end"},
+						],
+					},
+				}
+
+			if bandit_accepted and not bandit_completed:
+				return {
+					"start": {
+						"text": "[b]Bandido[/b]: Hah. Achas que me podes derrotar?\n[b]Bandido[/b]: Entao prova. (Por agora, usa o botao [i]Derrotar Bandido[/i].)",
+						"choices": [
+							{"text": "Vamos a isso.", "next": "end"},
+						],
+					},
+				}
+
+			return {
+				"start": {
+					"text": "[b]Bandido[/b]: ...",
+					"choices": [
+						{"text": "Ok.", "next": "end"},
+					],
+				},
+			}
 		"glip":
 			return {
 				"start": {
@@ -733,11 +867,37 @@ func _get_dialogue_nodes(_station_id: String, npc_id: String) -> Dictionary:
 func _on_accept_kill_quest() -> void:
 	if _offered_quest_id.is_empty():
 		return
+
+	if _offered_quest_id == GameState.QUEST_TAVERN_BANDIT:
+		var station_id := _active_station_id
+		if station_id.is_empty():
+			station_id = DEFAULT_STATION_ID
+
+		var def: Dictionary = GameState.QUEST_DEFS.get(_offered_quest_id, {}) as Dictionary
+		var giver_station_id := str(def.get("giver_station_id", ""))
+		var target_station_id := str(def.get("target_station_id", ""))
+
+		var q: Dictionary = GameState.get_quest_state(_offered_quest_id)
+		var accepted := bool(q.get("accepted", false))
+		var completed := bool(q.get("completed", false))
+
+		if station_id == giver_station_id:
+			if not accepted:
+				GameState.accept_quest(_offered_quest_id)
+		elif station_id == target_station_id:
+			if accepted and not completed:
+				GameState.complete_quest(_offered_quest_id)
+
+		_update_station_quest_buttons()
+		return
+
 	GameState.accept_quest(_offered_quest_id)
 	_update_station_quest_buttons()
 
 func _on_claim_station_quest() -> void:
 	if _offered_quest_id.is_empty():
+		return
+	if _offered_quest_id == GameState.QUEST_TAVERN_BANDIT:
 		return
 	GameState.claim_quest(_offered_quest_id)
 	_update_station_quest_buttons()
@@ -749,6 +909,61 @@ func _update_station_quest_buttons() -> void:
 	claim_station_quest_button.text = "Entregar missao (recompensa)"
 
 	if _offered_quest_id.is_empty():
+		return
+
+	if _offered_quest_id == GameState.QUEST_TAVERN_BANDIT:
+		var station_id := _active_station_id
+		if station_id.is_empty():
+			station_id = DEFAULT_STATION_ID
+
+		var def: Dictionary = GameState.QUEST_DEFS.get(_offered_quest_id, {}) as Dictionary
+		var q: Dictionary = GameState.get_quest_state(_offered_quest_id)
+		var accepted := bool(q.get("accepted", false))
+		var completed := bool(q.get("completed", false))
+		var claimed := bool(q.get("claimed", false))
+		var title := str(def.get("title", "Missao"))
+
+		var giver_station_id := str(def.get("giver_station_id", ""))
+		var target_station_id := str(def.get("target_station_id", ""))
+
+		claim_station_quest_button.text = "Recompensa: fala com o Cacador"
+		claim_station_quest_button.disabled = true
+
+		if station_id == giver_station_id:
+			if not accepted:
+				accept_kill_quest_button.text = "Aceitar: %s" % title
+				accept_kill_quest_button.disabled = false
+				return
+
+			if not completed:
+				accept_kill_quest_button.text = "%s: vai ao Mercador Delta" % title
+				accept_kill_quest_button.disabled = true
+				return
+
+			if completed and not claimed:
+				accept_kill_quest_button.text = "%s: fala com o Cacador" % title
+				accept_kill_quest_button.disabled = true
+				return
+
+			accept_kill_quest_button.text = "%s: concluida" % title
+			accept_kill_quest_button.disabled = true
+			return
+
+		if station_id == target_station_id:
+			if not accepted:
+				accept_kill_quest_button.text = "%s: fala com o Cacador no Refugio Epsilon" % title
+				accept_kill_quest_button.disabled = true
+				return
+
+			if accepted and not completed:
+				accept_kill_quest_button.text = "Derrotar Bandido (placeholder)"
+				accept_kill_quest_button.disabled = false
+				return
+
+			accept_kill_quest_button.text = "%s: volta ao Cacador" % title
+			accept_kill_quest_button.disabled = true
+			return
+
 		return
 
 	var def: Dictionary = GameState.QUEST_DEFS.get(_offered_quest_id, {}) as Dictionary
@@ -802,7 +1017,9 @@ func _rebuild_missions_list() -> void:
 		var progress: int = int(q.get("progress", 0))
 		var completed := bool(q.get("completed", false))
 		var claimed := bool(q.get("claimed", false))
-		var reward: Dictionary = def.get("reward", {}) as Dictionary
+		var delivery_hint := "(entrega numa estacao)"
+		if quest_id == GameState.QUEST_TAVERN_BANDIT:
+			delivery_hint = "(reclama com o Cacador no Refugio Epsilon)"
 
 		var status := "Em progresso"
 		if claimed:
