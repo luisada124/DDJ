@@ -35,12 +35,21 @@ func _magnet_to_player(delta: float) -> void:
 	if _player == null:
 		return
 
+	# No início, só o alien apanha recursos. A nave só apanha depois do artefacto "Aspirador".
+	if _player.is_in_group("ship") and not GameState.can_ship_collect_pickups():
+		return
+
 	var effective_range := magnet_range * GameState.get_pickup_magnet_range_multiplier()
 	var effective_speed := magnet_speed * GameState.get_pickup_magnet_speed_multiplier()
 	if global_position.distance_to(_player.global_position) <= effective_range:
 		global_position = global_position.move_toward(_player.global_position, effective_speed * delta)
 
 func _on_body_entered(body: Node2D) -> void:  
-	if body.is_in_group("player"):
+	if body.is_in_group("alien"):
+		GameState.add_resource(resource_type, amount)
+		queue_free()
+		return
+
+	if body.is_in_group("ship") and GameState.can_ship_collect_pickups():
 		GameState.add_resource(resource_type, amount)
 		queue_free()
