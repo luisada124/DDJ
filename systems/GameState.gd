@@ -19,6 +19,15 @@ var player_health: int = BASE_PLAYER_MAX_HEALTH
 var alien_max_health: int = BASE_ALIEN_MAX_HEALTH
 var alien_health: int = BASE_ALIEN_MAX_HEALTH
 
+# Consumíveis (inventário).
+var consumables := {
+	"repair_kit": 0,
+}
+
+# Regeneração automática do "auto_regen".
+var _regen_cooldown: float = 0.0
+var _regen_accum: float = 0.0
+
 var resources := {
 	"scrap": 0,
 	"mineral": 0,
@@ -108,6 +117,28 @@ func _ready() -> void:
 	randomize()
 	load_game()
 	emit_signal("state_changed")
+
+func _process(delta: float) -> void:
+	_tick_regen(delta)
+
+func _tick_regen(delta: float) -> void:
+	if not has_artifact("auto_regen"):
+		return
+	if player_health >= player_max_health:
+		return
+	_regen_cooldown = maxf(0.0, _regen_cooldown - delta)
+	if _regen_cooldown > 0.0:
+		_regen_accum = 0.0
+		return
+	var rate: float = ArtifactDatabase.get_regen_rate()
+	if rate <= 0.0:
+		return
+	_regen_accum += rate * delta
+	var heal_amount: int = int(floor(_regen_accum))
+	if heal_amount <= 0:
+		return
+	_regen_accum -= float(heal_amount)
+	heal_player(heal_amount)
 
 func add_resource(type: String, amount: int) -> void:
 	if not resources.has(type):
@@ -435,6 +466,8 @@ func try_buy_artifact_part(cost: Dictionary) -> bool:
 
 func damage_player(amount: int) -> void:
 	player_health = max(player_health - amount, 0)
+	_regen_cooldown = ArtifactDatabase.get_regen_delay()
+	_regen_accum = 0.0
 	emit_signal("state_changed")
 	_queue_save()
 	if player_health <= 0:
@@ -446,6 +479,44 @@ func heal_player(amount: int) -> void:
 	player_health = min(player_health + amount, player_max_health)
 	emit_signal("state_changed")
 	_queue_save()
+
+func buy_repair_kit(cost: Dictionary) -> bool:
+	if not can_afford(cost):
+		return false
+	for res_type_variant in cost.keys():
+		var res_type := str(res_type_variant)
+		resources[res_type] = int(resources.get(res_type, 0)) - int(cost[res_type])
+	consumables["repair_kit"] = int(consumables.get("repair_kit", 0)) + 1
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
+func get_repair_kit_count() -> int:
+	return int(consumables.get("repair_kit", 0))
+
+func use_repair_kit() -> bool:
+	var count := get_repair_kit_count()
+	if count <= 0:
+		return false
+	var half := int(floor(float(player_max_health) * 0.5))
+	if half <= 0:
+		half = 1
+	consumables["repair_kit"] = count - 1
+	heal_player(half)
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
+func repair_ship(cost: Dictionary) -> bool:
+	if not can_afford(cost):
+		return false
+	for res_type_variant in cost.keys():
+		var res_type := str(res_type_variant)
+		resources[res_type] = int(resources.get(res_type, 0)) - int(cost[res_type])
+	player_health = player_max_health
+	emit_signal("state_changed")
+	_queue_save()
+	return true
 
 func reset_alien_health() -> void:
 	alien_health = alien_max_health
@@ -485,6 +556,9 @@ func has_side_dash() -> bool:
 
 func has_aux_ship() -> bool:
 	return has_artifact("aux_ship")
+
+func has_mining_drill() -> bool:
+	return has_artifact("mining_drill")
 
 func get_reverse_thrust_factor() -> float:
 	return ArtifactDatabase.get_reverse_thrust_factor()
@@ -666,6 +740,7 @@ func save_game() -> void:
 	var data := {
 		"version": SAVE_VERSION,
 		"resources": resources,
+		"consumables": consumables,
 		"vault_unlocked": vault_unlocked,
 		"vault_resources": vault_resources,
 		"quests": quests,
@@ -716,6 +791,14 @@ func load_game() -> void:
 	# garantir que ametista existe em saves antigos
 	if not resources.has("ametista"):
 		resources["ametista"] = 0
+
+	var loaded_consumables = data.get("consumables")
+	if typeof(loaded_consumables) == TYPE_DICTIONARY:
+		consumables.clear()
+		for item_id in (loaded_consumables as Dictionary).keys():
+			consumables[str(item_id)] = int(loaded_consumables[item_id])
+	if not consumables.has("repair_kit"):
+		consumables["repair_kit"] = 0
 
 	var loaded_vault_unlocked = data.get("vault_unlocked")
 	if typeof(loaded_vault_unlocked) == TYPE_DICTIONARY:
@@ -811,6 +894,9 @@ func _apply_defaults() -> void:
 	player_health = player_max_health
 	alien_max_health = BASE_ALIEN_MAX_HEALTH
 	alien_health = alien_max_health
+	consumables = {"repair_kit": 0}
+	_regen_cooldown = 0.0
+	_regen_accum = 0.0
 
 func _ensure_quests_initialized() -> void:
 	if quests == null:

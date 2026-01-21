@@ -1,5 +1,9 @@
 todo:
 
+Meter um menu de upgrades para a nave auxiliar. 
+
+Começamos com o aspirador e depois ele avaria, e temos de apanhar as peças para o teto de volta. 
+
 Medir as missões a virem de conversas com NPCs. 
 
 Resolver problema da descrição das missões. Não estará a aparecer quando se compra. 
@@ -64,14 +68,24 @@ inimigo - 4  | 1,2,3,4
 
 
 Lista de artefactos e gadgets:
+pensar no numero de ametistas para cada
+Zona 1:
 
+vacuum: 2 
 
-vacuum
-reverse_thruster
-side_dash
+reverse_thruster: 3
 
+Zona 2:
+
+broca de mineracao: 1 
+
+Vai ser obtida logo numa estação perto do spawn da zona 2 e Vai ser um tropa que lhe vai dar para desde que ele faça recolha de 4 ametistas para ele. Se ele não cumprir e não lhe as devolver, também não consegue fazer mais missões nesse gás, e esse gás vai ter missões boas. 
+
+side_dash: 6
+Maquina auxiliar: 6
+
+auto_regen:
 
 
 promps:
 
-Chatini agora preciso de 

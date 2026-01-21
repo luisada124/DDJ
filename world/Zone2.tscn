@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=3 uid="uid://dwnoooka70fwj"]
+[gd_scene load_steps=7 format=3 uid="uid://dwnoooka70fwj"]
 
 [ext_resource type="Texture2D" uid="uid://td7kqwf0gshu" path="res://textures/fundoZona2.png" id="1_bal8j"]
 [ext_resource type="PackedScene" uid="uid://cshejja03gcoo" path="res://world/comet.tscn" id="2_comet"]
 [ext_resource type="Script" uid="uid://bh6ub2jiqfrcn" path="res://world/comet_spawner.gd" id="3_spawner"]
 [ext_resource type="PackedScene" path="res://world/TraderPlanet.tscn" id="4_trader"]
+[ext_resource type="PackedScene" path="res://pickups/ArtifactPart.tscn" id="5_artifact_part"]
+[ext_resource type="PackedScene" path="res://world/AmetistaMiningComet.tscn" id="6_ametista_mine"]
 
 [node name="Zone2" type="Node2D"]
 
@@ -28,6 +30,72 @@ station_id = "station_beta"
 [node name="TraderPlanet2" parent="." instance=ExtResource("4_trader")]
 position = Vector2(-2600, -1800)
 station_id = "station_alpha"
+
+[node name="Mining" type="Node2D" parent="."]
+
+[node name="DrillPart" parent="Mining" instance=ExtResource("5_artifact_part")]
+position = Vector2(240, -160)
+artifact_id = "mining_drill"
+
+[node name="AmetistaComet1" parent="Mining" instance=ExtResource("6_ametista_mine")]
+position = Vector2(-200, 180)
+
+[node name="AmetistaComet2" parent="Mining" instance=ExtResource("6_ametista_mine")]
+position = Vector2(520, 260)
+
+[node name="AmetistaComet3" parent="Mining" instance=ExtResource("6_ametista_mine")]
+position = Vector2(1200, -900)
+
+[node name="AmetistaComet4" parent="Mining" instance=ExtResource("6_ametista_mine")]
+position = Vector2(-1400, 850)
+
+[node name="AmetistaComet5" parent="Mining" instance=ExtResource("6_ametista_mine")]
+position = Vector2(2200, 1200)
+
+[node name="AmetistaComet6" parent="Mining" instance=ExtResource("6_ametista_mine")]
+position = Vector2(-2400, -1300)
+
+[node name="AmetistaComet7" parent="Mining" instance=ExtResource("6_ametista_mine")]
+position = Vector2(3000, -1800)
+
+[node name="AmetistaComet8" parent="Mining" instance=ExtResource("6_ametista_mine")]
+position = Vector2(-3200, 1900)
+
+[node name="AmetistaComet9" parent="Mining" instance=ExtResource("6_ametista_mine")]
+position = Vector2(800, 2400)
+
+[node name="AmetistaComet10" parent="Mining" instance=ExtResource("6_ametista_mine")]
+position = Vector2(-900, -2500)
+
+[node name="AmetistaComet11" parent="Mining" instance=ExtResource("6_ametista_mine")]
+position = Vector2(0, 3100)
+
+[node name="AmetistaComet12" parent="Mining" instance=ExtResource("6_ametista_mine")]
+position = Vector2(1400, 3200)
+
+[node name="AmetistaComet13" parent="Mining" instance=ExtResource("6_ametista_mine")]
+position = Vector2(-1500, 3300)
+
+[node name="AmetistaComet14" parent="Mining" instance=ExtResource("6_ametista_mine")]
+position = Vector2(3600, 400)
+
+[node name="AmetistaComet15" parent="Mining" instance=ExtResource("6_ametista_mine")]
+position = Vector2(-3700, -500)
+
+[node name="AmetistaComet16" parent="Mining" instance=ExtResource("6_ametista_mine")]
+position = Vector2(2600, 2800)
+
+[node name="AmetistaComet17" parent="Mining" instance=ExtResource("6_ametista_mine")]
+position = Vector2(-2800, 2900)
+
+[node name="AmetistaComet18" parent="Mining" instance=ExtResource("6_ametista_mine")]
+position = Vector2(3300, -3100)
+
+[node name="AmetistaComet19" parent="Mining" instance=ExtResource("6_ametista_mine")]
+position = Vector2(-3400, -3200)
+
+[node name="AmetistaComet20" parent="Mining" instance=ExtResource("6_ametista_mine")]
+position = Vector2(100, -3600)
 
 [node name="CometSpawner" type="Node2D" parent="."]
 script = ExtResource("3_spawner")

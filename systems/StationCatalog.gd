@@ -152,6 +152,14 @@ static func get_tavern_reward(station_id: String) -> Dictionary:
 static func get_station_npcs(station_id: String) -> Array:
 	return get_station_def(station_id).get("npcs", []) as Array
 
+static func get_repair_kit_cost(_station_id: String) -> Dictionary:
+	# Consumível: cura 50% do HP máximo e pode ser usado fora da estação.
+	return {"scrap": 80}
+
+static func get_ship_repair_cost(_station_id: String) -> Dictionary:
+	# Reparação total (cura para HP máximo) no mecânico.
+	return {"scrap": 35, "mineral": 10}
+
 static func get_offered_quests(station_id: String) -> Array:
 	var npcs: Array = get_station_npcs(station_id)
 	if not npcs.is_empty():

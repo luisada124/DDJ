@@ -28,6 +28,7 @@ extends Control
 @onready var scrap_to_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/ScrapToMineralButton
 @onready var mineral_to_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/MineralToScrapButton
 @onready var buy_artifact_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyArtifactPartButton
+@onready var buy_repair_kit_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyRepairKitButton
 @onready var ametista_to_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/AmetistaToMineralButton
 @onready var ametista_to_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/AmetistaToScrapButton
 @onready var trader_tabs: TabContainer = $TraderMenu/Panel/Margin/VBox/Tabs
@@ -56,6 +57,7 @@ extends Control
 @onready var knife_game_result: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/KnifeGameResult
 @onready var knife_game_start_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/KnifeGameStartButton
 @onready var open_upgrades_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mecanico/OpenUpgradesButton
+@onready var repair_ship_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mecanico/RepairShipButton
 
 @onready var buy_vault_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/BuyVaultButton
 @onready var vault_status: RichTextLabel = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultStatus
@@ -148,6 +150,7 @@ func _ready() -> void:
 	scrap_to_mineral_button.pressed.connect(_on_trade_scrap_to_mineral)
 	mineral_to_scrap_button.pressed.connect(_on_trade_mineral_to_scrap)
 	buy_artifact_part_button.pressed.connect(_on_buy_artifact_part)
+	buy_repair_kit_button.pressed.connect(_on_buy_repair_kit_pressed)
 	ametista_to_mineral_button.pressed.connect(_on_trade_ametista_to_mineral)
 	ametista_to_scrap_button.pressed.connect(_on_trade_ametista_to_scrap)
 	npc1_button.pressed.connect(_on_npc_pressed.bind(0))
@@ -170,6 +173,7 @@ func _ready() -> void:
 	withdraw_ametista_button.pressed.connect(_on_withdraw_percent.bind("ametista"))
 	end_dialogue_button.pressed.connect(_end_dialogue)
 	knife_game_start_button.pressed.connect(_on_knife_game_start_pressed)
+	repair_ship_button.pressed.connect(_on_repair_ship_pressed)
 	if trader_tabs != null:
 		trader_tabs.tab_changed.connect(_on_trader_tab_changed)
 		_on_trader_tab_changed(trader_tabs.current_tab)
@@ -553,6 +557,14 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	var can_buy_part := (not GameState.artifact_completed) and GameState.can_afford(artifact_cost)
 	buy_artifact_part_button.disabled = not can_buy_part
 
+	var kit_cost: Dictionary = StationCatalog.get_repair_kit_cost(station_id)
+	buy_repair_kit_button.text = "Kit de reparacao (+50% HP) (%s)" % _format_cost(kit_cost)
+	buy_repair_kit_button.disabled = not GameState.can_afford(kit_cost)
+
+	var repair_cost: Dictionary = StationCatalog.get_ship_repair_cost(station_id)
+	repair_ship_button.text = "Reparar nave (cura total) (%s)" % _format_cost(repair_cost)
+	repair_ship_button.disabled = GameState.player_health >= GameState.player_max_health or not GameState.can_afford(repair_cost)
+
 	var offered: Array = StationCatalog.get_offered_quests(station_id)
 	offered = GameState.filter_offered_quests(offered)
 	_offered_quest_id = ""
@@ -712,6 +724,13 @@ func _on_buy_artifact_part() -> void:
 		station_id = DEFAULT_STATION_ID
 	var cost: Dictionary = StationCatalog.get_artifact_part_cost(station_id)
 	GameState.try_buy_artifact_part(cost)
+
+func _on_buy_repair_kit_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var cost: Dictionary = StationCatalog.get_repair_kit_cost(station_id)
+	GameState.buy_repair_kit(cost)
 
 func _on_trade_ametista_to_mineral() -> void:
 	var station_id := _active_station_id
@@ -1919,6 +1938,15 @@ func _on_open_upgrades_pressed() -> void:
 		return
 	_set_upgrade_menu_visible(true)
 
+func _on_repair_ship_pressed() -> void:
+	if _active_station == null:
+		return
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var cost: Dictionary = StationCatalog.get_ship_repair_cost(station_id)
+	GameState.repair_ship(cost)
+
 func _apply_trade(give: Dictionary, receive: Dictionary) -> void:
 	# trade genérico (1 input -> 1 output)
 	if give.size() != 1 or receive.size() != 1:
@@ -2067,6 +2095,28 @@ func _rebuild_inventory_list() -> void:
 	var sep_comp := HSeparator.new()
 	inventory_list.add_child(sep_comp)
 
+	var items_header := Label.new()
+	items_header.text = "Itens"
+	inventory_list.add_child(items_header)
+
+	var kit_count := GameState.get_repair_kit_count()
+	var kit_row := HBoxContainer.new()
+	kit_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var kit_label := Label.new()
+	kit_label.text = "Kit de reparacao: %d" % kit_count
+	kit_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	kit_row.add_child(kit_label)
+
+	var use_button := Button.new()
+	use_button.text = "Usar (+50% HP)"
+	use_button.disabled = kit_count <= 0
+	use_button.pressed.connect(_on_use_repair_kit_pressed)
+	kit_row.add_child(use_button)
+	inventory_list.add_child(kit_row)
+
+	var sep_items := HSeparator.new()
+	inventory_list.add_child(sep_items)
+
 	var gadgets_header := Label.new()
 	gadgets_header.text = "Gadgets (artefactos)"
 	inventory_list.add_child(gadgets_header)
@@ -2098,6 +2148,10 @@ func _rebuild_inventory_list() -> void:
 				gadget_hint = "Gadget: dash lateral (Mouse1/Mouse2)"
 			"aux_ship":
 				gadget_hint = "Gadget: nave auxiliar (auto-ataque)"
+			"mining_drill":
+				gadget_hint = "Gadget: broca para minerar ametista (E em cometas especiais)"
+			"auto_regen":
+				gadget_hint = "Gadget: regenera HP automaticamente fora de combate"
 
 		item.text = "[b]%s[/b]\nProgresso: %d/%d\nEstado: %s\n%s" % [
 			title,
@@ -2136,11 +2190,26 @@ func _rebuild_inventory_list() -> void:
 		l4.text = "- Nave Auxiliar (auto-ataque)"
 		inventory_list.add_child(l4)
 		any_gadget = true
+	if GameState.has_mining_drill():
+		var l5 := Label.new()
+		l5.text = "- Broca de Mineracao (minerar ametista com E)"
+		inventory_list.add_child(l5)
+		any_gadget = true
+	if GameState.has_artifact("auto_regen"):
+		var l6 := Label.new()
+		l6.text = "- Regenerador (cura passiva com o tempo)"
+		inventory_list.add_child(l6)
+		any_gadget = true
 
 	if not any_gadget:
 		var none := Label.new()
 		none.text = "Nenhum gadget desbloqueado ainda."
 		inventory_list.add_child(none)
+
+func _on_use_repair_kit_pressed() -> void:
+	GameState.use_repair_kit()
+	_update_hud()
+	_rebuild_inventory_list()
 
 
 func _rebuild_map_zone_list() -> void:

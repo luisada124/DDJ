@@ -8,7 +8,7 @@ extends Area2D
 
 var _player: Node2D
 var _default_texture: Texture2D
-const AMETISTA_TEXTURE: Texture2D = preload("res://textures/material - ametista.webp")
+const AMETISTA_TEXTURE: Texture2D = preload("res://textures/ametista-block.png")
 
 func _ready() -> void:
 	add_to_group("pickup")
