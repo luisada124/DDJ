@@ -50,6 +50,7 @@ const QUEST_DEFS := QuestDatabase.QUEST_DEFS
 var quests: Dictionary = {}
 var tavern_hi_scores: Dictionary = {}
 var tavern_reward_claimed: Dictionary = {}
+var boss_planet_resources_unlocked: bool = false
 
 var upgrades := {
 	"hull": 0,      # +HP max
@@ -411,6 +412,26 @@ func should_show_boss_compass() -> bool:
 	var q: Dictionary = get_quest_state(QUEST_BOSS_PLANET)
 	return bool(q.get("accepted", false)) and not bool(q.get("claimed", false))
 
+func is_boss_defeated() -> bool:
+	if not QUEST_DEFS.has(QUEST_BOSS_PLANET):
+		return false
+	var q: Dictionary = get_quest_state(QUEST_BOSS_PLANET)
+	return bool(q.get("completed", false)) or bool(q.get("claimed", false))
+
+func has_boss_planet_resources_unlocked() -> bool:
+	return boss_planet_resources_unlocked
+
+func can_unlock_boss_planet_resources() -> bool:
+	return is_boss_defeated() and not boss_planet_resources_unlocked
+
+func unlock_boss_planet_resources() -> bool:
+	if not can_unlock_boss_planet_resources():
+		return false
+	boss_planet_resources_unlocked = true
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
 func filter_offered_quests(quest_ids: Array) -> Array:
 	var filtered: Array[String] = []
 	var current_bandit := get_current_bandit_quest_id()
@@ -746,6 +767,7 @@ func save_game() -> void:
 		"quests": quests,
 		"tavern_hi_scores": tavern_hi_scores,
 		"tavern_reward_claimed": tavern_reward_claimed,
+		"boss_planet_resources_unlocked": boss_planet_resources_unlocked,
 		"upgrades": upgrades,
 		"player_health": player_health,
 		"artifact_parts_collected": artifact_parts_collected,
@@ -822,6 +844,8 @@ func load_game() -> void:
 	if typeof(loaded_tavern_rewards) == TYPE_DICTIONARY:
 		tavern_reward_claimed = loaded_tavern_rewards
 
+	boss_planet_resources_unlocked = bool(data.get("boss_planet_resources_unlocked", false))
+
 	var loaded_upgrades = data.get("upgrades")
 	if typeof(loaded_upgrades) == TYPE_DICTIONARY:
 		for upgrade_id in (loaded_upgrades as Dictionary).keys():
@@ -897,6 +921,7 @@ func _apply_defaults() -> void:
 	consumables = {"repair_kit": 0}
 	_regen_cooldown = 0.0
 	_regen_accum = 0.0
+	boss_planet_resources_unlocked = false
 
 func _ensure_quests_initialized() -> void:
 	if quests == null:

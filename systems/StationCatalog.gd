@@ -113,6 +113,12 @@ const STATIONS: Dictionary = {
 		"artifact_part_cost": {"scrap": 70, "mineral": 45},
 		"offered_quests": [],
 	},
+	"boss_planet": {
+		"title": "Planeta Perdido",
+		"prompt": "E - Planeta Perdido",
+		"color": Color(0.9, 0.9, 0.9),
+		"npcs": [],
+	},
 }
 
 static func get_station_def(station_id: String) -> Dictionary:
