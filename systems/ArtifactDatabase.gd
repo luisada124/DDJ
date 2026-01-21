@@ -26,6 +26,10 @@ const ARTIFACTS: Dictionary = {
 		"laser_damage": 4,
 		"range": 1400.0,
 	},
+	"mining_drill": {
+		"title": "Broca de Mineracao",
+		"parts_required": 1,
+	},
 }
 
 static func is_valid_artifact(artifact_id: String) -> bool:

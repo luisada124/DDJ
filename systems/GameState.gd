@@ -429,6 +429,9 @@ func has_side_dash() -> bool:
 func has_aux_ship() -> bool:
 	return has_artifact("aux_ship")
 
+func has_mining_drill() -> bool:
+	return has_artifact("mining_drill")
+
 func get_reverse_thrust_factor() -> float:
 	return ArtifactDatabase.get_reverse_thrust_factor()
 

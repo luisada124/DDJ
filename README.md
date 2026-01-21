@@ -1,5 +1,7 @@
 todo:
 
+Começamos com o aspirador e depois a lavaria, e temos de apanhar as peças para o teto de volta. 
+
 Medir as missões a virem de conversas com NPCs. 
 
 Resolver problema da descrição das missões. Não estará a aparecer quando se compra. 
@@ -67,11 +69,17 @@ inimigo - 4  | 1,2,3,4
 
 Lista de artefactos e gadgets:
 
+Zona 1:
 
-vacuum
-reverse_thruster
-side_dash
+vacuum: 2 
 
+reverse_thruster: 3
+
+Zona 2:
+
+broca de mineracao: 1
+side_dash: 6
+Maquina auxiliar: 6
 
 
 promps:

@@ -1686,6 +1686,8 @@ func _rebuild_inventory_list() -> void:
 				gadget_hint = "Gadget: dash lateral (Mouse1/Mouse2)"
 			"aux_ship":
 				gadget_hint = "Gadget: nave auxiliar (auto-ataque)"
+			"mining_drill":
+				gadget_hint = "Gadget: broca para minerar ametista (E em cometas especiais)"
 
 		item.text = "[b]%s[/b]\nProgresso: %d/%d\nEstado: %s\n%s" % [
 			title,
@@ -1723,6 +1725,11 @@ func _rebuild_inventory_list() -> void:
 		var l4 := Label.new()
 		l4.text = "- Nave Auxiliar (auto-ataque)"
 		inventory_list.add_child(l4)
+		any_gadget = true
+	if GameState.has_mining_drill():
+		var l5 := Label.new()
+		l5.text = "- Broca de Mineracao (minerar ametista com E)"
+		inventory_list.add_child(l5)
 		any_gadget = true
 
 	if not any_gadget:
