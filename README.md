@@ -3,11 +3,9 @@ todo:
 Meter um menu de upgrades para a nave auxiliar. 
 
 Começamos com o aspirador e depois ele avaria, e temos de apanhar as peças para o teto de volta. 
+ 
 
-Medir as missões a virem de conversas com NPCs. 
-
-
-
+Inimigos a spawnar fora Da visão do jogador. 
 
 meter mais vida na nave e menos inimigos a spawnar
 Meter os artefactos fora do minimapa só estarão disponíveis com mapas depois de os desbloquear. 
@@ -27,17 +25,13 @@ jogo mais lento
 Estações defendidas por muitos inimigos. 
 Por cooldwon no dash
 
-No mini jogo que nós temos agora, "Playsolder" para derrotar o bandido na missão do caçador,
-
-Para o placeholder do minigame do bandido, podíamos fazer um minigame de Quick Time Event no WASD, que teriamos de acertar para conseguir matar o bandido e concluir a missão. faz o minigame fixe e com dificultado aumentar consoante de cada missão do caçador.  em que o O jogador vai ter 5 missões para assassinar os bandidos diferentes Vai aumentando em dificuldade
-
- e a recompensa. 
 
 BOSSES
+kit reparação está sem os recursos. 
 
+No ponto do planeta perdido, não há nem boss inimigo, nem planeta perdido nenhum. Isso já lá, e o inimigo vai tentar se aproximar. E vai aparecer a barra de vida do inimigo em cima. Como os jogos tipo Dark Souls ou assim, está lá em cima É que ele dispara muito rápido e É grande. 
 
-
-
+Começar a luta com o boss quando o boss detectar o jogador por perto. 
 
 TEXTURAS:
 Mudar a textura da nave com o aparelho. 
@@ -48,7 +42,6 @@ mudar a cor da explosao
 
 mecanicas a adicionar:
 
-Conversas na taverna ficam sempre em primeiro lugar. Baixo os NPCs. Missões desta interface da taverna: fazer com que elas surjam a partir dos NPCs, isto é, temos de falar com eles. E as missões vão ficar no tab. 
 
 upgrades:
 
@@ -85,7 +78,10 @@ auto_regen:3
 PROMPS:
 
 
+Tens de meter o planeta fora do mapa, e ele não aparece no mapa
+Isto é, ele só aparece quando aceitamos a missão do planeta ao caçador, e depois vai aparecer a seta , e nós temos de ir para lá. Estamos muito mais perto do boss, é que ele vai detectar. Ele tem que ter 10 vezes mais vida e disparar mais rápido. quando derroto o boss e vou ao plenaQuando eu derroto o boss, eu vou ao planeta das recompensas ta das recompensas ta la a dizer que ainda perciso de derrotar o boss
 
+O planeta não aparece no mapa. 
 
 2.
 

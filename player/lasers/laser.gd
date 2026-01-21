@@ -17,10 +17,22 @@ const _LAYER_ENEMY := 8
 func _ready() -> void:
 	# Ajusta colisões conforme o dono do tiro (evita lasers do player a baterem no player)
 	if from_player:
+		_apply_player_color()
 		collision_mask = _LAYER_COMET | _LAYER_ENEMY
 	else:
 		collision_mask = _LAYER_PLAYER
 
+
+func _apply_player_color() -> void:
+	if not has_node("Sprite2D"):
+		return
+	var sprite := $Sprite2D as Sprite2D
+	var level := GameState.get_upgrade_level("laser_damage")
+	var max_level := GameState.get_upgrade_max_level("laser_damage")
+	if level >= 5:
+		sprite.modulate = Color(0.0, 1.0, 0.0)
+	else:
+		sprite.modulate = Color(1, 1, 1)
 
 func _physics_process(delta: float) -> void:
 	global_position += (direction * speed + inherited_velocity) * delta

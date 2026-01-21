@@ -2,6 +2,9 @@ extends Control
 
 @onready var health_label: Label = $HealthContainer/HealthLabel
 @onready var alien_health_label: Label = $AlienHealthContainer/AlienHealthLabel
+@onready var boss_health_container: Control = $BossHealthContainer
+@onready var boss_health_label: Label = $BossHealthContainer/BossHealthBox/BossHealthLabel
+@onready var boss_health_bar: ProgressBar = $BossHealthContainer/BossHealthBox/BossHealthBar
 @onready var scrap_label: Label = $ResourcesContainer/ResourcesBox/ScrapLabel
 @onready var mineral_label: Label = $ResourcesContainer/ResourcesBox/MineralLabel
 @onready var ametista_label: Label = $ResourcesContainer/ResourcesBox/AmetistaLabel
@@ -12,6 +15,7 @@ extends Control
 
 @onready var hull_button: Button = $UpgradeMenu/Panel/Margin/VBox/HullButton
 @onready var blaster_button: Button = $UpgradeMenu/Panel/Margin/VBox/BlasterButton
+@onready var laser_damage_button: Button = $UpgradeMenu/Panel/Margin/VBox/LaserDamageButton
 @onready var engine_button: Button = $UpgradeMenu/Panel/Margin/VBox/EngineButton
 @onready var thrusters_button: Button = $UpgradeMenu/Panel/Margin/VBox/ThrustersButton
 @onready var magnet_button: Button = $UpgradeMenu/Panel/Margin/VBox/MagnetButton
@@ -101,7 +105,7 @@ const BOSS_PLANET_STATION_ID := "boss_planet"
 const QuestDatabase := preload("res://systems/QuestDatabase.gd")
 const BOSS_ARROW_TEXTURE := preload("res://textures/seta.png")
 const BOSS_ARROW_RADIUS := 120.0
-const BOSS_PLANET_FALLBACK_POS := Vector2(-6300, -5400)
+const BOSS_PLANET_FALLBACK_POS := Vector2(-5200, -5200)
 const BANDIT_QTE_KEYS := [KEY_W, KEY_A, KEY_S, KEY_D]
 const KNIFE_GAME_SEQUENCE := [KEY_A, KEY_S, KEY_D, KEY_W]
 const KNIFE_GAME_ATTEMPT_TIME := 20.0
@@ -124,6 +128,7 @@ var _bandit_qte_steps: int = 0
 var _bandit_qte_quest_id: String = ""
 var _bandit_qte_last_failed: bool = false
 var _boss_arrow: Sprite2D = null
+var _boss_node: Node = null
 var _knife_game_active: bool = false
 var _knife_game_score: int = 0
 var _knife_game_sequence_index: int = 0
@@ -141,6 +146,7 @@ func _ready() -> void:
 	_upgrade_buttons = {
 		"hull": hull_button,
 		"blaster": blaster_button,
+		"laser_damage": laser_damage_button,
 		"engine": engine_button,
 		"thrusters": thrusters_button,
 		"magnet": magnet_button,
@@ -223,6 +229,7 @@ func _process(delta: float) -> void:
 			_update_knife_game_prompt_text()
 
 	_update_boss_compass()
+	_update_boss_health_ui()
 
 
 func _input(event: InputEvent) -> void:
@@ -431,6 +438,11 @@ func _update_upgrade_menu(scrap: int, mineral: int) -> void:
 		var title := GameState.get_upgrade_title(upgrade_id)
 		var level := GameState.get_upgrade_level(upgrade_id)
 		var max_level := GameState.get_upgrade_max_level(upgrade_id)
+
+		var button_color := Color(1, 1, 1)
+		if level >= 5:
+			button_color = Color(0.0, 1.0, 0.0)
+		button.modulate = button_color
 
 		if level >= max_level:
 			button.text = "%s (MAX)" % title
@@ -690,6 +702,46 @@ func _update_boss_planet_ui() -> void:
 func _on_boss_planet_collect_pressed() -> void:
 	if GameState.unlock_boss_planet_resources():
 		_update_boss_planet_ui()
+
+func _get_boss_node() -> Node:
+	if _boss_node != null and is_instance_valid(_boss_node):
+		return _boss_node
+	var node := get_tree().get_first_node_in_group("boss")
+	_boss_node = node
+	return node
+
+func _update_boss_health_ui() -> void:
+	if boss_health_container == null:
+		return
+
+	var boss := _get_boss_node()
+	if boss == null or not is_instance_valid(boss):
+		boss_health_container.visible = false
+		return
+
+	var engaged := false
+	if boss.has_method("is_boss_engaged"):
+		engaged = bool(boss.call("is_boss_engaged"))
+	else:
+		engaged = bool(boss.get("boss_engaged"))
+
+	if not engaged:
+		boss_health_container.visible = false
+		return
+
+	var max_hp := int(boss.get("max_health"))
+	if max_hp <= 0:
+		boss_health_container.visible = false
+		return
+
+	var current_hp := int(boss.get("current_health"))
+	if boss_health_bar != null:
+		boss_health_bar.max_value = max_hp
+		boss_health_bar.value = clamp(current_hp, 0, max_hp)
+	if boss_health_label != null:
+		boss_health_label.text = "BOSS"
+
+	boss_health_container.visible = true
 
 func _update_vault_ui() -> void:
 	if vault_status == null:
