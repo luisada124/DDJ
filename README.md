@@ -23,11 +23,18 @@ Por cooldwon no dash
 
 No mini jogo que nós temos agora, "Playsolder" para derrotar o bandido na missão do caçador,
 
-Para o placeholder do minigame do bandido, podíamos fazer um minigame de Quick Time Event no WASD, que teriamos de acertar para conseguir matar o bandido e concluir a missão. 
+Para o placeholder do minigame do bandido, podíamos fazer um minigame de Quick Time Event no WASD, que teriamos de acertar para conseguir matar o bandido e concluir a missão. faz o minigame fixe e com dificultado aumentar consoante de cada missão do caçador.  em que o O jogador vai ter 5 missões para assassinar os bandidos diferentes Vai aumentando em dificuldade
+
+ e a recompensa. 
 
 
 Vamos ter um planeta que está fora da zona do mapa. Tentei o último artefacto para conseguir dar warp à próxima zona. A localização ou marcador deste planeta vai ser dado a partir da última missão do caçador. O nosso amiguinho vai ter de matar um boss. Esse gajo dropa o  artefacto e estava a rondar o planeta. Este planeta vai ter muitos recursos. 
 BOSSES
+
+
+
+
+Ter hi score pre definido que vai de 70 a 180 em cada uma das tabernas e receber dinheiro quando a malta bate o recorde. consoante a dificuldade
 
 TEXTURAS:
 Mudar a textura da nave com o aparelho. 

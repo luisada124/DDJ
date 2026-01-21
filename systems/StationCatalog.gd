@@ -8,6 +8,10 @@ const STATIONS: Dictionary = {
 		"title": "Estacao Alfa",
 		"prompt": "E - Estacao Alfa",
 		"color": Color(0.35, 0.7, 1.0),
+		"tavern": {
+			"base_hi_score": 70,
+			"reward": {"scrap": 40},
+		},
 		"npcs": [
 			{"id": "glip", "name": "Glip-Glop", "type": "scavenger"},
 			{"id": "zorbo", "name": "Zorbo o Pegajoso", "type": "bruiser"},
@@ -25,6 +29,10 @@ const STATIONS: Dictionary = {
 		"title": "Outpost Beta",
 		"prompt": "E - Outpost Beta",
 		"color": Color(0.7, 0.35, 1.0),
+		"tavern": {
+			"base_hi_score": 100,
+			"reward": {"scrap": 60},
+		},
 		"npcs": [
 			{"id": "bloop", "name": "Bloop", "type": "scavenger"},
 			{"id": "krrth", "name": "Krr'th", "type": "marksman"},
@@ -44,6 +52,10 @@ const STATIONS: Dictionary = {
 		"title": "Base Gamma",
 		"prompt": "E - Base Gamma",
 		"color": Color(1.0, 0.55, 0.25),
+		"tavern": {
+			"base_hi_score": 130,
+			"reward": {"scrap": 90},
+		},
 		"npcs": [
 			{"id": "vexa", "name": "Vexa", "type": "bounty"},
 			{"id": "oomu", "name": "Oomu", "type": "scavenger"},
@@ -63,6 +75,10 @@ const STATIONS: Dictionary = {
 		"title": "Mercador Delta",
 		"prompt": "E - Mercador Delta",
 		"color": Color(0.25, 1.0, 0.65),
+		"tavern": {
+			"base_hi_score": 150,
+			"reward": {"scrap": 110},
+		},
 		"npcs": [
 			{"id": "bandit", "name": "Bandido", "type": "hunter"},
 			{"id": "krrth", "name": "Krr'th", "type": "marksman"},
@@ -80,6 +96,10 @@ const STATIONS: Dictionary = {
 		"title": "Refugio Epsilon",
 		"prompt": "E - Refugio Epsilon",
 		"color": Color(1.0, 0.85, 0.25),
+		"tavern": {
+			"base_hi_score": 180,
+			"reward": {"scrap": 140},
+		},
 		"npcs": [
 			{"id": "hunter", "name": "Cacador", "type": "hunter"},
 			{"id": "vexa", "name": "Vexa", "type": "bounty"},
@@ -118,6 +138,16 @@ static func get_artifact_part_cost(station_id: String) -> Dictionary:
 
 static func get_vault_cost(station_id: String) -> Dictionary:
 	return get_station_def(station_id).get("vault_cost", {}) as Dictionary
+
+static func get_tavern_def(station_id: String) -> Dictionary:
+	return get_station_def(station_id).get("tavern", {}) as Dictionary
+
+static func get_tavern_base_score(station_id: String) -> int:
+	var def := get_tavern_def(station_id)
+	return int(def.get("base_hi_score", 0))
+
+static func get_tavern_reward(station_id: String) -> Dictionary:
+	return get_tavern_def(station_id).get("reward", {}) as Dictionary
 
 static func get_station_npcs(station_id: String) -> Array:
 	return get_station_def(station_id).get("npcs", []) as Array
