@@ -24,6 +24,9 @@ extends Control
 @onready var close_map_button: Button = $MapMenu/Panel/Margin/VBox/CloseMapButton
 
 @onready var trader_menu: Control = $TraderMenu
+@onready var boss_planet_panel: VBoxContainer = $TraderMenu/Panel/Margin/VBox/BossPlanetPanel
+@onready var boss_planet_info: Label = $TraderMenu/Panel/Margin/VBox/BossPlanetPanel/BossPlanetInfo
+@onready var boss_planet_collect_button: Button = $TraderMenu/Panel/Margin/VBox/BossPlanetPanel/BossPlanetCollectButton
 @onready var trader_info: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/Info
 @onready var scrap_to_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/ScrapToMineralButton
 @onready var mineral_to_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/MineralToScrapButton
@@ -93,6 +96,7 @@ extends Control
 @onready var close_missions_button: Button = $MissionsMenu/Panel/Margin/VBox/CloseMissionsButton
 
 const DEFAULT_STATION_ID := "station_alpha"
+const BOSS_PLANET_STATION_ID := "boss_planet"
 const QuestDatabase := preload("res://systems/QuestDatabase.gd")
 const BOSS_ARROW_TEXTURE := preload("res://textures/seta.png")
 const BOSS_ARROW_RADIUS := 120.0
@@ -187,6 +191,8 @@ func _ready() -> void:
 	end_dialogue_button.pressed.connect(_end_dialogue)
 	knife_game_start_button.pressed.connect(_on_knife_game_start_pressed)
 	repair_ship_button.pressed.connect(_on_repair_ship_pressed)
+	if boss_planet_collect_button != null:
+		boss_planet_collect_button.pressed.connect(_on_boss_planet_collect_pressed)
 	if trader_tabs != null:
 		trader_tabs.tab_changed.connect(_on_trader_tab_changed)
 		_on_trader_tab_changed(trader_tabs.current_tab)
@@ -360,11 +366,15 @@ func _set_trader_menu_visible(visible: bool) -> void:
 		_end_dialogue()
 		if trader_tabs != null:
 			_on_trader_tab_changed(trader_tabs.current_tab)
+		_update_boss_planet_ui()
 
 func _on_trader_tab_changed(_tab: int) -> void:
 	if tavern_bottom_bar == null or trader_tabs == null:
 		return
-	tavern_bottom_bar.visible = trader_tabs.current_tab == TRADER_TAB_TAVERN
+	if _active_station_id == BOSS_PLANET_STATION_ID:
+		tavern_bottom_bar.visible = false
+	else:
+		tavern_bottom_bar.visible = trader_tabs.current_tab == TRADER_TAB_TAVERN
 
 func _set_missions_menu_visible(visible: bool) -> void:
 	if _menu_guard:
@@ -523,6 +533,10 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	var station_id := _active_station_id
 	if station_id.is_empty():
 		station_id = DEFAULT_STATION_ID
+	var is_boss_planet := station_id == BOSS_PLANET_STATION_ID
+	_update_boss_planet_ui()
+	if is_boss_planet:
+		return
 
 	var trades: Dictionary = StationCatalog.get_trades(station_id)
 	var artifact_cost: Dictionary = StationCatalog.get_artifact_part_cost(station_id)
@@ -632,6 +646,45 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	_update_npc_button_text()
 	_update_vault_ui()
 	_update_bandit_qte_ui()
+
+func _update_boss_planet_ui() -> void:
+	if boss_planet_panel == null:
+		return
+
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var is_boss_planet := station_id == BOSS_PLANET_STATION_ID
+
+	boss_planet_panel.visible = is_boss_planet
+	if trader_tabs != null:
+		trader_tabs.visible = not is_boss_planet
+
+	if tavern_bottom_bar != null:
+		if is_boss_planet:
+			tavern_bottom_bar.visible = false
+		elif trader_tabs != null:
+			tavern_bottom_bar.visible = trader_tabs.current_tab == TRADER_TAB_TAVERN
+
+	if not is_boss_planet:
+		return
+
+	var defeated := GameState.is_boss_defeated()
+	var unlocked := GameState.has_boss_planet_resources_unlocked()
+	if not defeated:
+		boss_planet_info.text = "Derrota o boss para desbloquear os recursos do planeta."
+	elif unlocked:
+		boss_planet_info.text = "Recursos desbloqueados. Apanha-os no exterior."
+	else:
+		boss_planet_info.text = "Boss derrotado. Podes libertar os recursos do planeta."
+
+	if boss_planet_collect_button != null:
+		boss_planet_collect_button.visible = defeated and not unlocked
+		boss_planet_collect_button.disabled = not GameState.can_unlock_boss_planet_resources()
+
+func _on_boss_planet_collect_pressed() -> void:
+	if GameState.unlock_boss_planet_resources():
+		_update_boss_planet_ui()
 
 func _update_vault_ui() -> void:
 	if vault_status == null:

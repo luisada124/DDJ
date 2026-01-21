@@ -5,8 +5,8 @@
 [ext_resource type="Script" uid="uid://bh6ub2jiqfrcn" path="res://world/comet_spawner.gd" id="3_spawner"]
 [ext_resource type="PackedScene" path="res://world/TraderPlanet.tscn" id="4_trader"]
 [ext_resource type="PackedScene" uid="uid://ckg7u4r0x3e6e" path="res://enemies/BossEnemy.tscn" id="5_boss"]
-[ext_resource type="Texture2D" uid="uid://c7odrpanrcvfj" path="res://textures/inimigos/inimigo2-removebg-preview.png" id="6_boss_planet"]
 [ext_resource type="PackedScene" uid="uid://ca3xybgbgmyin" path="res://pickups/Pickup.tscn" id="7_pickup"]
+[ext_resource type="Script" path="res://world/boss_planet.gd" id="8_boss_planet_script"]
 
 [node name="Zone3" type="Node2D"]
 
@@ -32,12 +32,11 @@ station_id = "station_gamma"
 position = Vector2(-2400, 2000)
 station_id = "station_beta"
 
-[node name="BossPlanet" type="Node2D" parent="." groups=["boss_planet_marker"]]
+[node name="BossPlanet" parent="." instance=ExtResource("4_trader") groups=["boss_planet_marker"]]
+script = ExtResource("8_boss_planet_script")
 position = Vector2(-6300, -5400)
-
-[node name="PlanetSprite" type="Sprite2D" parent="BossPlanet"]
-texture = ExtResource("6_boss_planet")
-scale = Vector2(3, 3)
+station_id = "boss_planet"
+prompt_text = "E - Planeta Perdido"
 
 [node name="BossResources" type="Node2D" parent="BossPlanet"]
 
