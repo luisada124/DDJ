@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3 uid="uid://b5l6mqu5lj0w7"]
+
+[ext_resource type="Script" uid="uid://c7u8g8avjhmrh" path="res://enemies/EnemyData.gd" id="1_EnemyData"]
+[ext_resource type="Texture2D" uid="uid://c7odrpanrcvfj" path="res://textures/inimigos/inimigo2-removebg-preview.png" id="2_boss_tex"]
+
+[resource]
+script = ExtResource("1_EnemyData")
+id = "boss"
+display_name = "Boss"
+move_speed = 200.0
+desired_distance = 280.0
+distance_tolerance = 25.0
+chase_range = 2600.0
+texture = ExtResource("2_boss_tex")
+max_health = 260
+contact_damage = 22
+fire_interval = 0.95
+laser_damage = 14
+min_drops = 6
+max_drops = 10
+mineral_drop_chance = 0.55
+scrap_amount = 4
+mineral_amount = 3

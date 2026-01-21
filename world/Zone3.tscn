@@ -1,9 +1,12 @@
-[gd_scene load_steps=5 format=3 uid="uid://c2022r782cuvy"]
+[gd_scene load_steps=8 format=3 uid="uid://c2022r782cuvy"]
 
 [ext_resource type="Texture2D" uid="uid://drfquk3homeyn" path="res://textures/fundozona3.png" id="1_dss6q"]
 [ext_resource type="PackedScene" uid="uid://cshejja03gcoo" path="res://world/comet.tscn" id="2_comet"]
 [ext_resource type="Script" uid="uid://bh6ub2jiqfrcn" path="res://world/comet_spawner.gd" id="3_spawner"]
 [ext_resource type="PackedScene" path="res://world/TraderPlanet.tscn" id="4_trader"]
+[ext_resource type="PackedScene" uid="uid://ckg7u4r0x3e6e" path="res://enemies/BossEnemy.tscn" id="5_boss"]
+[ext_resource type="Texture2D" uid="uid://c7odrpanrcvfj" path="res://textures/inimigos/inimigo2-removebg-preview.png" id="6_boss_planet"]
+[ext_resource type="PackedScene" uid="uid://ca3xybgbgmyin" path="res://pickups/Pickup.tscn" id="7_pickup"]
 
 [node name="Zone3" type="Node2D"]
 
@@ -28,6 +31,71 @@ station_id = "station_gamma"
 [node name="TraderPlanet2" parent="." instance=ExtResource("4_trader")]
 position = Vector2(-2400, 2000)
 station_id = "station_beta"
+
+[node name="BossPlanet" type="Node2D" parent="." groups=["boss_planet_marker"]]
+position = Vector2(-6300, -5400)
+
+[node name="PlanetSprite" type="Sprite2D" parent="BossPlanet"]
+texture = ExtResource("6_boss_planet")
+scale = Vector2(3, 3)
+
+[node name="BossResources" type="Node2D" parent="BossPlanet"]
+
+[node name="Scrap1" parent="BossPlanet/BossResources" instance=ExtResource("7_pickup")]
+position = Vector2(-160, -140)
+resource_type = "scrap"
+amount = 4
+
+[node name="Scrap2" parent="BossPlanet/BossResources" instance=ExtResource("7_pickup")]
+position = Vector2(-40, -200)
+resource_type = "scrap"
+amount = 4
+
+[node name="Scrap3" parent="BossPlanet/BossResources" instance=ExtResource("7_pickup")]
+position = Vector2(120, -160)
+resource_type = "scrap"
+amount = 4
+
+[node name="Scrap4" parent="BossPlanet/BossResources" instance=ExtResource("7_pickup")]
+position = Vector2(180, 0)
+resource_type = "scrap"
+amount = 4
+
+[node name="Scrap5" parent="BossPlanet/BossResources" instance=ExtResource("7_pickup")]
+position = Vector2(40, 160)
+resource_type = "scrap"
+amount = 4
+
+[node name="Scrap6" parent="BossPlanet/BossResources" instance=ExtResource("7_pickup")]
+position = Vector2(-140, 120)
+resource_type = "scrap"
+amount = 4
+
+[node name="Mineral1" parent="BossPlanet/BossResources" instance=ExtResource("7_pickup")]
+position = Vector2(-220, 40)
+resource_type = "mineral"
+amount = 3
+
+[node name="Mineral2" parent="BossPlanet/BossResources" instance=ExtResource("7_pickup")]
+position = Vector2(0, -260)
+resource_type = "mineral"
+amount = 3
+
+[node name="Mineral3" parent="BossPlanet/BossResources" instance=ExtResource("7_pickup")]
+position = Vector2(220, 80)
+resource_type = "mineral"
+amount = 3
+
+[node name="Mineral4" parent="BossPlanet/BossResources" instance=ExtResource("7_pickup")]
+position = Vector2(-60, 240)
+resource_type = "mineral"
+amount = 3
+
+[node name="BossEnemy" parent="." instance=ExtResource("5_boss")]
+position = Vector2(-6020, -5150)
+patrol_radius = 650.0
+patrol_speed = 160.0
+detection_range = 3200.0
 
 [node name="CometSpawner" type="Node2D" parent="."]
 script = ExtResource("3_spawner")

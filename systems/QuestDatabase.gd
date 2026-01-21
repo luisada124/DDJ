@@ -10,6 +10,7 @@ const QUEST_TAVERN_BANDIT_2 := "tavern_bandit_2"
 const QUEST_TAVERN_BANDIT_3 := "tavern_bandit_3"
 const QUEST_TAVERN_BANDIT_4 := "tavern_bandit_4"
 const QUEST_TAVERN_BANDIT_5 := "tavern_bandit_5"
+const QUEST_BOSS_PLANET := "boss_planet"
 const QUEST_TAVERN_BANDIT := QUEST_TAVERN_BANDIT_1
 
 const BANDIT_QUESTS := [
@@ -102,6 +103,14 @@ const QUEST_DEFS := {
 		"qte_steps": 14,
 		"qte_time": 0.7,
 	},
+	QUEST_BOSS_PLANET: {
+		"title": "Planeta Perdido",
+		"description": "Localizacao revelada: um planeta fora do mapa. Derrota o boss que ronda o planeta e recupera a peca do artefacto.",
+		"enemy_id": "boss",
+		"goal": 1,
+		"giver_station_id": "station_epsilon",
+		"reward": {},
+	},
 }
 
 const NPC_QUEST_POOLS := {
@@ -109,7 +118,14 @@ const NPC_QUEST_POOLS := {
 	"marksman": [QUEST_KILL_10_SNIPER],
 	"bruiser": [QUEST_KILL_5_TANK],
 	"bounty": [QUEST_KILL_15_BASIC, QUEST_KILL_10_SNIPER, QUEST_KILL_5_TANK],
-	"hunter": BANDIT_QUESTS,
+	"hunter": [
+		QUEST_TAVERN_BANDIT_1,
+		QUEST_TAVERN_BANDIT_2,
+		QUEST_TAVERN_BANDIT_3,
+		QUEST_TAVERN_BANDIT_4,
+		QUEST_TAVERN_BANDIT_5,
+		QUEST_BOSS_PLANET,
+	],
 }
 
 const DEFAULT_NPC_QUEST_POOL := "bounty"

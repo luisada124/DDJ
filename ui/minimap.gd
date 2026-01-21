@@ -5,6 +5,7 @@ extends Control
 @export var player_color: Color = Color(0.2, 1.0, 0.2)
 @export var artifact_color: Color = Color(1.0, 0.25, 0.25)
 @export var trader_color: Color = Color(1.0, 0.85, 0.2)
+@export var boss_planet_color: Color = Color(1.0, 0.45, 0.25)
 @export var unknown_poi_color: Color = Color(0.8, 0.8, 0.9)
 
 @export var draw_catalog_pois: bool = false
@@ -86,4 +87,11 @@ func _draw() -> void:
 
 	# Jogador
 	if _player != null and is_instance_valid(_player):
-		draw_circle(to_map.call(_player.global_position), 3.5, player_color)
+			draw_circle(to_map.call(_player.global_position), 3.5, player_color)
+
+	# Marcador do planeta do boss (libertado pela ultima missao do cacador).
+	if GameState.has_boss_planet_marker():
+		var boss_markers: Array[Node] = get_tree().get_nodes_in_group("boss_planet_marker")
+		for n: Node in boss_markers:
+			if n is Node2D:
+				draw_circle(to_map.call((n as Node2D).global_position), 4.5, boss_planet_color)
