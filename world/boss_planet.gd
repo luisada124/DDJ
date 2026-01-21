@@ -25,10 +25,19 @@ func _refresh_visibility() -> void:
 	if require_quest_active:
 		should_show = GameState.has_boss_planet_marker()
 	_set_planet_active(should_show)
+	if should_show:
+		_ensure_boss_completion_if_missing()
 
 func _refresh_resources() -> void:
 	var unlocked := _planet_active and GameState.is_boss_defeated() and GameState.has_boss_planet_resources_unlocked()
 	_set_resources_active(unlocked)
+
+func _ensure_boss_completion_if_missing() -> void:
+	if GameState.is_boss_defeated():
+		return
+	var boss := get_tree().get_first_node_in_group("boss")
+	if boss == null or not is_instance_valid(boss):
+		GameState.complete_quest(GameState.QUEST_BOSS_PLANET)
 
 func _set_planet_active(active: bool) -> void:
 	_planet_active = active
@@ -36,8 +45,8 @@ func _set_planet_active(active: bool) -> void:
 	set_process(active)
 	set_physics_process(active)
 	if self is Area2D:
-		monitoring = active
-		monitorable = active
+		set_deferred("monitoring", active)
+		set_deferred("monitorable", active)
 	var prompt := get_node_or_null("Prompt") as Label
 	if prompt != null:
 		prompt.visible = active and _player_in_range
@@ -59,5 +68,5 @@ func _set_resource_node_active(node: Node, active: bool) -> void:
 	node.set_physics_process(active)
 	if node is Area2D:
 		var area := node as Area2D
-		area.monitoring = active
-		area.monitorable = active
+		area.set_deferred("monitoring", active)
+		area.set_deferred("monitorable", active)

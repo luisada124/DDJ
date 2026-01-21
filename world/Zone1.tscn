@@ -43,7 +43,7 @@ station_id = "station_epsilon"
 
 [node name="BossPlanet" parent="." instance=ExtResource("4_trader") groups=["boss_planet_marker"]]
 script = ExtResource("10_boss_planet_script")
-position = Vector2(-5200, -5200)
+position = Vector2(-3172, -3172)
 station_id = "boss_planet"
 prompt_text = "E - Planeta Perdido"
 
@@ -100,7 +100,7 @@ resource_type = "mineral"
 amount = 3
 
 [node name="BossEnemy" parent="." instance=ExtResource("8_boss")]
-position = Vector2(-4850, -5200)
+position = Vector2(-2872, -3172)
 patrol_radius = 720.0
 patrol_speed = 180.0
 detection_range = 2600.0

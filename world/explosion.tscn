@@ -240,6 +240,7 @@ libraries = {
 }
 
 [node name="Pieces" type="Node2D" parent="."]
+scale = Vector2(0.33333334, 0.33333334)
 
 [node name="Sprite2D" type="Sprite2D" parent="Pieces"]
 position = Vector2(-107, -87)

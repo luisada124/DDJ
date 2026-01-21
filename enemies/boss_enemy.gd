@@ -66,6 +66,7 @@ func _set_patrol_anchor() -> void:
 func die() -> void:
 	_spawn_boss_artifact()
 	super.die()
+	GameState.complete_quest(GameState.QUEST_BOSS_PLANET)
 
 func _spawn_boss_artifact() -> void:
 	if artifact_scene == null:
