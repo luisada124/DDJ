@@ -319,7 +319,7 @@ text = "Recursos do planeta."
 
 [node name="BossPlanetCollectButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/BossPlanetPanel"]
 layout_mode = 2
-text = "Coletar recursos"
+text = "Coletar recompensa"
 
 [node name="Tabs" type="TabContainer" parent="TraderMenu/Panel/Margin/VBox"]
 layout_mode = 2
@@ -561,6 +561,15 @@ text = ""
 [node name="KnifeGameStartButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 text = "Start Knife Game"
+
+[node name="DebugBossSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+layout_mode = 2
+visible = false
+
+[node name="DebugBossPlanetButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+layout_mode = 2
+text = "DEBUG: Ativar missao Planeta Perdido"
+visible = false
 
 [node name="MechanicInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mecanico"]
 layout_mode = 2

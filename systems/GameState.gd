@@ -552,7 +552,7 @@ func should_show_boss_compass() -> bool:
 	if not QUEST_DEFS.has(QUEST_BOSS_PLANET):
 		return false
 	var q: Dictionary = get_quest_state(QUEST_BOSS_PLANET)
-	return bool(q.get("accepted", false)) and not bool(q.get("claimed", false))
+	return bool(q.get("accepted", false)) and not bool(q.get("claimed", false)) and not boss_planet_resources_unlocked
 
 func is_boss_defeated() -> bool:
 	if not QUEST_DEFS.has(QUEST_BOSS_PLANET):

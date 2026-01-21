@@ -21,6 +21,9 @@ const EnemyScene: PackedScene = preload("res://enemies/Enemy.tscn")
 @export var chase_range_override: float = 2600.0
 @export var guard_desired_distance: float = 420.0
 @export var enemy_scale: Vector2 = Vector2(0.5, 0.5)
+@export var enforce_offscreen_spawn: bool = true
+@export var offscreen_margin: float = 120.0
+@export var spawn_attempts: int = 12
 
 var _guards: Array[Node] = []
 var _timer: Timer
@@ -99,7 +102,8 @@ func _spawn_guard() -> Node:
 	if inst == null:
 		return null
 	if inst is Node2D:
-		(inst as Node2D).global_position = _random_spawn_pos(station_node.global_position)
+		var camera := get_viewport().get_camera_2d()
+		(inst as Node2D).global_position = _random_spawn_pos(station_node.global_position, camera)
 		(inst as Node2D).scale = enemy_scale
 
 	var enemy_id := _pick_enemy_id()
@@ -124,11 +128,35 @@ func _spawn_guard() -> Node:
 	_wave_spawned += 1
 	return inst
 
-func _random_spawn_pos(center: Vector2) -> Vector2:
+func _random_spawn_pos(center: Vector2, camera: Camera2D) -> Vector2:
 	var base: float = maxf(0.0, station_safe_radius)
-	var r: float = base + randf_range(spawn_radius_min, spawn_radius_max)
-	var a: float = randf_range(0.0, TAU)
-	return center + Vector2(cos(a), sin(a)) * r
+	var tries: int = maxi(1, spawn_attempts)
+	for _i in range(tries):
+		var r: float = base + randf_range(spawn_radius_min, spawn_radius_max)
+		var a: float = randf_range(0.0, TAU)
+		var pos := center + Vector2(cos(a), sin(a)) * r
+		if not enforce_offscreen_spawn:
+			return pos
+		if camera == null or not _is_in_camera_view(pos, camera):
+			return pos
+
+	var r_fallback: float = base + spawn_radius_max
+	var a_fallback: float = randf_range(0.0, TAU)
+	return center + Vector2(cos(a_fallback), sin(a_fallback)) * r_fallback
+
+func _is_in_camera_view(pos: Vector2, camera: Camera2D) -> bool:
+	if camera == null:
+		return false
+	var viewport_size := get_viewport().get_visible_rect().size
+	var zoom := camera.zoom
+	var world_view_size := viewport_size / zoom
+	var cam_pos := camera.global_position
+	var half := world_view_size * 0.5
+	var left := cam_pos.x - half.x - offscreen_margin
+	var right := cam_pos.x + half.x + offscreen_margin
+	var top := cam_pos.y - half.y - offscreen_margin
+	var bottom := cam_pos.y + half.y + offscreen_margin
+	return pos.x >= left and pos.x <= right and pos.y >= top and pos.y <= bottom
 
 func _on_guard_tree_exited(guard: Node) -> void:
 	var despawned := false

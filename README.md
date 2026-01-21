@@ -26,10 +26,12 @@ Estações defendidas por muitos inimigos.
 Por cooldwon no dash
 
 
+desSpawn de materiais
+
+
+
 BOSSES
 kit reparação está sem os recursos. 
-
-No ponto do planeta perdido, não há nem boss inimigo, nem planeta perdido nenhum. Isso já lá, e o inimigo vai tentar se aproximar. E vai aparecer a barra de vida do inimigo em cima. Como os jogos tipo Dark Souls ou assim, está lá em cima É que ele dispara muito rápido e É grande. 
 
 Começar a luta com o boss quando o boss detectar o jogador por perto. 
 
