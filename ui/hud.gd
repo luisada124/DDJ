@@ -41,6 +41,13 @@ extends Control
 @onready var dialogue_text: RichTextLabel = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/DialogueText
 @onready var dialogue_choices: VBoxContainer = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/DialogueChoices
 @onready var end_dialogue_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/EndDialogueButton
+@onready var bandit_qte_separator: HSeparator = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/BanditQteSeparator
+@onready var bandit_qte_panel: VBoxContainer = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/BanditQtePanel
+@onready var bandit_qte_info: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/BanditQtePanel/BanditQteInfo
+@onready var bandit_qte_progress: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/BanditQtePanel/BanditQteProgress
+@onready var bandit_qte_prompt: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/BanditQtePanel/BanditQtePrompt
+@onready var bandit_qte_start_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/BanditQtePanel/BanditQteStartButton
+@onready var bandit_qte_result: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/BanditQtePanel/BanditQteResult
 @onready var knife_game_high_score: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/KnifeGameHighScore
 @onready var knife_game_score: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/KnifeGameScore
 @onready var knife_game_prompt: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/KnifeGamePrompt
@@ -77,6 +84,7 @@ extends Control
 
 const DEFAULT_STATION_ID := "station_alpha"
 const QuestDatabase := preload("res://systems/QuestDatabase.gd")
+const BANDIT_QTE_KEYS := [KEY_W, KEY_A, KEY_S, KEY_D]
 const KNIFE_GAME_SEQUENCE := [KEY_A, KEY_S, KEY_D, KEY_W]
 const KNIFE_GAME_ATTEMPT_TIME := 20.0
 
@@ -89,6 +97,14 @@ var _dialogue_state: Dictionary = {}
 var _station_npcs: Array = []
 var _active_npc_id: String = ""
 var _active_npc_type: String = ""
+var _bandit_qte_active: bool = false
+var _bandit_qte_sequence: Array[int] = []
+var _bandit_qte_index: int = 0
+var _bandit_qte_time_left: float = 0.0
+var _bandit_qte_time_per_step: float = 0.0
+var _bandit_qte_steps: int = 0
+var _bandit_qte_quest_id: String = ""
+var _bandit_qte_last_failed: bool = false
 var _knife_game_active: bool = false
 var _knife_game_score: int = 0
 var _knife_game_sequence_index: int = 0
@@ -144,6 +160,8 @@ func _ready() -> void:
 	withdraw_ametista_button.pressed.connect(_on_withdraw_percent.bind("ametista"))
 	end_dialogue_button.pressed.connect(_end_dialogue)
 	knife_game_start_button.pressed.connect(_on_knife_game_start_pressed)
+	if bandit_qte_start_button != null:
+		bandit_qte_start_button.pressed.connect(_on_bandit_qte_start_pressed)
 
 	GameState.state_changed.connect(_update_hud)
 	GameState.player_died.connect(_on_player_died)
@@ -151,6 +169,14 @@ func _ready() -> void:
 	_update_hud()
 
 func _process(delta: float) -> void:
+	if _bandit_qte_active:
+		_bandit_qte_time_left -= delta
+		if _bandit_qte_time_left <= 0.0:
+			_finish_bandit_qte(false, "Tempo esgotado.")
+			return
+		_update_bandit_qte_prompt_text()
+		return
+
 	if _knife_game_active:
 		_knife_game_time_left -= delta
 		if _knife_game_time_left <= 0.0:
@@ -160,6 +186,12 @@ func _process(delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if _bandit_qte_active and trader_menu.visible and event is InputEventKey and (event as InputEventKey).pressed and not (event as InputEventKey).echo:
+		var key_event := event as InputEventKey
+		if _handle_bandit_qte_input(key_event):
+			get_viewport().set_input_as_handled()
+			return
+
 	if _knife_game_active and trader_menu.visible and event is InputEventKey and (event as InputEventKey).pressed and not (event as InputEventKey).echo:
 		var key_event := event as InputEventKey
 		if _handle_knife_game_input(key_event):
@@ -260,6 +292,7 @@ func _set_trader_menu_visible(visible: bool) -> void:
 	_apply_pause_from_menus()
 	_update_hud()
 	if not visible:
+		_stop_bandit_qte()
 		_stop_knife_game()
 	if visible:
 		_end_dialogue()
@@ -410,6 +443,7 @@ func register_station_in_range(station: Node, station_id: String, in_range: bool
 			_active_station_id = ""
 			_active_npc_id = ""
 			_active_npc_type = ""
+			_stop_bandit_qte()
 			_stop_knife_game()
 			if upgrade_menu.visible:
 				_set_upgrade_menu_visible(false)
@@ -468,6 +502,7 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	buy_artifact_part_button.disabled = not can_buy_part
 
 	var offered: Array = StationCatalog.get_offered_quests(station_id)
+	offered = GameState.filter_offered_quests(offered)
 	_offered_quest_id = ""
 	if offered.size() > 0:
 		_offered_quest_id = str(offered[0])
@@ -475,6 +510,7 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	_update_station_quest_buttons()
 	_update_npc_button_text()
 	_update_vault_ui()
+	_update_bandit_qte_ui()
 
 func _update_vault_ui() -> void:
 	if vault_status == null:
@@ -736,6 +772,12 @@ func _pick_offered_quest_for_npc() -> String:
 func _on_knife_game_start_pressed() -> void:
 	_start_knife_game()
 
+func _on_bandit_qte_start_pressed() -> void:
+	var quest_id := GameState.get_current_bandit_quest_id()
+	if quest_id.is_empty():
+		return
+	_start_bandit_qte(quest_id)
+
 func _start_knife_game() -> void:
 	_knife_game_active = true
 	_knife_game_score = 0
@@ -826,6 +868,183 @@ func _update_knife_game_ui() -> void:
 	knife_game_high_score.text = "Hi-score: %d" % hi
 	knife_game_score.text = "Score: %d" % _knife_game_score
 	_update_knife_game_prompt_text()
+
+func _start_bandit_qte(quest_id: String) -> void:
+	if _bandit_qte_active or quest_id.is_empty():
+		return
+	var def: Dictionary = GameState.QUEST_DEFS.get(quest_id, {}) as Dictionary
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var target_station_id := str(def.get("target_station_id", ""))
+	if not target_station_id.is_empty() and target_station_id != station_id:
+		return
+	var q: Dictionary = GameState.get_quest_state(quest_id)
+	if not bool(q.get("accepted", false)) or bool(q.get("completed", false)):
+		return
+	var steps := int(def.get("qte_steps", 6))
+	if steps < 1:
+		steps = 1
+	var time_per := float(def.get("qte_time", 1.0))
+	if time_per < 0.2:
+		time_per = 0.2
+
+	_bandit_qte_sequence = []
+	for _i in range(steps):
+		var idx := randi() % BANDIT_QTE_KEYS.size()
+		_bandit_qte_sequence.append(BANDIT_QTE_KEYS[idx])
+
+	_bandit_qte_active = true
+	_bandit_qte_quest_id = quest_id
+	_bandit_qte_steps = steps
+	_bandit_qte_time_per_step = time_per
+	_bandit_qte_index = 0
+	_bandit_qte_time_left = _bandit_qte_time_per_step
+	_bandit_qte_last_failed = false
+	if bandit_qte_result != null:
+		bandit_qte_result.text = ""
+	_stop_knife_game()
+	_update_bandit_qte_ui()
+
+func _stop_bandit_qte() -> void:
+	_bandit_qte_active = false
+	_bandit_qte_sequence.clear()
+	_bandit_qte_index = 0
+	_bandit_qte_time_left = 0.0
+	_bandit_qte_time_per_step = 0.0
+	_bandit_qte_steps = 0
+	_bandit_qte_quest_id = ""
+	_bandit_qte_last_failed = false
+	if bandit_qte_result != null:
+		bandit_qte_result.text = ""
+	_update_bandit_qte_ui()
+
+func _handle_bandit_qte_input(key_event: InputEventKey) -> bool:
+	if not _bandit_qte_active:
+		return false
+	var keycode := key_event.keycode
+	if not BANDIT_QTE_KEYS.has(keycode):
+		return false
+	if keycode != _get_bandit_qte_expected_keycode():
+		_finish_bandit_qte(false, "Falhaste a tecla.")
+		return true
+
+	_bandit_qte_index += 1
+	if _bandit_qte_index >= _bandit_qte_steps:
+		_finish_bandit_qte(true, "Bandido derrotado.")
+		return true
+
+	_bandit_qte_time_left = _bandit_qte_time_per_step
+	_update_bandit_qte_ui()
+	return true
+
+func _get_bandit_qte_expected_keycode() -> int:
+	if _bandit_qte_sequence.is_empty():
+		return KEY_W
+	return int(_bandit_qte_sequence[_bandit_qte_index % _bandit_qte_sequence.size()])
+
+func _bandit_qte_key_name(keycode: int) -> String:
+	match keycode:
+		KEY_W:
+			return "W"
+		KEY_A:
+			return "A"
+		KEY_S:
+			return "S"
+		KEY_D:
+			return "D"
+	return "?"
+
+func _update_bandit_qte_prompt_text() -> void:
+	if bandit_qte_prompt == null:
+		return
+	if not _bandit_qte_active:
+		bandit_qte_prompt.text = "Tecla: -"
+		return
+	var key_name := _bandit_qte_key_name(_get_bandit_qte_expected_keycode())
+	var time_left := _bandit_qte_time_left
+	if time_left < 0.0:
+		time_left = 0.0
+	bandit_qte_prompt.text = "Tecla: %s (%.1fs)" % [key_name, time_left]
+
+func _update_bandit_qte_ui() -> void:
+	if bandit_qte_panel == null:
+		return
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var quest_id := GameState.get_current_bandit_quest_id()
+	if _bandit_qte_active and not _bandit_qte_quest_id.is_empty():
+		quest_id = _bandit_qte_quest_id
+	var show := false
+	var accepted := false
+	var completed := false
+	var target_station_id := ""
+	if not quest_id.is_empty():
+		var def: Dictionary = GameState.QUEST_DEFS.get(quest_id, {}) as Dictionary
+		target_station_id = str(def.get("target_station_id", ""))
+		var q: Dictionary = GameState.get_quest_state(quest_id)
+		accepted = bool(q.get("accepted", false))
+		completed = bool(q.get("completed", false))
+		show = accepted and not completed and station_id == target_station_id
+	if _bandit_qte_active:
+		show = true
+	if bandit_qte_result != null and not bandit_qte_result.text.is_empty():
+		show = true
+
+	bandit_qte_panel.visible = show
+	if bandit_qte_separator != null:
+		bandit_qte_separator.visible = show
+
+	if not show:
+		return
+
+	var def2: Dictionary = GameState.QUEST_DEFS.get(quest_id, {}) as Dictionary
+	var steps := _bandit_qte_steps
+	var time_per := _bandit_qte_time_per_step
+	if not _bandit_qte_active:
+		steps = int(def2.get("qte_steps", 0))
+		time_per = float(def2.get("qte_time", 0.0))
+	var idx := GameState.get_bandit_quest_index(quest_id)
+	var title := str(def2.get("title", "Duelo"))
+	if bandit_qte_info != null:
+		bandit_qte_info.text = "%s (dificuldade %d/5)\nAcerta %d teclas (%.1fs por tecla)." % [title, idx, steps, time_per]
+	if bandit_qte_progress != null:
+		bandit_qte_progress.text = "Passos: %d/%d" % [_bandit_qte_index, steps]
+	if bandit_qte_start_button != null:
+		bandit_qte_start_button.visible = show
+		var can_start := (not quest_id.is_empty()) and accepted and (not completed) and (station_id == target_station_id)
+		bandit_qte_start_button.disabled = _bandit_qte_active or not can_start
+		if _bandit_qte_last_failed:
+			bandit_qte_start_button.text = "Tentar de novo"
+		else:
+			bandit_qte_start_button.text = "Comecar duelo"
+	_update_bandit_qte_prompt_text()
+
+func _finish_bandit_qte(success: bool, reason: String) -> void:
+	_bandit_qte_active = false
+	_bandit_qte_index = 0
+	_bandit_qte_sequence.clear()
+	_bandit_qte_time_left = 0.0
+	if success and not _bandit_qte_quest_id.is_empty():
+		GameState.complete_quest(_bandit_qte_quest_id)
+		_bandit_qte_last_failed = false
+		if bandit_qte_result != null:
+			var idx := GameState.get_bandit_quest_index(_bandit_qte_quest_id)
+			if idx >= 5:
+				bandit_qte_result.text = "Vitoria final. O ultimo bandido cai."
+			else:
+				bandit_qte_result.text = "Vitoria. [Bandido]: Nao vou deixar isto passar."
+	else:
+		_bandit_qte_last_failed = true
+		if bandit_qte_result != null:
+			var fail_text := reason
+			if not fail_text.is_empty():
+				fail_text += " "
+			bandit_qte_result.text = "%s[Bandido]: Tenta outra vez, turista." % fail_text
+	_bandit_qte_quest_id = ""
+	_update_station_quest_buttons()
+	_update_bandit_qte_ui()
 
 func _get_tavern_station_id() -> String:
 	var station_id := _active_station_id
@@ -928,8 +1147,11 @@ func _on_dialogue_choice(next_node: String) -> void:
 					GameState.accept_quest(quest_id)
 				"claim_quest":
 					GameState.claim_quest(quest_id)
+				"start_bandit_qte":
+					_start_bandit_qte(quest_id)
 
 			_update_station_quest_buttons()
+			_update_bandit_qte_ui()
 
 			if next_after == "end":
 				_end_dialogue()
@@ -960,17 +1182,33 @@ func _get_dialogue_nodes(_station_id: String, npc_id: String) -> Dictionary:
 	# Conversas engraçadas com escolhas.
 	match npc_id:
 		"hunter":
-			var hunter_q: Dictionary = GameState.get_quest_state(GameState.QUEST_TAVERN_BANDIT)
+			var quest_id := GameState.get_current_bandit_quest_id()
+			if quest_id.is_empty():
+				return {
+					"start": {
+						"text": "[b]Cacador[/b]: Ja nao tenho mais bandidos para ti. Bom trabalho.",
+						"choices": [
+							{"text": "Ok.", "next": "end"},
+						],
+					},
+				}
+
+			var hunter_q: Dictionary = GameState.get_quest_state(quest_id)
 			var hunter_accepted := bool(hunter_q.get("accepted", false))
 			var hunter_completed := bool(hunter_q.get("completed", false))
 			var hunter_claimed := bool(hunter_q.get("claimed", false))
+			var def: Dictionary = GameState.QUEST_DEFS.get(quest_id, {}) as Dictionary
+			var title := str(def.get("title", "Missao"))
+			var idx := GameState.get_bandit_quest_index(quest_id)
+			var description := str(def.get("description", ""))
+			var mission_label := "%s (%d/5)" % [title, idx]
 
 			if not hunter_accepted:
 				return {
 					"start": {
-						"text": "[b]Cacador[/b]: Preciso de ajuda. Um Bandido esta a causar problemas na taberna do Mercador Delta.\n[b]Cacador[/b]: Vai la e derrota-o. Depois volta aqui para receber 3 partes do Thruster Reverso.",
+						"text": "[b]Cacador[/b]: Tenho um novo alvo.\n[b]Cacador[/b]: %s\n[b]Cacador[/b]: %s. Aceitas?" % [description, mission_label],
 						"choices": [
-							{"text": "Aceitar missao.", "next": "action:accept_quest:tavern_bandit:accepted"},
+							{"text": "Aceitar missao.", "next": "action:accept_quest:%s:accepted" % quest_id},
 							{"text": "Agora nao.", "next": "end"},
 						],
 					},
@@ -985,7 +1223,7 @@ func _get_dialogue_nodes(_station_id: String, npc_id: String) -> Dictionary:
 			if hunter_accepted and not hunter_completed:
 				return {
 					"start": {
-						"text": "[b]Cacador[/b]: Ainda estas aqui? O Bandido esta no Mercador Delta.\n[b]Cacador[/b]: Derrota-o e volta para receber as partes.",
+						"text": "[b]Cacador[/b]: Ainda estas aqui? O Bandido esta no Mercador Delta.\n[b]Cacador[/b]: Derrota-o e volta para receber a recompensa.",
 						"choices": [
 							{"text": "Vou ja.", "next": "end"},
 						],
@@ -997,12 +1235,12 @@ func _get_dialogue_nodes(_station_id: String, npc_id: String) -> Dictionary:
 					"start": {
 						"text": "[b]Cacador[/b]: Excelente! Sabia que conseguias.\n[b]Cacador[/b]: Queres receber a recompensa agora?",
 						"choices": [
-							{"text": "Receber partes.", "next": "action:claim_quest:tavern_bandit:rewarded"},
+							{"text": "Receber recompensa.", "next": "action:claim_quest:%s:rewarded" % quest_id},
 							{"text": "Depois.", "next": "end"},
 						],
 					},
 					"rewarded": {
-						"text": "[b]Cacador[/b]: Aqui estao as 3 partes do Thruster Reverso.",
+						"text": "[b]Cacador[/b]: Aqui esta a recompensa.",
 						"choices": [
 							{"text": "Obrigado.", "next": "end"},
 						],
@@ -1018,9 +1256,21 @@ func _get_dialogue_nodes(_station_id: String, npc_id: String) -> Dictionary:
 				},
 			}
 		"bandit":
-			var bandit_q: Dictionary = GameState.get_quest_state(GameState.QUEST_TAVERN_BANDIT)
+			var quest_id := GameState.get_current_bandit_quest_id()
+			if quest_id.is_empty():
+				return {
+					"start": {
+						"text": "[b]Bandido[/b]: ...",
+						"choices": [
+							{"text": "Ok.", "next": "end"},
+						],
+					},
+				}
+
+			var bandit_q: Dictionary = GameState.get_quest_state(quest_id)
 			var bandit_accepted := bool(bandit_q.get("accepted", false))
 			var bandit_completed := bool(bandit_q.get("completed", false))
+			var idx := GameState.get_bandit_quest_index(quest_id)
 
 			if not bandit_accepted:
 				return {
@@ -1035,9 +1285,44 @@ func _get_dialogue_nodes(_station_id: String, npc_id: String) -> Dictionary:
 			if bandit_accepted and not bandit_completed:
 				return {
 					"start": {
-						"text": "[b]Bandido[/b]: Hah. Achas que me podes derrotar?\n[b]Bandido[/b]: Entao prova. (Por agora, usa o botao [i]Derrotar Bandido[/i].)",
+						"text": "[b]Bandido[/b]: Eh, turista. Vieste pelo duelo ou so pelo cheiro a sopa?\n[b]Bandido[/b]: Eu nao perco para quem derrama mineral ao beber.",
 						"choices": [
-							{"text": "Vamos a isso.", "next": "end"},
+							{"text": "Quero duelar.", "next": "duel_intro"},
+							{"text": "Conta uma piada.", "next": "joke"},
+							{"text": "Adeus.", "next": "end"},
+						],
+					},
+					"joke": {
+						"text": "[b]Bandido[/b]: Um dia tentei ser honesto. Foi o pior assalto da minha vida.",
+						"choices": [
+							{"text": "Ok, duelo.", "next": "duel_intro"},
+							{"text": "Voltar.", "next": "start"},
+						],
+					},
+					"duel_intro": {
+						"text": "[b]Bandido[/b]: Duelo %d/5. WASD, sem choro.\n[b]Bandido[/b]: Se falhares, vou gozar por semanas." % idx,
+						"choices": [
+							{"text": "Comecar duelo.", "next": "action:start_bandit_qte:%s:end" % quest_id},
+							{"text": "Ainda nao.", "next": "end"},
+						],
+					},
+				}
+
+			if bandit_completed:
+				if idx >= 5:
+					return {
+						"start": {
+							"text": "[b]Bandido[/b]: Ok... desta vez ganhaste.\n[b]Bandido[/b]: Diz ao Cacador que acabou.",
+							"choices": [
+								{"text": "Adeus.", "next": "end"},
+							],
+						},
+					}
+				return {
+					"start": {
+						"text": "[b]Bandido[/b]: Nao vou deixar isto passar.\n[b]Bandido[/b]: Isto ainda nao acabou.",
+						"choices": [
+							{"text": "Veremos.", "next": "end"},
 						],
 					},
 				}
@@ -1237,7 +1522,7 @@ func _on_accept_kill_quest() -> void:
 	if _offered_quest_id.is_empty():
 		return
 
-	if _offered_quest_id == GameState.QUEST_TAVERN_BANDIT:
+	if GameState.is_bandit_quest(_offered_quest_id):
 		var station_id := _active_station_id
 		if station_id.is_empty():
 			station_id = DEFAULT_STATION_ID
@@ -1255,7 +1540,7 @@ func _on_accept_kill_quest() -> void:
 				GameState.accept_quest(_offered_quest_id)
 		elif station_id == target_station_id:
 			if accepted and not completed:
-				GameState.complete_quest(_offered_quest_id)
+				_start_bandit_qte(_offered_quest_id)
 
 		_update_station_quest_buttons()
 		return
@@ -1266,7 +1551,7 @@ func _on_accept_kill_quest() -> void:
 func _on_claim_station_quest() -> void:
 	if _offered_quest_id.is_empty():
 		return
-	if _offered_quest_id == GameState.QUEST_TAVERN_BANDIT:
+	if GameState.is_bandit_quest(_offered_quest_id):
 		return
 	GameState.claim_quest(_offered_quest_id)
 	_update_station_quest_buttons()
@@ -1283,7 +1568,7 @@ func _update_station_quest_buttons() -> void:
 			station_quest_details.text = "Seleciona uma missao na lista."
 		return
 
-	if _offered_quest_id == GameState.QUEST_TAVERN_BANDIT:
+	if GameState.is_bandit_quest(_offered_quest_id):
 		var station_id := _active_station_id
 		if station_id.is_empty():
 			station_id = DEFAULT_STATION_ID
@@ -1332,8 +1617,8 @@ func _update_station_quest_buttons() -> void:
 				return
 
 			if accepted and not completed:
-				accept_kill_quest_button.text = "Derrotar Bandido (placeholder)"
-				accept_kill_quest_button.disabled = false
+				accept_kill_quest_button.text = "Derrotar Bandido (QTE)"
+				accept_kill_quest_button.disabled = _bandit_qte_active
 				_set_station_quest_details(_offered_quest_id)
 				return
 
@@ -1437,7 +1722,7 @@ func _set_station_quest_details(quest_id: String) -> void:
 		status = "Em progresso"
 
 	var delivery_hint := "Entrega em: %s" % StationCatalog.get_station_titles_offering_quest(quest_id)
-	if quest_id == GameState.QUEST_TAVERN_BANDIT:
+	if GameState.is_bandit_quest(quest_id):
 		delivery_hint = "Entrega: fala com o Cacador (Refugio Epsilon)"
 
 	station_quest_details.text = "[b]%s[/b]\n%s\n\nProgresso: %d/%d\nEstado: %s\n%s\nRecompensa: %s" % [
@@ -1485,7 +1770,7 @@ func _rebuild_missions_list() -> void:
 		var completed := bool(q.get("completed", false))
 		var claimed := bool(q.get("claimed", false))
 		var delivery_hint := "(entrega numa estacao)"
-		if quest_id == GameState.QUEST_TAVERN_BANDIT:
+		if GameState.is_bandit_quest(quest_id):
 			delivery_hint = "(reclama com o Cacador no Refugio Epsilon)"
 
 		var status := "Em progresso"
