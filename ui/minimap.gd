@@ -122,4 +122,6 @@ func _draw() -> void:
 		var boss_markers: Array[Node] = get_tree().get_nodes_in_group("boss_planet_marker")
 		for n: Node in boss_markers:
 			if n is Node2D:
-				draw_circle(to_map.call((n as Node2D).global_position), 4.5, boss_planet_color)
+				var boss_pos := (n as Node2D).global_position
+				if bounds.has_point(boss_pos):
+					draw_circle(to_map.call(boss_pos), 4.5, boss_planet_color)

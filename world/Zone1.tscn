@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://cjlxyltpch1o"]
+[gd_scene load_steps=10 format=3 uid="uid://cjlxyltpch1o"]
 
 [ext_resource type="Texture2D" uid="uid://bjrm3amgjxcyo" path="res://textures/ChatGPT Image Jan 5, 2026, 12_57_27 AM.png" id="1_a3a3j"]
 [ext_resource type="PackedScene" uid="uid://cshejja03gcoo" path="res://world/comet.tscn" id="2_htqom"]
@@ -7,6 +7,9 @@
 [ext_resource type="PackedScene" path="res://pickups/ArtifactPart.tscn" id="5_artifact_part"]
 [ext_resource type="Script" path="res://world/vacuum_random_part.gd" id="6_vacuum_random_part"]
 [ext_resource type="Script" path="res://world/reverse_thruster_random_part.gd" id="7_reverse_thruster_random_part"]
+[ext_resource type="PackedScene" uid="uid://ckg7u4r0x3e6e" path="res://enemies/BossEnemy.tscn" id="8_boss"]
+[ext_resource type="PackedScene" uid="uid://ca3xybgbgmyin" path="res://pickups/Pickup.tscn" id="9_pickup"]
+[ext_resource type="Script" path="res://world/boss_planet.gd" id="10_boss_planet_script"]
 
 [node name="Zone1" type="Node2D"]
 position = Vector2(19, 0)
@@ -37,6 +40,71 @@ station_id = "station_delta"
 [node name="TraderPlanet3" parent="." instance=ExtResource("4_trader")]
 position = Vector2(2500, 2600)
 station_id = "station_epsilon"
+
+[node name="BossPlanet" parent="." instance=ExtResource("4_trader") groups=["boss_planet_marker"]]
+script = ExtResource("10_boss_planet_script")
+position = Vector2(-5200, -5200)
+station_id = "boss_planet"
+prompt_text = "E - Planeta Perdido"
+
+[node name="BossResources" type="Node2D" parent="BossPlanet"]
+
+[node name="Scrap1" parent="BossPlanet/BossResources" instance=ExtResource("9_pickup")]
+position = Vector2(-160, -140)
+resource_type = "scrap"
+amount = 4
+
+[node name="Scrap2" parent="BossPlanet/BossResources" instance=ExtResource("9_pickup")]
+position = Vector2(-40, -200)
+resource_type = "scrap"
+amount = 4
+
+[node name="Scrap3" parent="BossPlanet/BossResources" instance=ExtResource("9_pickup")]
+position = Vector2(120, -160)
+resource_type = "scrap"
+amount = 4
+
+[node name="Scrap4" parent="BossPlanet/BossResources" instance=ExtResource("9_pickup")]
+position = Vector2(180, 0)
+resource_type = "scrap"
+amount = 4
+
+[node name="Scrap5" parent="BossPlanet/BossResources" instance=ExtResource("9_pickup")]
+position = Vector2(40, 160)
+resource_type = "scrap"
+amount = 4
+
+[node name="Scrap6" parent="BossPlanet/BossResources" instance=ExtResource("9_pickup")]
+position = Vector2(-140, 120)
+resource_type = "scrap"
+amount = 4
+
+[node name="Mineral1" parent="BossPlanet/BossResources" instance=ExtResource("9_pickup")]
+position = Vector2(-220, 40)
+resource_type = "mineral"
+amount = 3
+
+[node name="Mineral2" parent="BossPlanet/BossResources" instance=ExtResource("9_pickup")]
+position = Vector2(0, -260)
+resource_type = "mineral"
+amount = 3
+
+[node name="Mineral3" parent="BossPlanet/BossResources" instance=ExtResource("9_pickup")]
+position = Vector2(220, 80)
+resource_type = "mineral"
+amount = 3
+
+[node name="Mineral4" parent="BossPlanet/BossResources" instance=ExtResource("9_pickup")]
+position = Vector2(-60, 240)
+resource_type = "mineral"
+amount = 3
+
+[node name="BossEnemy" parent="." instance=ExtResource("8_boss")]
+position = Vector2(-4850, -5200)
+patrol_radius = 720.0
+patrol_speed = 180.0
+detection_range = 2600.0
+patrol_anchor_path = NodePath("../BossPlanet")
 
 [node name="VacuumRandomPart" parent="." instance=ExtResource("5_artifact_part")]
 script = ExtResource("6_vacuum_random_part")

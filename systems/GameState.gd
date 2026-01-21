@@ -11,6 +11,7 @@ const SAVE_VERSION := 1
 const BASE_PLAYER_MAX_HEALTH := 10000000000
 const BASE_ALIEN_MAX_HEALTH := 50
 const BASE_FIRE_INTERVAL := 0.28
+const BASE_PLAYER_LASER_DAMAGE := 5
 const BASE_ACCELERATION := 470.0
 const BASE_MAX_SPEED := 360.0
 
@@ -97,6 +98,7 @@ var boss_planet_resources_unlocked: bool = false
 var upgrades := {
 	"hull": 0,      # +HP max
 	"blaster": 0,   # mais fire rate (menos intervalo)
+	"laser_damage": 0, # mais dano do laser
 	"engine": 0,    # mais aceleração
 	"thrusters": 0, # mais velocidade max
 	"magnet": 0,    # maior range/velocidade do magnet
@@ -129,6 +131,13 @@ const UPGRADE_DEFS := {
 		"description": "Dispara mais rápido (reduz o intervalo entre tiros).",
 		"max_level": 10,
 		"base_cost": {"scrap": 12, "mineral": 2},
+		"growth": 1.35,
+	},
+	"laser_damage": {
+		"title": "Laser Damage",
+		"description": "Aumenta o dano do laser (+10% por nivel).",
+		"max_level": 10,
+		"base_cost": {"scrap": 16, "mineral": 6},
 		"growth": 1.35,
 	},
 	"engine": {
@@ -908,6 +917,11 @@ func get_fire_interval() -> float:
 	var level := get_upgrade_level("blaster")
 	return max(0.06, BASE_FIRE_INTERVAL * pow(0.92, level))
 
+func get_player_laser_damage() -> int:
+	var level := get_upgrade_level("laser_damage")
+	var value := float(BASE_PLAYER_LASER_DAMAGE) * pow(1.10, level)
+	return int(round(value))
+
 func get_acceleration() -> float:
 	var level := get_upgrade_level("engine")
 	return BASE_ACCELERATION * (1.0 + 0.12 * level)
@@ -945,6 +959,8 @@ func get_upgrade_description(upgrade_id: String) -> String:
 			return "+10 HP máximo por nível."
 		"blaster":
 			return "Dispara mais rápido (reduz o intervalo entre tiros)."
+		"laser_damage":
+			return "Aumenta o dano do laser (+10% por nivel)."
 		"engine":
 			return "Mais aceleração (+12% por nível)."
 		"thrusters":
@@ -1315,6 +1331,7 @@ func _apply_defaults() -> void:
 	upgrades = {
 		"hull": 0,
 		"blaster": 0,
+		"laser_damage": 0,
 		"engine": 0,
 		"thrusters": 0,
 		"magnet": 0,

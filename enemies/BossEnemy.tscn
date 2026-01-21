@@ -9,6 +9,7 @@ size = Vector2(177, 188.5)
 [node name="BossEnemy" type="CharacterBody2D" groups=["enemy"]]
 collision_layer = 8
 collision_mask = 15
+scale = Vector2(0.8, 0.8)
 script = ExtResource("1_boss_script")
 enemy_id = "boss"
 patrol_radius = 750.0
