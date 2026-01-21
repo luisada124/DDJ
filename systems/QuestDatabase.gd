@@ -5,6 +5,7 @@ const QUEST_KILL_15_BASIC := "kill_15_basic"
 const QUEST_KILL_10_SNIPER := "kill_10_sniper"
 const QUEST_KILL_5_TANK := "kill_5_tank"
 const QUEST_VACUUM_PART := "vacuum_part"
+const QUEST_SIDE_DASH_MAP := "side_dash_map"
 const QUEST_TAVERN_BANDIT_1 := "tavern_bandit_1"
 const QUEST_TAVERN_BANDIT_2 := "tavern_bandit_2"
 const QUEST_TAVERN_BANDIT_3 := "tavern_bandit_3"
@@ -51,6 +52,16 @@ const QUEST_DEFS := {
 		"giver_station_id": "station_alpha",
 		"reward": {"scrap": 25},
 		"artifact_parts_reward": {"vacuum": 1},
+	},
+	QUEST_SIDE_DASH_MAP: {
+		"title": "Mapa do Dash",
+		"description": "Um informador deixou pistas do Dash Lateral. Mata 12 inimigos basicos e volta para receberes o mapa.",
+		"enemy_id": "basic",
+		"goal": 12,
+		"giver_station_id": "station_beta",
+		"reward": {"scrap": 40},
+		"artifact_parts_reward": {"side_dash": 1},
+		"map_reward": "side_dash",
 	},
 	QUEST_TAVERN_BANDIT_1: {
 		"title": "Acerto de Contas I",
@@ -114,7 +125,7 @@ const QUEST_DEFS := {
 
 const NPC_QUEST_POOLS := {
 	"scavenger": [QUEST_KILL_15_BASIC, QUEST_VACUUM_PART],
-	"marksman": [QUEST_KILL_10_SNIPER],
+	"marksman": [QUEST_KILL_10_SNIPER, QUEST_SIDE_DASH_MAP],
 	"bruiser": [QUEST_KILL_5_TANK],
 	"bounty": [QUEST_KILL_15_BASIC, QUEST_KILL_10_SNIPER, QUEST_KILL_5_TANK],
 	"hunter": [

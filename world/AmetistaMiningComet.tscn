@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://world/ametista_mining_comet.gd" id="1_script"]
-[ext_resource type="Texture2D" path="res://textures/12b09e93-7850-452e-9dc7-1a5baf1c23c8.png" id="2_tex"]
+[ext_resource type="Texture2D" path="res://textures/ametista-block.png" id="2_tex"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
 radius = 22.0

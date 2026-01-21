@@ -48,6 +48,13 @@ var reverse_thruster_random_part_world: Vector2 = Vector2.ZERO # runtime (global
 var reverse_thruster_random_part_collected: bool = false
 var reverse_thruster_shop_parts_bought: Dictionary = {} # station_id -> bool (compra unica por estacao)
 
+# Side Dash: 2 pecas em mercados (2 estacoes diferentes) + 1 peca aleatoria na Zona 2, mapa por missao.
+var side_dash_map_unlocked: bool = false
+var side_dash_random_part_local: Vector2 = Vector2.ZERO
+var side_dash_random_part_world: Vector2 = Vector2.ZERO # runtime (global), usado pelo minimapa
+var side_dash_random_part_collected: bool = false
+var side_dash_shop_parts_bought: Dictionary = {} # station_id -> bool (compra unica por estacao)
+
 # Cofres por estacao: recursos guardados nao se perdem na morte.
 var vault_unlocked: Dictionary = {} # station_id -> bool
 var vault_resources: Dictionary = {} # station_id -> {res_type -> int}
@@ -351,6 +358,10 @@ func claim_quest(quest_id: String, station_id: String = "") -> bool:
 		for _i in range(max(count, 0)):
 			collect_artifact_part(artifact_id)
 
+	var map_reward := str(def.get("map_reward", ""))
+	if map_reward == "side_dash":
+		side_dash_map_unlocked = true
+
 	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
 	q["claimed"] = true
 	quests[quest_id] = q
@@ -645,6 +656,32 @@ func buy_reverse_thruster_map(station_id: String, cost: Dictionary) -> bool:
 	_queue_save()
 	return true
 
+func buy_side_dash_shop_part(station_id: String, cost: Dictionary) -> bool:
+	# Apenas na Zona 2.
+	if current_zone_id != "mid":
+		return false
+	if station_id != "station_zeta" and station_id != "station_beta":
+		return false
+	if has_artifact("side_dash"):
+		return false
+	var required := ArtifactDatabase.get_parts_required("side_dash")
+	if required <= 0:
+		return false
+	if get_artifact_parts("side_dash") >= required:
+		return false
+	if bool(side_dash_shop_parts_bought.get(station_id, false)):
+		return false
+	if not can_afford(cost):
+		return false
+	for res_type_variant in cost.keys():
+		var res_type := str(res_type_variant)
+		resources[res_type] = int(resources.get(res_type, 0)) - int(cost[res_type_variant])
+	collect_artifact_part("side_dash")
+	side_dash_shop_parts_bought[station_id] = true
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
 func get_repair_kit_count() -> int:
 	return int(consumables.get("repair_kit", 0))
 
@@ -916,6 +953,10 @@ func save_game() -> void:
 		"reverse_thruster_random_part_local": [reverse_thruster_random_part_local.x, reverse_thruster_random_part_local.y],
 		"reverse_thruster_random_part_collected": reverse_thruster_random_part_collected,
 		"reverse_thruster_shop_parts_bought": reverse_thruster_shop_parts_bought,
+		"side_dash_map_unlocked": side_dash_map_unlocked,
+		"side_dash_random_part_local": [side_dash_random_part_local.x, side_dash_random_part_local.y],
+		"side_dash_random_part_collected": side_dash_random_part_collected,
+		"side_dash_shop_parts_bought": side_dash_shop_parts_bought,
 		"vault_unlocked": vault_unlocked,
 		"vault_resources": vault_resources,
 		"quests": quests,
@@ -992,6 +1033,25 @@ func load_game() -> void:
 		reverse_thruster_shop_parts_bought = loaded_rt_shops
 	else:
 		reverse_thruster_shop_parts_bought = {}
+
+	side_dash_map_unlocked = bool(data.get("side_dash_map_unlocked", false))
+	side_dash_random_part_collected = bool(data.get("side_dash_random_part_collected", false))
+	var stored_sd = data.get("side_dash_random_part_local")
+	if typeof(stored_sd) == TYPE_ARRAY and (stored_sd as Array).size() >= 2:
+		var a_sd := stored_sd as Array
+		side_dash_random_part_local = Vector2(float(a_sd[0]), float(a_sd[1]))
+	else:
+		side_dash_random_part_local = Vector2.ZERO
+	side_dash_random_part_world = Vector2.ZERO
+	var loaded_sd_shops = data.get("side_dash_shop_parts_bought")
+	if typeof(loaded_sd_shops) == TYPE_DICTIONARY:
+		side_dash_shop_parts_bought = loaded_sd_shops
+	else:
+		side_dash_shop_parts_bought = {}
+	# Migração: Station Alpha deixou de existir na Zona 2; agora é Posto Zeta.
+	if side_dash_shop_parts_bought.has("station_alpha") and not side_dash_shop_parts_bought.has("station_zeta"):
+		side_dash_shop_parts_bought["station_zeta"] = bool(side_dash_shop_parts_bought.get("station_alpha", false))
+		side_dash_shop_parts_bought.erase("station_alpha")
 
 	var loaded_consumables = data.get("consumables")
 	if typeof(loaded_consumables) == TYPE_DICTIONARY:
@@ -1111,6 +1171,11 @@ func _apply_defaults() -> void:
 	reverse_thruster_random_part_world = Vector2.ZERO
 	reverse_thruster_random_part_collected = false
 	reverse_thruster_shop_parts_bought = {}
+	side_dash_map_unlocked = false
+	side_dash_random_part_local = Vector2.ZERO
+	side_dash_random_part_world = Vector2.ZERO
+	side_dash_random_part_collected = false
+	side_dash_shop_parts_bought = {}
 
 func queue_save() -> void:
 	_queue_save()

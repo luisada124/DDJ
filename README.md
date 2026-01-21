@@ -19,6 +19,8 @@ Estações têm de ser ou compradas a localização ou encontradas.
 
 BALANCEAMENTO:
 
+Balancear o preço das peças dos artefactos na zona 2 com a medista. 
+
 Zonas específicas com mais inimigos. 
 vida da nava
 jogo mais lento
