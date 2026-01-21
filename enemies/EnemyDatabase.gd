@@ -25,7 +25,7 @@ static func apply_to(enemy: Node, enemy_id: String, difficulty_multiplier: float
 
 	var speed_mult: float = float(pow(diff, 0.25)) # aumenta pouco a velocidade
 
-	enemy.set("move_speed", data.move_speed * speed_mult)
+	enemy.set("move_speed", data.move_speed * speed_mult * 0.85)
 	enemy.set("desired_distance", data.desired_distance)
 	enemy.set("distance_tolerance", data.distance_tolerance)
 	enemy.set("chase_range", data.chase_range)

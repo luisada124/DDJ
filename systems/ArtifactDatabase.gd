@@ -15,9 +15,9 @@ const ARTIFACTS: Dictionary = {
 	"side_dash": {
 		"title": "Dash Lateral",
 		"parts_required": 6,
-		"dash_speed": 1100.0,
-		"dash_duration": 0.12,
-		"dash_cooldown": 0.6,
+		"dash_speed": 900.0,
+		"dash_duration": 0.10,
+		"dash_cooldown": 1.2,
 	},
 }
 
