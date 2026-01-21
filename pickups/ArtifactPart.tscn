@@ -1,21 +1,20 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=4 format=3 uid="uid://bi51iiu6cmm24"]
 
-[ext_resource type="Script" path="res://pickups/artifact_part.gd" id="1_artifact"]
+[ext_resource type="Script" uid="uid://bgpoa2l73hbhy" path="res://pickups/artifact_part.gd" id="1_artifact"]
 [ext_resource type="Texture2D" uid="uid://dav1hvcsxqb66" path="res://textures/Crystal_01.png" id="2_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_artifact"]
 size = Vector2(42, 50)
 
 [node name="ArtifactPart" type="Area2D"]
-collision_layer = 4
-collision_mask = 1
-script = ExtResource("1_artifact")
 z_index = 5
+collision_layer = 4
+script = ExtResource("1_artifact")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(1, 0.9, 0.3, 1)
 scale = Vector2(0.18, 0.18)
 texture = ExtResource("2_tex")
-modulate = Color(1, 0.9, 0.3, 1)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_artifact")

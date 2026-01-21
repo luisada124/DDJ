@@ -86,6 +86,9 @@ extends Control
 
 const DEFAULT_STATION_ID := "station_alpha"
 const QuestDatabase := preload("res://systems/QuestDatabase.gd")
+const BOSS_ARROW_TEXTURE := preload("res://textures/seta.png")
+const BOSS_ARROW_RADIUS := 120.0
+const BOSS_PLANET_FALLBACK_POS := Vector2(-6300, -5400)
 const BANDIT_QTE_KEYS := [KEY_W, KEY_A, KEY_S, KEY_D]
 const KNIFE_GAME_SEQUENCE := [KEY_A, KEY_S, KEY_D, KEY_W]
 const KNIFE_GAME_ATTEMPT_TIME := 20.0
@@ -107,6 +110,7 @@ var _bandit_qte_time_per_step: float = 0.0
 var _bandit_qte_steps: int = 0
 var _bandit_qte_quest_id: String = ""
 var _bandit_qte_last_failed: bool = false
+var _boss_arrow: Sprite2D = null
 var _knife_game_active: bool = false
 var _knife_game_score: int = 0
 var _knife_game_sequence_index: int = 0
@@ -176,22 +180,24 @@ func _ready() -> void:
 	GameState.player_died.connect(_on_player_died)
 	GameState.alien_died.connect(_on_alien_died)
 	_update_hud()
+	_update_boss_compass()
 
 func _process(delta: float) -> void:
 	if _bandit_qte_active:
 		_bandit_qte_time_left -= delta
 		if _bandit_qte_time_left <= 0.0:
 			_finish_bandit_qte(false, "Tempo esgotado.")
-			return
-		_update_bandit_qte_prompt_text()
-		return
+		else:
+			_update_bandit_qte_prompt_text()
 
-	if _knife_game_active:
+	elif _knife_game_active:
 		_knife_game_time_left -= delta
 		if _knife_game_time_left <= 0.0:
 			_finish_knife_game("Tempo acabou.")
-			return
-		_update_knife_game_prompt_text()
+		else:
+			_update_knife_game_prompt_text()
+
+	_update_boss_compass()
 
 
 func _input(event: InputEvent) -> void:
@@ -915,6 +921,68 @@ func _update_knife_game_ui() -> void:
 	knife_game_score.text = "Score: %d" % _knife_game_score
 	_update_knife_game_prompt_text()
 
+func _update_boss_compass() -> void:
+	if _boss_arrow != null and not is_instance_valid(_boss_arrow):
+		_boss_arrow = null
+
+	var show := GameState.should_show_boss_compass()
+	if not show:
+		if _boss_arrow != null:
+			_boss_arrow.visible = false
+		return
+
+	var ship_node := get_tree().get_first_node_in_group("ship")
+	if not (ship_node is Node2D):
+		ship_node = get_tree().get_first_node_in_group("player")
+	if not (ship_node is Node2D):
+		if _boss_arrow != null:
+			_boss_arrow.visible = false
+		return
+
+	var marker_node := get_tree().get_first_node_in_group("boss_planet_marker")
+	var ship := ship_node as Node2D
+	var target_pos: Vector2
+	if marker_node is Node2D:
+		target_pos = (marker_node as Node2D).global_position
+	else:
+		var manager := get_tree().get_first_node_in_group("zone_manager")
+		if manager != null:
+			var zone_offset: Vector2 = Vector2.ZERO
+			var zone_scale: Vector2 = Vector2.ONE
+			var offset_value: Variant = manager.get("zone_offset")
+			if offset_value is Vector2:
+				zone_offset = offset_value
+			var scale_value: Variant = manager.get("zone_scale")
+			if scale_value is Vector2:
+				zone_scale = scale_value
+			target_pos = zone_offset + BOSS_PLANET_FALLBACK_POS * zone_scale
+		else:
+			target_pos = BOSS_PLANET_FALLBACK_POS
+
+	var dir := target_pos - ship.global_position
+	if dir.length() <= 0.001:
+		if _boss_arrow != null:
+			_boss_arrow.visible = false
+		return
+	dir = dir.normalized()
+
+	if _boss_arrow == null:
+		_boss_arrow = Sprite2D.new()
+		_boss_arrow.texture = BOSS_ARROW_TEXTURE
+		_boss_arrow.centered = true
+		_boss_arrow.z_index = 100
+		_boss_arrow.scale = Vector2(0.15, 0.15)
+
+	var root := get_tree().current_scene
+	if root != null and _boss_arrow.get_parent() != root:
+		if _boss_arrow.get_parent() != null:
+			_boss_arrow.get_parent().remove_child(_boss_arrow)
+		root.add_child(_boss_arrow)
+
+	_boss_arrow.visible = true
+	_boss_arrow.global_position = ship.global_position + dir * BOSS_ARROW_RADIUS
+	_boss_arrow.rotation = dir.angle()
+
 func _start_bandit_qte(quest_id: String) -> void:
 	if _bandit_qte_active or quest_id.is_empty():
 		return
@@ -1230,9 +1298,68 @@ func _get_dialogue_nodes(_station_id: String, npc_id: String) -> Dictionary:
 		"hunter":
 			var quest_id := GameState.get_current_bandit_quest_id()
 			if quest_id.is_empty():
+				var boss_id := GameState.QUEST_BOSS_PLANET
+				if not GameState.QUEST_DEFS.has(boss_id):
+					return {
+						"start": {
+							"text": "[b]Cacador[/b]: Ja nao tenho mais bandidos para ti. Bom trabalho.",
+							"choices": [
+								{"text": "Ok.", "next": "end"},
+							],
+						},
+					}
+
+				var boss_q: Dictionary = GameState.get_quest_state(boss_id)
+				var boss_accepted := bool(boss_q.get("accepted", false))
+				var boss_completed := bool(boss_q.get("completed", false))
+				var boss_claimed := bool(boss_q.get("claimed", false))
+				if not boss_accepted:
+					return {
+						"start": {
+							"text": "[b]Cacador[/b]: Agora a coisa e seria. Descobri um planeta fora do mapa.\n[b]Cacador[/b]: Um boss ronda a zona. Se o derrubares, a peca do artefacto e tua.\n[b]Cacador[/b]: Enviei o marcador para o teu mapa.",
+							"choices": [
+								{"text": "Aceitar missao.", "next": "action:accept_quest:%s:accepted" % boss_id},
+								{"text": "Agora nao.", "next": "end"},
+							],
+						},
+						"accepted": {
+							"text": "[b]Cacador[/b]: Vai la e acaba com ele. O planeta esta fora do mapa, segue o marcador.",
+							"choices": [
+								{"text": "Ok.", "next": "end"},
+							],
+						},
+					}
+
+				if boss_accepted and not boss_completed:
+					return {
+						"start": {
+							"text": "[b]Cacador[/b]: O boss ainda ronda o planeta. Vai la e trata disso.",
+							"choices": [
+								{"text": "Estou a caminho.", "next": "end"},
+							],
+						},
+					}
+
+				if boss_completed and not boss_claimed:
+					return {
+						"start": {
+							"text": "[b]Cacador[/b]: Conseguiste? O marcador confirmou a queda.\n[b]Cacador[/b]: Queres fechar isto agora?",
+							"choices": [
+								{"text": "Fechar missao.", "next": "action:claim_quest:%s:rewarded" % boss_id},
+								{"text": "Depois.", "next": "end"},
+							],
+						},
+						"rewarded": {
+							"text": "[b]Cacador[/b]: Bom trabalho. Agora tens o warp para a proxima zona.",
+							"choices": [
+								{"text": "Obrigado.", "next": "end"},
+							],
+						},
+					}
+
 				return {
 					"start": {
-						"text": "[b]Cacador[/b]: Ja nao tenho mais bandidos para ti. Bom trabalho.",
+						"text": "[b]Cacador[/b]: Ja nao tenho mais trabalho para ti. Descansa.",
 						"choices": [
 							{"text": "Ok.", "next": "end"},
 						],

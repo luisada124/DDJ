@@ -34,6 +34,7 @@ const QUEST_KILL_15_BASIC := QuestDatabase.QUEST_KILL_15_BASIC
 const QUEST_KILL_10_SNIPER := QuestDatabase.QUEST_KILL_10_SNIPER
 const QUEST_KILL_5_TANK := QuestDatabase.QUEST_KILL_5_TANK
 const QUEST_TAVERN_BANDIT := QuestDatabase.QUEST_TAVERN_BANDIT
+const QUEST_BOSS_PLANET := QuestDatabase.QUEST_BOSS_PLANET
 const BANDIT_QUESTS := QuestDatabase.BANDIT_QUESTS
 const QUEST_DEFS := QuestDatabase.QUEST_DEFS
 
@@ -360,6 +361,25 @@ func get_bandit_quest_index(quest_id: String) -> int:
 		return 0
 	return idx + 1
 
+func is_bandit_chain_complete() -> bool:
+	for quest_id in BANDIT_QUESTS:
+		var q: Dictionary = get_quest_state(quest_id)
+		if not bool(q.get("claimed", false)):
+			return false
+	return true
+
+func has_boss_planet_marker() -> bool:
+	if not QUEST_DEFS.has(QUEST_BOSS_PLANET):
+		return false
+	var q: Dictionary = get_quest_state(QUEST_BOSS_PLANET)
+	return bool(q.get("accepted", false)) or bool(q.get("completed", false)) or bool(q.get("claimed", false))
+
+func should_show_boss_compass() -> bool:
+	if not QUEST_DEFS.has(QUEST_BOSS_PLANET):
+		return false
+	var q: Dictionary = get_quest_state(QUEST_BOSS_PLANET)
+	return bool(q.get("accepted", false)) and not bool(q.get("claimed", false))
+
 func filter_offered_quests(quest_ids: Array) -> Array:
 	var filtered: Array[String] = []
 	var current_bandit := get_current_bandit_quest_id()
@@ -367,6 +387,10 @@ func filter_offered_quests(quest_ids: Array) -> Array:
 		var quest_id := str(quest_id_variant)
 		if is_bandit_quest(quest_id):
 			if quest_id == current_bandit:
+				filtered.append(quest_id)
+		elif quest_id == QUEST_BOSS_PLANET:
+			var q: Dictionary = get_quest_state(quest_id)
+			if is_bandit_chain_complete() and not bool(q.get("claimed", false)):
 				filtered.append(quest_id)
 		else:
 			filtered.append(quest_id)

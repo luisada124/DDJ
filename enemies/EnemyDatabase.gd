@@ -65,6 +65,7 @@ static func _load_defaults() -> void:
 	_register("basic", "res://enemies/data/basic_enemy.tres")
 	_register("sniper", "res://enemies/data/sniper_enemy.tres")
 	_register("tank", "res://enemies/data/tank_enemy.tres")
+	_register("boss", "res://enemies/data/boss_enemy.tres")
 
 static func _register(enemy_id: String, path: String) -> void:
 	var data = load(path)

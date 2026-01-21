@@ -27,8 +27,6 @@ Para o placeholder do minigame do bandido, podíamos fazer um minigame de Quick 
 
  e a recompensa. 
 
-
-Vamos ter um planeta que está fora da zona do mapa. que o último artefacto para conseguir dar warp à próxima zona. A localização ou marcador deste planeta vai ser dado a partir da última missão do caçador. O nosso amiguinho vai ter de matar um boss. Esse gajo dropa o  artefacto e estava a rondar o planeta. Este planeta vai ter muitos recursos. 
 BOSSES
 
 
