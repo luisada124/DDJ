@@ -192,6 +192,60 @@ func _can_detect_player(distance: float) -> bool:
 		return false
 	return hit.get("collider") == player
 
+func _apply_station_safe_radius() -> void:
+	if player == null:
+		return
+
+	var station := _get_station_for_safety()
+	if station == null:
+		return
+
+	var safe_radius := station_safe_radius
+	if safe_radius <= 0.0:
+		safe_radius = DEFAULT_STATION_SAFE_RADIUS
+
+	# Só ativa a "bolha" se o player estiver mesmo ao pé da estação.
+	var player_station_dist := (player.global_position - station.global_position).length()
+	if player_station_dist > safe_radius:
+		return
+
+	var to_station := station.global_position - global_position
+	var dist_to_station := to_station.length()
+	if dist_to_station <= 0.001:
+		return
+
+	# Se o inimigo já estiver dentro da bolha, empurra para fora.
+	if dist_to_station < safe_radius:
+		velocity = -to_station.normalized() * move_speed
+		return
+
+	# Se estiver no limite, não deixa avançar para dentro.
+	if dist_to_station <= safe_radius + STATION_SAFE_MARGIN:
+		if velocity.dot(to_station) > 0.0:
+			velocity = Vector2.ZERO
+
+func _get_station_for_safety() -> Node2D:
+	if home_station != null and is_instance_valid(home_station):
+		return home_station
+
+	var best: Node2D = null
+	var best_dist := INF
+	for n in get_tree().get_nodes_in_group("station"):
+		if n == null or not is_instance_valid(n):
+			continue
+		if not (n is Node2D):
+			continue
+		var s := n as Node2D
+		var d := (player.global_position - s.global_position).length()
+		if d < best_dist:
+			best_dist = d
+			best = s
+
+	var effective_radius := station_safe_radius if station_safe_radius > 0.0 else DEFAULT_STATION_SAFE_RADIUS
+	if best != null and best_dist <= effective_radius * 1.5:
+		return best
+	return null
+ 
 
 func _shoot(dir_to_player: Vector2) -> void:
 	if laser_scene == null:

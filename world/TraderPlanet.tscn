@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dnkgrwnjb6gks" path="res://world/trader_planet.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://c6k4axfsqdtob" path="res://textures/pixel-moon-moon-icon-8-bit-moon-png.webp" id="2_jhlxm"]
-[ext_resource type="Script" path="res://world/station_guard_spawner.gd" id="3_guard_spawner_script"]
+[ext_resource type="Script" uid="uid://bebsp80sjbk77" path="res://world/station_guard_spawner.gd" id="3_guard_spawner_script"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_interact"]
 radius = 90.0
