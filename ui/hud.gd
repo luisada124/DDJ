@@ -20,7 +20,7 @@ extends Control
 @onready var close_button: Button = $UpgradeMenu/Panel/Margin/VBox/CloseButton
 
 @onready var map_menu: Control = $MapMenu
-@onready var map_zone_list: VBoxContainer = $MapMenu/Panel/Margin/VBox/ZoneList
+@onready var map_zone_list: VBoxContainer = $MapMenu/Panel/Margin/VBox/ZoneScroll/ZoneList
 @onready var close_map_button: Button = $MapMenu/Panel/Margin/VBox/CloseMapButton
 
 @onready var trader_menu: Control = $TraderMenu
@@ -31,47 +31,47 @@ extends Control
 @onready var ametista_to_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/AmetistaToMineralButton
 @onready var ametista_to_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/AmetistaToScrapButton
 
-@onready var npc1_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/NPC1Button
-@onready var npc2_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/NPC2Button
-@onready var npc3_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/NPC3Button
-@onready var accept_kill_quest_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/AcceptKillQuestButton
-@onready var claim_station_quest_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/ClaimStationQuestButton
-@onready var station_quest_list: VBoxContainer = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/QuestList
-@onready var station_quest_details: RichTextLabel = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/QuestDetails
-@onready var dialogue_text: RichTextLabel = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/DialogueText
-@onready var dialogue_choices: VBoxContainer = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/DialogueChoices
-@onready var end_dialogue_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/EndDialogueButton
-@onready var knife_game_high_score: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/KnifeGameHighScore
-@onready var knife_game_score: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/KnifeGameScore
-@onready var knife_game_prompt: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/KnifeGamePrompt
-@onready var knife_game_result: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/KnifeGameResult
-@onready var knife_game_start_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/KnifeGameStartButton
+@onready var npc1_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/NPC1Button
+@onready var npc2_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/NPC2Button
+@onready var npc3_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/NPC3Button
+@onready var accept_kill_quest_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/AcceptKillQuestButton
+@onready var claim_station_quest_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/ClaimStationQuestButton
+@onready var station_quest_list: VBoxContainer = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/QuestList
+@onready var station_quest_details: RichTextLabel = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/QuestDetails
+@onready var dialogue_text: RichTextLabel = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/DialogueText
+@onready var dialogue_choices: VBoxContainer = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/DialogueChoices
+@onready var end_dialogue_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/EndDialogueButton
+@onready var knife_game_high_score: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/KnifeGameHighScore
+@onready var knife_game_score: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/KnifeGameScore
+@onready var knife_game_prompt: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/KnifeGamePrompt
+@onready var knife_game_result: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/KnifeGameResult
+@onready var knife_game_start_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/KnifeGameStartButton
 @onready var open_upgrades_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mecanico/OpenUpgradesButton
 
-@onready var buy_vault_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/BuyVaultButton
-@onready var vault_status: RichTextLabel = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultStatus
-@onready var deposit_all_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/DepositAllButton
-@onready var withdraw_all_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/WithdrawAllButton
-@onready var scrap_slider: HSlider = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow/ScrapControls/ScrapSlider
-@onready var scrap_percent_label: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow/ScrapControls/ScrapPercent
-@onready var deposit_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow/ScrapControls/DepositScrapButton
-@onready var withdraw_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow/ScrapControls/WithdrawScrapButton
+@onready var buy_vault_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/BuyVaultButton
+@onready var vault_status: RichTextLabel = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultStatus
+@onready var deposit_all_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/DepositAllButton
+@onready var withdraw_all_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/WithdrawAllButton
+@onready var scrap_slider: HSlider = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/ScrapRow/ScrapControls/ScrapSlider
+@onready var scrap_percent_label: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/ScrapRow/ScrapControls/ScrapPercent
+@onready var deposit_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/ScrapRow/ScrapControls/DepositScrapButton
+@onready var withdraw_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/ScrapRow/ScrapControls/WithdrawScrapButton
 
-@onready var mineral_slider: HSlider = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow/MineralControls/MineralSlider
-@onready var mineral_percent_label: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow/MineralControls/MineralPercent
-@onready var deposit_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow/MineralControls/DepositMineralButton
-@onready var withdraw_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow/MineralControls/WithdrawMineralButton
+@onready var mineral_slider: HSlider = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/MineralRow/MineralControls/MineralSlider
+@onready var mineral_percent_label: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/MineralRow/MineralControls/MineralPercent
+@onready var deposit_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/MineralRow/MineralControls/DepositMineralButton
+@onready var withdraw_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/MineralRow/MineralControls/WithdrawMineralButton
 
-@onready var ametista_slider: HSlider = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow/AmetistaControls/AmetistaSlider
-@onready var ametista_percent_label: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow/AmetistaControls/AmetistaPercent
-@onready var deposit_ametista_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow/AmetistaControls/DepositAmetistaButton
-@onready var withdraw_ametista_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow/AmetistaControls/WithdrawAmetistaButton
+@onready var ametista_slider: HSlider = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/AmetistaRow/AmetistaControls/AmetistaSlider
+@onready var ametista_percent_label: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/AmetistaRow/AmetistaControls/AmetistaPercent
+@onready var deposit_ametista_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/AmetistaRow/AmetistaControls/DepositAmetistaButton
+@onready var withdraw_ametista_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/AmetistaRow/AmetistaControls/WithdrawAmetistaButton
 
 @onready var close_trader_button: Button = $TraderMenu/Panel/Margin/VBox/CloseTraderButton
 
 @onready var missions_menu: Control = $MissionsMenu
 @onready var missions_tabs: TabContainer = $MissionsMenu/Panel/Margin/VBox/Tabs
-@onready var missions_list: VBoxContainer = $MissionsMenu/Panel/Margin/VBox/Tabs/Missoes/MissionList
+@onready var missions_list: VBoxContainer = $MissionsMenu/Panel/Margin/VBox/Tabs/Missoes/MissionScroll/MissionList
 @onready var inventory_list: VBoxContainer = $MissionsMenu/Panel/Margin/VBox/Tabs/Inventario/InventoryScroll/InventoryList
 @onready var close_missions_button: Button = $MissionsMenu/Panel/Margin/VBox/CloseMissionsButton
 
