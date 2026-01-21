@@ -68,7 +68,7 @@ inimigo - 4  | 1,2,3,4
 
 
 Lista de artefactos e gadgets:
-
+pensar no numero de ametistas para cada
 Zona 1:
 
 vacuum: 2 
@@ -77,7 +77,10 @@ reverse_thruster: 3
 
 Zona 2:
 
-broca de mineracao: 1
+broca de mineracao: 1 
+
+Vai ser obtida logo numa estação perto do spawn da zona 2 e Vai ser um tropa que lhe vai dar para desde que ele faça recolha de 4 ametistas para ele. Se ele não cumprir e não lhe as devolver, também não consegue fazer mais missões nesse gás, e esse gás vai ter missões boas. 
+
 side_dash: 6
 Maquina auxiliar: 6
 
