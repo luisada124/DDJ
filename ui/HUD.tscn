@@ -320,6 +320,10 @@ text = "Trocar"
 layout_mode = 2
 text = "Comprar parte de artefacto"
 
+[node name="BuyRepairKitButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
+layout_mode = 2
+text = "Comprar kit de reparacao"
+
 [node name="AmetistaToMineralButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
 layout_mode = 2
 text = "Trocar"
@@ -463,6 +467,10 @@ text = "Mecanico: upgrades so podem ser feitos nas estacoes."
 [node name="OpenUpgradesButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mecanico"]
 layout_mode = 2
 text = "Abrir upgrades (U)"
+
+[node name="RepairShipButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mecanico"]
+layout_mode = 2
+text = "Reparar nave (cura total)"
 
 [node name="VaultInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent"]
 layout_mode = 2

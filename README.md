@@ -1,6 +1,8 @@
 todo:
 
-Começamos com o aspirador e depois a lavaria, e temos de apanhar as peças para o teto de volta. 
+Meter um menu de upgrades para a nave auxiliar. 
+
+Começamos com o aspirador e depois ele avaria, e temos de apanhar as peças para o teto de volta. 
 
 Medir as missões a virem de conversas com NPCs. 
 
@@ -84,7 +86,8 @@ Vai ser obtida logo numa estação perto do spawn da zona 2 e Vai ser um tropa q
 side_dash: 6
 Maquina auxiliar: 6
 
+auto_regen:
+
 
 promps:
 
-Chatini agora preciso de 

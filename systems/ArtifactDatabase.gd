@@ -30,6 +30,12 @@ const ARTIFACTS: Dictionary = {
 		"title": "Broca de Mineracao",
 		"parts_required": 1,
 	},
+	"auto_regen": {
+		"title": "Regenerador",
+		"parts_required": 3,
+		"regen_delay": 6.0,
+		"regen_rate": 3.0, # HP por segundo
+	},
 }
 
 static func is_valid_artifact(artifact_id: String) -> bool:
@@ -70,3 +76,11 @@ static func get_aux_ship_laser_damage() -> int:
 static func get_aux_ship_range() -> float:
 	var def: Dictionary = ARTIFACTS.get("aux_ship", {})
 	return float(def.get("range", 1400.0))
+
+static func get_regen_delay() -> float:
+	var def: Dictionary = ARTIFACTS.get("auto_regen", {})
+	return float(def.get("regen_delay", 6.0))
+
+static func get_regen_rate() -> float:
+	var def: Dictionary = ARTIFACTS.get("auto_regen", {})
+	return float(def.get("regen_rate", 3.0))
