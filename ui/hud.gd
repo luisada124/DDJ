@@ -6,6 +6,9 @@ extends Control
 @onready var mineral_label: Label = $ResourcesContainer/ResourcesBox/MineralLabel
 @onready var ametista_label: Label = $ResourcesContainer/ResourcesBox/AmetistaLabel
 
+@onready var speech_bubble: PanelContainer = $SpeechBubble
+@onready var speech_label: Label = $SpeechBubble/SpeechLabel
+
 @onready var upgrade_menu: Control = $UpgradeMenu
 @onready var upgrade_info: Label = $UpgradeMenu/Panel/Margin/VBox/Info
 @onready var upgrade_description: RichTextLabel = $UpgradeMenu/Panel/Margin/VBox/UpgradeDescription
@@ -131,6 +134,7 @@ var _knife_game_active: bool = false
 var _knife_game_score: int = 0
 var _knife_game_sequence_index: int = 0
 var _knife_game_time_left: float = 0.0
+var _speech_time_left: float = 0.0
 var _menu_guard: bool = false
 var _fullscreen_toggle_blocked: bool = false
 var _fullscreen_toggle_warned: bool = false
@@ -210,6 +214,7 @@ func _ready() -> void:
 	GameState.state_changed.connect(_update_hud)
 	GameState.player_died.connect(_on_player_died)
 	GameState.alien_died.connect(_on_alien_died)
+	GameState.speech_requested.connect(_show_speech_bubble)
 	_update_hud()
 	_update_boss_compass()
 
@@ -229,6 +234,39 @@ func _process(delta: float) -> void:
 			_update_knife_game_prompt_text()
 
 	_update_boss_compass()
+	_update_speech_bubble(delta)
+
+func _update_speech_bubble(delta: float) -> void:
+	if speech_bubble == null:
+		return
+	if not speech_bubble.visible:
+		return
+
+	_speech_time_left -= delta
+	if _speech_time_left <= 0.0:
+		speech_bubble.visible = false
+		return
+
+	var p := get_tree().get_first_node_in_group("player")
+	if p is Node2D:
+		var player_pos := (p as Node2D).global_position
+		var cam: Camera2D = get_viewport().get_camera_2d()
+		var screen_pos := player_pos
+		if cam != null:
+			var center: Vector2 = cam.global_position
+			if cam.has_method("get_screen_center_position"):
+				center = cam.get_screen_center_position()
+			var vp_size: Vector2 = get_viewport().get_visible_rect().size
+			var zoom: Vector2 = cam.zoom
+			screen_pos = (player_pos - center) * zoom + vp_size * 0.5
+		speech_bubble.position = screen_pos + Vector2(20, -90)
+
+func _show_speech_bubble(text: String) -> void:
+	if speech_bubble == null or speech_label == null:
+		return
+	speech_label.text = text
+	_speech_time_left = 4.5
+	speech_bubble.visible = true
 
 
 func _input(event: InputEvent) -> void:

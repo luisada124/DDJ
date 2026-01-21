@@ -2,7 +2,7 @@ todo:
 
 Meter um menu de upgrades para a nave auxiliar. 
 
-Começamos com o aspirador e depois ele avaria, e temos de apanhar as peças para o teto de volta. 
+
 
 Medir as missões a virem de conversas com NPCs. 
 
@@ -40,8 +40,8 @@ BOSSES
 
 
 TEXTURAS:
-Mudar a textura da nave com o aparelho. 
-meter no artefactos
+
+
 mudar a cor da explosao
 
 

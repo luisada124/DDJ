@@ -7,7 +7,7 @@ func _ready() -> void:
 	artifact_id = "vacuum"
 	show_on_minimap = false
 
-	if GameState.vacuum_random_part_collected or GameState.has_artifact("vacuum"):
+	if GameState.vacuum_random_part_collected:
 		queue_free()
 		return
 
@@ -18,8 +18,14 @@ func _ready() -> void:
 	call_deferred("_refresh_world_marker")
 
 func _process(delta: float) -> void:
+	# Só fica visível/usável quando o Vacuum estiver partido.
+	var should_be_active := GameState.vacuum_is_broken and not GameState.vacuum_random_part_collected
+	visible = should_be_active
+	monitoring = should_be_active
+	monitorable = should_be_active
+
 	# Mantém o world marker correto quando o mapa estiver comprado (sem gravar em save).
-	if GameState.vacuum_map_bought and not GameState.vacuum_random_part_collected:
+	if should_be_active and GameState.vacuum_map_bought:
 		GameState.vacuum_random_part_world = global_position
 	super(delta)
 

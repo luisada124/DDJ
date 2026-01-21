@@ -3,6 +3,7 @@ extends Node
 signal state_changed
 signal player_died
 signal alien_died
+signal speech_requested(text: String)
 
 const SAVE_PATH := "user://save.json"
 const SAVE_VERSION := 1
@@ -40,6 +41,9 @@ var vacuum_random_part_local: Vector2 = Vector2.ZERO
 var vacuum_random_part_world: Vector2 = Vector2.ZERO # runtime (global), usado pelo minimapa
 var vacuum_random_part_collected: bool = false
 var vacuum_shop_part_bought: bool = false
+var vacuum_intro_uses_left: int = 30
+var vacuum_broken_once: bool = false
+var vacuum_is_broken: bool = false
 
 # Reverse Thruster: 2 pecas em mercados (2 estacoes diferentes) + 1 peca aleatoria na Zona 1.
 var reverse_thruster_map_bought: bool = false
@@ -184,6 +188,48 @@ func add_resource(type: String, amount: int) -> void:
 		resources[type] = 0
 	resources[type] += amount
 	print(type, " =", resources[type])
+	emit_signal("state_changed")
+	_queue_save()
+
+func record_vacuum_use() -> void:
+	# Conta apenas os usos iniciais (tutorial). Depois de reparado, o Vacuum nao volta a partir.
+	if vacuum_broken_once:
+		return
+	if vacuum_is_broken:
+		return
+	if not has_artifact("vacuum"):
+		return
+	if vacuum_intro_uses_left <= 0:
+		return
+
+	vacuum_intro_uses_left -= 1
+	if vacuum_intro_uses_left <= 0:
+		_break_vacuum()
+	else:
+		emit_signal("state_changed")
+		_queue_save()
+
+func _break_vacuum() -> void:
+	if vacuum_broken_once:
+		return
+	vacuum_broken_once = true
+	vacuum_is_broken = true
+	vacuum_intro_uses_left = 0
+
+	# Remove o gadget e volta ao fluxo normal de "arranjar pecas".
+	var idx := unlocked_artifacts.find("vacuum")
+	if idx >= 0:
+		unlocked_artifacts.remove_at(idx)
+	artifact_parts["vacuum"] = 0
+
+	# Reset ao loop de obtencao das pecas (mapa + peca aleatoria + compra).
+	vacuum_map_bought = false
+	vacuum_random_part_local = Vector2.ZERO
+	vacuum_random_part_world = Vector2.ZERO
+	vacuum_random_part_collected = false
+	vacuum_shop_part_bought = false
+
+	emit_signal("speech_requested", "Bolas, o aspirador partiu-se. Tenho de arranjar pecas para o recuperar.")
 	emit_signal("state_changed")
 	_queue_save()
 
@@ -989,6 +1035,8 @@ func collect_artifact_part(artifact_id: String = "relic") -> void:
 
 	if current >= required:
 		unlocked_artifacts.append(artifact_id)
+		if artifact_id == "vacuum":
+			vacuum_is_broken = false
 
 	emit_signal("state_changed")
 	_queue_save()
@@ -1029,6 +1077,9 @@ func save_game() -> void:
 		"vacuum_random_part_local": [vacuum_random_part_local.x, vacuum_random_part_local.y],
 		"vacuum_random_part_collected": vacuum_random_part_collected,
 		"vacuum_shop_part_bought": vacuum_shop_part_bought,
+		"vacuum_intro_uses_left": vacuum_intro_uses_left,
+		"vacuum_broken_once": vacuum_broken_once,
+		"vacuum_is_broken": vacuum_is_broken,
 		"reverse_thruster_map_bought": reverse_thruster_map_bought,
 		"reverse_thruster_random_part_local": [reverse_thruster_random_part_local.x, reverse_thruster_random_part_local.y],
 		"reverse_thruster_random_part_collected": reverse_thruster_random_part_collected,
@@ -1102,6 +1153,9 @@ func load_game() -> void:
 	vacuum_map_bought = bool(data.get("vacuum_map_bought", false))
 	vacuum_random_part_collected = bool(data.get("vacuum_random_part_collected", false))
 	vacuum_shop_part_bought = bool(data.get("vacuum_shop_part_bought", false))
+	vacuum_intro_uses_left = int(data.get("vacuum_intro_uses_left", 30))
+	vacuum_broken_once = bool(data.get("vacuum_broken_once", false))
+	vacuum_is_broken = bool(data.get("vacuum_is_broken", false))
 	var stored_vac = data.get("vacuum_random_part_local")
 	if typeof(stored_vac) == TYPE_ARRAY and (stored_vac as Array).size() >= 2:
 		var a := stored_vac as Array
@@ -1270,6 +1324,8 @@ func _apply_defaults() -> void:
 		"reverse_thruster": 0,
 	}
 	unlocked_artifacts = PackedStringArray([])
+	# Comeca com o Vacuum desbloqueado (tutorial de quebra).
+	unlocked_artifacts.append("vacuum")
 	current_zone_id = "outer"
 	unlocked_zones = PackedStringArray(["outer"])
 	_recalculate_player_stats()
@@ -1285,6 +1341,9 @@ func _apply_defaults() -> void:
 	vacuum_random_part_world = Vector2.ZERO
 	vacuum_random_part_collected = false
 	vacuum_shop_part_bought = false
+	vacuum_intro_uses_left = 30
+	vacuum_broken_once = false
+	vacuum_is_broken = false
 	reverse_thruster_map_bought = false
 	reverse_thruster_random_part_local = Vector2.ZERO
 	reverse_thruster_random_part_world = Vector2.ZERO
