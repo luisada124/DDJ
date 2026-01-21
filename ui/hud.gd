@@ -30,12 +30,14 @@ extends Control
 @onready var buy_artifact_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyArtifactPartButton
 @onready var ametista_to_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/AmetistaToMineralButton
 @onready var ametista_to_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/AmetistaToScrapButton
+@onready var trader_tabs: TabContainer = $TraderMenu/Panel/Margin/VBox/Tabs
+@onready var tavern_bottom_bar: Control = $TraderMenu/Panel/Margin/VBox/TavernBottomBar
 
 @onready var npc1_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/NPC1Button
 @onready var npc2_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/NPC2Button
 @onready var npc3_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/NPC3Button
-@onready var accept_kill_quest_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/AcceptKillQuestButton
-@onready var claim_station_quest_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/ClaimStationQuestButton
+@onready var accept_kill_quest_button: Button = $TraderMenu/Panel/Margin/VBox/TavernBottomBar/AcceptKillQuestButton
+@onready var claim_station_quest_button: Button = $TraderMenu/Panel/Margin/VBox/TavernBottomBar/ClaimStationQuestButton
 @onready var station_quest_list: VBoxContainer = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/QuestList
 @onready var station_quest_details: RichTextLabel = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/QuestDetails
 @onready var dialogue_text: RichTextLabel = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/DialogueText
@@ -95,6 +97,10 @@ var _knife_game_base_time: float = 1.2
 var _knife_game_min_time: float = 0.35
 var _knife_game_rng := RandomNumberGenerator.new()
 var _menu_guard: bool = false
+var _fullscreen_toggle_blocked: bool = false
+var _fullscreen_toggle_warned: bool = false
+
+const TRADER_TAB_TAVERN := 1
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -145,6 +151,9 @@ func _ready() -> void:
 	withdraw_ametista_button.pressed.connect(_on_withdraw_percent.bind("ametista"))
 	end_dialogue_button.pressed.connect(_end_dialogue)
 	knife_game_start_button.pressed.connect(_on_knife_game_start_pressed)
+	if trader_tabs != null:
+		trader_tabs.tab_changed.connect(_on_trader_tab_changed)
+		_on_trader_tab_changed(trader_tabs.current_tab)
 
 	GameState.state_changed.connect(_update_hud)
 	GameState.player_died.connect(_on_player_died)
@@ -182,6 +191,23 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _unhandled_input(event: InputEvent) -> void:
+	# Fullscreen toggle (F11 ou Alt+Enter)
+	if event is InputEventKey and (event as InputEventKey).pressed and not (event as InputEventKey).echo:
+		var key_event_fs := event as InputEventKey
+		if key_event_fs.keycode == KEY_F11 or (key_event_fs.keycode == KEY_ENTER and key_event_fs.alt_pressed):
+			if _fullscreen_toggle_blocked:
+				get_viewport().set_input_as_handled()
+				return
+
+			var mode := DisplayServer.window_get_mode()
+			if mode == DisplayServer.WINDOW_MODE_FULLSCREEN or mode == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
+				DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+			else:
+				DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
+				call_deferred("_verify_fullscreen_toggle")
+			get_viewport().set_input_as_handled()
+			return
+
 	if event.is_action_pressed("interact") and _active_trader != null and not trader_menu.visible:
 		_set_trader_menu_visible(true)
 		get_viewport().set_input_as_handled()
@@ -219,6 +245,19 @@ func _unhandled_input(event: InputEvent) -> void:
 		_set_missions_menu_visible(false)
 		get_viewport().set_input_as_handled()
 		return
+
+func _verify_fullscreen_toggle() -> void:
+	# No "embedded game" do editor, Godot não permite fullscreen (imprime: Embedded window only supports Windowed mode.)
+	var mode := DisplayServer.window_get_mode()
+	var is_fullscreen := mode == DisplayServer.WINDOW_MODE_FULLSCREEN or mode == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN
+	if is_fullscreen:
+		return
+
+	# Bloqueia novas tentativas para não spammar a consola.
+	_fullscreen_toggle_blocked = true
+	if not _fullscreen_toggle_warned:
+		_fullscreen_toggle_warned = true
+		push_warning("Fullscreen não é suportado quando o jogo está a correr em modo Embedded no editor. Desliga 'Embed Game' e corre numa janela separada para testar fullscreen.")
 
 func _set_upgrade_menu_visible(visible: bool) -> void:
 	if _menu_guard:
@@ -265,6 +304,13 @@ func _set_trader_menu_visible(visible: bool) -> void:
 		_stop_knife_game()
 	if visible:
 		_end_dialogue()
+		if trader_tabs != null:
+			_on_trader_tab_changed(trader_tabs.current_tab)
+
+func _on_trader_tab_changed(_tab: int) -> void:
+	if tavern_bottom_bar == null or trader_tabs == null:
+		return
+	tavern_bottom_bar.visible = trader_tabs.current_tab == TRADER_TAB_TAVERN
 
 func _set_missions_menu_visible(visible: bool) -> void:
 	if _menu_guard:
@@ -1363,13 +1409,20 @@ func _rebuild_station_quest_list(offered: Array) -> void:
 		station_quest_list.add_child(l)
 		return
 
-	var any := false
+	var valid_ids: Array[String] = []
 	for quest_id_variant in offered:
 		var quest_id := str(quest_id_variant)
-		if not GameState.QUEST_DEFS.has(quest_id):
-			continue
-		any = true
+		if GameState.QUEST_DEFS.has(quest_id):
+			valid_ids.append(quest_id)
 
+	if valid_ids.is_empty():
+		var l2 := Label.new()
+		l2.text = "Sem missoes validas aqui."
+		station_quest_list.add_child(l2)
+		return
+
+	for i in range(valid_ids.size()):
+		var quest_id := valid_ids[i]
 		var def: Dictionary = GameState.QUEST_DEFS.get(quest_id, {}) as Dictionary
 		var title := str(def.get("title", quest_id))
 		var q: Dictionary = GameState.get_quest_state(quest_id)
@@ -1390,11 +1443,10 @@ func _rebuild_station_quest_list(offered: Array) -> void:
 		b.text = title + status
 		b.pressed.connect(_on_select_station_quest.bind(quest_id))
 		station_quest_list.add_child(b)
-
-	if not any:
-		var l2 := Label.new()
-		l2.text = "Sem missoes validas aqui."
-		station_quest_list.add_child(l2)
+		if i < valid_ids.size() - 1:
+			var sep := HSeparator.new()
+			sep.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			station_quest_list.add_child(sep)
 
 func _on_select_station_quest(quest_id: String) -> void:
 	_offered_quest_id = quest_id

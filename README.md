@@ -1,5 +1,7 @@
 todo:
 
+Medir as missões a virem de conversas com NPCs. 
+
 Resolver problema da descrição das missões. Não estará a aparecer quando se compra. 
 
 
