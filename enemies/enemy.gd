@@ -4,7 +4,7 @@ const SHIP_FORWARD := Vector2.UP   # ponta da nave na textura
 
 const EnemyDatabase := preload("res://enemies/EnemyDatabase.gd")
 
-const DEFAULT_STATION_SAFE_RADIUS := 320.0
+const DEFAULT_STATION_SAFE_RADIUS := 1000.0
 const STATION_SAFE_MARGIN := 120.0
 
 @export var enemy_id: String = "basic"
@@ -262,7 +262,9 @@ func _shoot(dir_to_player: Vector2) -> void:
 	laser.set("damage", laser_damage)
 	laser.from_player = false   # <- MUITO IMPORTANTE
 
-	get_tree().current_scene.add_child(laser)
+	var root := get_tree().current_scene
+	if root != null:
+		root.call_deferred("add_child", laser)
 	
 	
 func take_damage(amount: int) -> void:
@@ -302,4 +304,6 @@ func _spawn_loot() -> void:
 		if in_zone2 and randf() < ametista_drop_chance:
 			loot.set("resource_type", "ametista")
 			loot.set("amount", 1)
-		get_tree().current_scene.add_child(loot)
+		var root := get_tree().current_scene
+		if root != null:
+			root.call_deferred("add_child", loot)

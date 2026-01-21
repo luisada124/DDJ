@@ -12,6 +12,14 @@ script = ExtResource("1_script")
 
 [node name="StationGuardSpawner" type="Node2D" parent="."]
 script = ExtResource("3_guard_spawner_script")
+enabled = null
+max_guards = null
+spawn_radius_min = null
+spawn_radius_max = null
+respawn_interval = null
+station_safe_radius = null
+chase_range_override = null
+guard_desired_distance = null
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 modulate = Color(0.35, 0.7, 1, 1)
