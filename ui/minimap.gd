@@ -68,12 +68,18 @@ func _draw() -> void:
 		if n is Node2D:
 			draw_circle(to_map.call((n as Node2D).global_position), 4.0, artifact_color)
 
+	# Dica do mapa do Vacuum (apenas se comprado e ainda existir a peça aleatória)
+	if GameState.vacuum_map_bought and not GameState.vacuum_random_part_collected and GameState.vacuum_random_part_world != Vector2.ZERO:
+		var p: Vector2 = to_map.call(GameState.vacuum_random_part_world)
+		draw_circle(p, 6.0, Color(0.4, 0.9, 1.0, 0.95))
+		draw_circle(p, 10.0, Color(0.4, 0.9, 1.0, 0.25))
+
 	# Traders reais (planeta/loja)
 	var trader_nodes: Array[Node] = get_tree().get_nodes_in_group("trader")
 	for n: Node in trader_nodes:
 		if n is Node2D:
 			var c := trader_color
-			var sid = n.get("station_id")
+			var sid: Variant = n.get("station_id")
 			if sid != null:
 				c = StationCatalog.get_station_color(str(sid))
 			draw_circle(to_map.call((n as Node2D).global_position), 4.0, c)

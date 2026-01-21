@@ -6,7 +6,7 @@ Começamos com o aspirador e depois ele avaria, e temos de apanhar as peças par
 
 Medir as missões a virem de conversas com NPCs. 
 
-Resolver problema da descrição das missões. Não estará a aparecer quando se compra. 
+
 
 
 meter mais vida na nave e menos inimigos a spawnar
@@ -38,7 +38,6 @@ BOSSES
 
 
 
-Ter hi score pre definido que vai de 70 a 180 em cada uma das tabernas e receber dinheiro quando a malta bate o recorde. consoante a dificuldade
 
 TEXTURAS:
 Mudar a textura da nave com o aparelho. 
@@ -83,11 +82,78 @@ broca de mineracao: 1
 
 Vai ser obtida logo numa estação perto do spawn da zona 2 e Vai ser um tropa que lhe vai dar para desde que ele faça recolha de 4 ametistas para ele. Se ele não cumprir e não lhe as devolver, também não consegue fazer mais missões nesse gás, e esse gás vai ter missões boas. 
 
-side_dash: 6
-Maquina auxiliar: 6
+side_dash: 3
+Maquina auxiliar: 3
 
-auto_regen:
+auto_regen:3
+
+PROMPS:
+
+1. 
+
+Vamos alterar as pecas de alguns gadgets, o side_dash, a aux_ship e o auto_regen quero que seja so preciso 3 pecas
 
 
-promps:
+2.
+
+chat tenho de atribuir as localizacoes de todas as partes para todos os gadgets.
+vamos fazer os gadgets 1 a 1 da lista e para depois de cada gadget para eu testar e depois vamos seguindo a lista.
+
+para cada gadget nao te esquecas de tirar as localizacoes que temos agora das pecas no mini mapa.
+
+
+
+se tiveres duvidas pergunta-me
+
+Zone 1 Gadgets
+
+Gadget 1: Reverse Thruster
+
+Required parts (3 total):
+
+Part A: sold in a market at a Zone 1 station
+
+Part B: sold in a different market at another Zone 1 station
+
+Part C: located at a random point in the Zone 1 world
+
+A map item revealing this location is sold in a Zone 1 station market
+
+Zone 2 Gadgets
+
+Gadget 2: Side Dash
+
+Required parts (3 total):
+
+Part A: sold in a Zone 2 station market
+
+Part B: sold in a different Zone 2 station market
+
+Part C: located at a random point in Zone 2
+
+A map revealing this part is given as a mission reward in Zone 2
+
+Gadget 3: Auxiliary Machine
+
+Required parts (3 total):
+
+Part A: mission reward in Zone 2
+
+Part B: sold in a Zone 2 station market
+
+Part C: located at a random point in Zone 2
+
+A map revealing this part is given as a Zone 2 mission reward
+
+Gadget 4: Auto Regeneration
+
+Required parts (2 total):
+
+2 parts scattered randomly across the Zone 2 world
+
+2 map items:
+
+One map sold at a Zone 1 station
+
+One map sold at a Zone 2 station
 
