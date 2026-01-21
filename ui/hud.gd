@@ -104,7 +104,9 @@ extends Control
 @onready var missions_list: VBoxContainer = $MissionsMenu/Panel/Margin/VBox/Tabs/Missoes/MissionScroll/MissionList
 @onready var inventory_list: VBoxContainer = $MissionsMenu/Panel/Margin/VBox/Tabs/Inventario/InventoryScroll/InventoryList
 @onready var debug_give_resources_button: Button = $MissionsMenu/Panel/Margin/VBox/DebugGiveResourcesButton
+@onready var debug_unlock_all_gadgets_button: Button = $MissionsMenu/Panel/Margin/VBox/DebugUnlockAllGadgetsButton
 @onready var close_missions_button: Button = $MissionsMenu/Panel/Margin/VBox/CloseMissionsButton
+@onready var reset_save_tab_button: Button = $MissionsMenu/Panel/Margin/VBox/ResetSaveTabButton
 
 const DEFAULT_STATION_ID := "station_alpha"
 const BOSS_PLANET_STATION_ID := "boss_planet"
@@ -140,7 +142,9 @@ var _knife_game_score: int = 0
 var _knife_game_sequence_index: int = 0
 var _knife_game_time_left: float = 0.0
 var _speech_time_left: float = 0.0
-var _speech_queue: Array[String] = []
+var _speech_queue: Array[Dictionary] = []
+var _speech_has_anchor: bool = false
+var _speech_anchor_world: Vector2 = Vector2.ZERO
 var _menu_guard: bool = false
 var _fullscreen_toggle_blocked: bool = false
 var _fullscreen_toggle_warned: bool = false
@@ -171,9 +175,14 @@ func _ready() -> void:
 	close_map_button.pressed.connect(_on_close_map_pressed)
 	close_trader_button.pressed.connect(_on_close_trader_pressed)
 	close_missions_button.pressed.connect(_on_close_missions_pressed)
+	if reset_save_tab_button != null:
+		reset_save_tab_button.pressed.connect(_on_reset_pressed)
 	if debug_give_resources_button != null:
 		debug_give_resources_button.visible = OS.is_debug_build()
 		debug_give_resources_button.pressed.connect(_on_debug_give_resources_pressed)
+	if debug_unlock_all_gadgets_button != null:
+		debug_unlock_all_gadgets_button.visible = OS.is_debug_build()
+		debug_unlock_all_gadgets_button.pressed.connect(_on_debug_unlock_all_gadgets_pressed)
 
 	scrap_to_mineral_button.pressed.connect(_on_trade_scrap_to_mineral)
 	mineral_to_scrap_button.pressed.connect(_on_trade_mineral_to_scrap)
@@ -222,6 +231,7 @@ func _ready() -> void:
 	GameState.player_died.connect(_on_player_died)
 	GameState.alien_died.connect(_on_alien_died)
 	GameState.speech_requested.connect(_show_speech_bubble)
+	GameState.speech_requested_at.connect(_show_speech_bubble_at)
 	_update_hud()
 	_update_boss_compass()
 
@@ -253,37 +263,67 @@ func _update_speech_bubble(delta: float) -> void:
 	_speech_time_left -= delta
 	if _speech_time_left <= 0.0:
 		if _speech_queue.size() > 0:
-			var next_text: String = _speech_queue[0]
+			var next_item: Dictionary = _speech_queue[0] as Dictionary
 			_speech_queue.remove_at(0)
-			_start_speech(next_text)
+			_start_speech(
+				str(next_item.get("text", "")),
+				bool(next_item.get("has_anchor", false)),
+				next_item.get("world_pos", Vector2.ZERO) as Vector2
+			)
 		else:
 			speech_bubble.visible = false
 			return
 
-	var p := get_tree().get_first_node_in_group("player")
-	if p is Node2D:
-		var player_pos := (p as Node2D).global_position
+	var world_pos := Vector2.ZERO
+	if _speech_has_anchor:
+		world_pos = _speech_anchor_world
+	else:
+		var p := get_tree().get_first_node_in_group("player")
+		if p is Node2D:
+			world_pos = (p as Node2D).global_position
+		else:
+			return
+
+	if true:
 		var cam: Camera2D = get_viewport().get_camera_2d()
-		var screen_pos := player_pos
+		var screen_pos := world_pos
 		if cam != null:
 			var center: Vector2 = cam.global_position
 			if cam.has_method("get_screen_center_position"):
 				center = cam.get_screen_center_position()
 			var vp_size: Vector2 = get_viewport().get_visible_rect().size
 			var zoom: Vector2 = cam.zoom
-			screen_pos = (player_pos - center) * zoom + vp_size * 0.5
+			screen_pos = (world_pos - center) * zoom + vp_size * 0.5
 		speech_bubble.position = screen_pos + Vector2(20, -90)
 
 func _show_speech_bubble(text: String) -> void:
 	if speech_bubble == null or speech_label == null:
 		return
 	if speech_bubble.visible and _speech_time_left > 0.0:
-		_speech_queue.append(text)
+		_speech_queue.append({
+			"text": text,
+			"has_anchor": false,
+			"world_pos": Vector2.ZERO,
+		})
 		return
-	_start_speech(text)
+	_start_speech(text, false, Vector2.ZERO)
 
-func _start_speech(text: String) -> void:
+func _show_speech_bubble_at(text: String, world_pos: Vector2) -> void:
+	if speech_bubble == null or speech_label == null:
+		return
+	if speech_bubble.visible and _speech_time_left > 0.0:
+		_speech_queue.append({
+			"text": text,
+			"has_anchor": true,
+			"world_pos": world_pos,
+		})
+		return
+	_start_speech(text, true, world_pos)
+
+func _start_speech(text: String, has_anchor: bool, world_pos: Vector2) -> void:
 	speech_label.text = text
+	_speech_has_anchor = has_anchor
+	_speech_anchor_world = world_pos
 	_speech_time_left = 4.5
 	speech_bubble.visible = true
 
@@ -1029,6 +1069,9 @@ func _on_buy_aux_ship_part_pressed() -> void:
 
 func _on_debug_give_resources_pressed() -> void:
 	GameState.debug_grant_test_resources()
+
+func _on_debug_unlock_all_gadgets_pressed() -> void:
+	GameState.debug_unlock_all_gadgets()
 
 func _on_buy_repair_kit_pressed() -> void:
 	var station_id := _active_station_id

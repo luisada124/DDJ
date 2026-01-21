@@ -32,7 +32,7 @@ const ZONES: Dictionary = {
 		"scene": "res://world/Zone2.tscn",
 		"ring": 1,
 		"difficulty_multiplier": 1.5,
-		"required_artifact_parts": 2,
+		"required_artifact_parts": 1,
 		"bounds": Rect2(-3072, -3072, 6144, 6144),
 		"pois": [
 			{
@@ -54,7 +54,7 @@ const ZONES: Dictionary = {
 		"scene": "res://world/Zone3.tscn",
 		"ring": 0,
 		"difficulty_multiplier": 2.2,
-		"required_artifact_parts": 4,
+		"required_artifact_parts": 2,
 		"bounds": Rect2(-3072, -3072, 6144, 6144),
 		"pois": [
 			{

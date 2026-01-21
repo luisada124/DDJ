@@ -1,5 +1,7 @@
 extends CharacterBody2D
 
+signal died(enemy: Node2D)
+
 const SHIP_FORWARD := Vector2.UP   # ponta da nave na textura
 
 const EnemyDatabase := preload("res://enemies/EnemyDatabase.gd")
@@ -275,6 +277,7 @@ func take_damage(amount: int) -> void:
 
 
 func die() -> void:
+	emit_signal("died", self)
 	_spawn_loot()
 	GameState.record_enemy_kill(enemy_id)
 	queue_free()

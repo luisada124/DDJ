@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://world/side_dash_random_part.gd" id="7_side_dash_random_part"]
 [ext_resource type="Script" path="res://world/auto_regen_random_part.gd" id="8_auto_regen_random_part"]
 [ext_resource type="Script" path="res://world/aux_ship_random_part.gd" id="9_aux_ship_random_part"]
+[ext_resource type="Script" path="res://world/zone2_core_gate_event.gd" id="10_core_gate_event"]
 
 [node name="Zone2" type="Node2D"]
 
@@ -47,6 +48,9 @@ part_index = 2
 
 [node name="AuxShipRandomPart" parent="." instance=ExtResource("5_artifact_part")]
 script = ExtResource("9_aux_ship_random_part")
+
+[node name="CoreGateEvent" type="Node2D" parent="."]
+script = ExtResource("10_core_gate_event")
 
 [node name="Mining" type="Node2D" parent="."]
 

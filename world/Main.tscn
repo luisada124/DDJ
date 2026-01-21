@@ -1,11 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://cn7tfg61pg54m"]
+[gd_scene load_steps=7 format=3 uid="uid://cn7tfg61pg54m"]
 
 [ext_resource type="PackedScene" uid="uid://dlsssxy4tf0b8" path="res://player/player.tscn" id="1_oxuid"]
 [ext_resource type="Script" path="res://world/ZoneManager.gd" id="2_zone_manager"]
 [ext_resource type="PackedScene" uid="uid://bhyk7leudmqo" path="res://ui/HUD.tscn" id="3_hh730"]
 [ext_resource type="PackedScene" path="res://enemies/Enemy.tscn" id="4_rqm65"]
 [ext_resource type="PackedScene" path="res://pickups/Pickup.tscn" id="5_pickup"]
-[ext_resource type="PackedScene" path="res://pickups/ArtifactPart.tscn" id="6_artifact"]
 [ext_resource type="Script" path="res://world/enemy_spawner.gd" id="7_enemy_spawner"]
 
 [node name="Main" type="Node2D"]
@@ -40,22 +39,6 @@ amount = 3
 position = Vector2(760, 610)
 resource_type = "mineral"
 amount = 3
-
-[node name="ArtifactPart1" parent="TestSetup" instance=ExtResource("6_artifact")]
-position = Vector2(600, 520)
-keep_visible_when_completed = true
-
-[node name="ArtifactPart2" parent="TestSetup" instance=ExtResource("6_artifact")]
-position = Vector2(820, 520)
-keep_visible_when_completed = true
-
-[node name="ArtifactPart3" parent="TestSetup" instance=ExtResource("6_artifact")]
-position = Vector2(600, 660)
-keep_visible_when_completed = true
-
-[node name="ArtifactPart4" parent="TestSetup" instance=ExtResource("6_artifact")]
-position = Vector2(820, 660)
-keep_visible_when_completed = true
 
 [node name="EnemySpawner" type="Node2D" parent="."]
 script = ExtResource("7_enemy_spawner")

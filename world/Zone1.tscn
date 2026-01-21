@@ -113,6 +113,9 @@ keep_visible_when_completed = true
 [node name="ReverseThrusterRandomPart" parent="." instance=ExtResource("5_artifact_part")]
 script = ExtResource("7_reverse_thruster_random_part")
 
+[node name="RelicPartZone1" parent="." instance=ExtResource("5_artifact_part")]
+position = Vector2(-2600, -2600)
+
 [node name="comet" parent="comets" instance=ExtResource("2_htqom")]
 position = Vector2(87, 132)
 
