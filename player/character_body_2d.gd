@@ -13,6 +13,7 @@ const DRAG := 0.5
 const ROTATION_SPEED := 3.0
 const LaserScene := preload("res://player/lasers/Laser.tscn")
 const AlienScene: PackedScene = preload("res://player/Alien.tscn")
+const AuxShipScene: PackedScene = preload("res://player/AuxShip.tscn")
 
 var fire_cooldown: float = 0.0
 var dash_cooldown: float = 0.0
@@ -20,6 +21,7 @@ var dash_time_left: float = 0.0
 var dash_dir: Vector2 = Vector2.ZERO
 var _controlling_alien: bool = false
 var _alien: CharacterBody2D = null
+var _aux_ship: Node2D = null
 
 @onready var _camera: Camera2D = $Camera2D
 @export var alien_camera_zoom: Vector2 = Vector2(1.6, 1.6)
@@ -52,6 +54,8 @@ func shoot() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_ensure_aux_ship()
+
 	if _controlling_alien:
 		# se o alien morreu/desapareceu, volta para a nave
 		if _alien == null or not is_instance_valid(_alien):
@@ -141,6 +145,37 @@ func _physics_process(delta: float) -> void:
 		invincible_timer -= delta
 		if invincible_timer <= 0.0:
 			invincible = false
+
+func _ensure_aux_ship() -> void:
+	var want := GameState.has_artifact("aux_ship")
+	if not want:
+		if _aux_ship != null and is_instance_valid(_aux_ship):
+			_aux_ship.queue_free()
+		_aux_ship = null
+		return
+
+	if _aux_ship != null and is_instance_valid(_aux_ship):
+		return
+
+	var existing := get_tree().get_first_node_in_group("aux_ship") as Node2D
+	if existing != null and is_instance_valid(existing):
+		_aux_ship = existing
+		return
+
+	if AuxShipScene == null:
+		return
+
+	var root: Node = get_tree().current_scene
+	if root == null:
+		return
+
+	var inst: Node = AuxShipScene.instantiate()
+	if inst == null or not (inst is Node2D):
+		return
+	var aux := inst as Node2D
+	aux.global_position = global_position + Vector2(120, 80)
+	root.call_deferred("add_child", aux)
+	_aux_ship = aux
 
 func _start_dash(side_sign: float) -> void:
 	var forward_dir := SHIP_FORWARD.rotated(rotation)

@@ -19,6 +19,13 @@ const ARTIFACTS: Dictionary = {
 		"dash_duration": 0.10,
 		"dash_cooldown": 1.2,
 	},
+	"aux_ship": {
+		"title": "Nave Auxiliar",
+		"parts_required": 6,
+		"fire_interval": 0.45,
+		"laser_damage": 4,
+		"range": 1400.0,
+	},
 }
 
 static func is_valid_artifact(artifact_id: String) -> bool:
@@ -47,3 +54,15 @@ static func get_dash_duration() -> float:
 static func get_dash_cooldown() -> float:
 	var def: Dictionary = ARTIFACTS.get("side_dash", {})
 	return float(def.get("dash_cooldown", 0.6))
+
+static func get_aux_ship_fire_interval() -> float:
+	var def: Dictionary = ARTIFACTS.get("aux_ship", {})
+	return float(def.get("fire_interval", 0.45))
+
+static func get_aux_ship_laser_damage() -> int:
+	var def: Dictionary = ARTIFACTS.get("aux_ship", {})
+	return int(def.get("laser_damage", 4))
+
+static func get_aux_ship_range() -> float:
+	var def: Dictionary = ARTIFACTS.get("aux_ship", {})
+	return float(def.get("range", 1400.0))

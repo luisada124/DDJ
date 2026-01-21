@@ -333,6 +333,10 @@ layout_mode = 2
 autowrap_mode = 3
 text = "Taberna: fala com NPCs para obter missoes."
 
+[node name="NPCSeparatorTitle" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+layout_mode = 2
+text = "NPCs"
+
 [node name="NPC1Button" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 text = "NPC: Cacador (missoes)"
@@ -345,13 +349,12 @@ text = "NPC 2"
 layout_mode = 2
 text = "NPC 3"
 
-[node name="AcceptKillQuestButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+[node name="NPCToMissionsSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
-text = "Aceitar missao"
 
-[node name="ClaimStationQuestButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+[node name="MissionsSeparatorTitle" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
-text = "Entregar missao (recompensa)"
+text = "Missoes"
 
 [node name="QuestList" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
@@ -363,6 +366,13 @@ fit_content = false
 scroll_active = false
 autowrap_mode = 3
 text = "Seleciona uma missao."
+
+[node name="MissionsToDialogueSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+layout_mode = 2
+
+[node name="DialogueSeparatorTitle" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+layout_mode = 2
+text = "Conversas"
 
 [node name="BanditQteSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
@@ -583,6 +593,20 @@ text = "Levantar"
 [node name="ButtonsSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox"]
 layout_mode = 2
 
+[node name="TavernBottomBar" type="HBoxContainer" parent="TraderMenu/Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="AcceptKillQuestButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/TavernBottomBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Aceitar missao"
+
+[node name="ClaimStationQuestButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/TavernBottomBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Entregar missao (recompensa)"
+
 [node name="CloseTraderButton" type="Button" parent="TraderMenu/Panel/Margin/VBox"]
 layout_mode = 2
 text = "Fechar"
@@ -667,4 +691,3 @@ size_flags_horizontal = 3
 [node name="CloseMissionsButton" type="Button" parent="MissionsMenu/Panel/Margin/VBox"]
 layout_mode = 2
 text = "Fechar"
-
