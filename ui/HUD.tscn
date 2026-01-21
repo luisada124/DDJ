@@ -374,6 +374,39 @@ layout_mode = 2
 layout_mode = 2
 text = "Conversas"
 
+[node name="BanditQteSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+layout_mode = 2
+visible = false
+
+[node name="BanditQtePanel" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+layout_mode = 2
+visible = false
+
+[node name="BanditQteTitle" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/BanditQtePanel"]
+layout_mode = 2
+text = "Duelo contra Bandido"
+
+[node name="BanditQteInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/BanditQtePanel"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Acerta a sequencia de WASD antes do tempo acabar."
+
+[node name="BanditQteProgress" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/BanditQtePanel"]
+layout_mode = 2
+text = "Passos: 0/0"
+
+[node name="BanditQtePrompt" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/BanditQtePanel"]
+layout_mode = 2
+text = "Tecla: -"
+
+[node name="BanditQteStartButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/BanditQtePanel"]
+layout_mode = 2
+text = "Comecar duelo"
+
+[node name="BanditQteResult" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/BanditQtePanel"]
+layout_mode = 2
+text = ""
+
 [node name="DialogueText" type="RichTextLabel" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 140)

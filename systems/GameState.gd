@@ -34,6 +34,7 @@ const QUEST_KILL_15_BASIC := QuestDatabase.QUEST_KILL_15_BASIC
 const QUEST_KILL_10_SNIPER := QuestDatabase.QUEST_KILL_10_SNIPER
 const QUEST_KILL_5_TANK := QuestDatabase.QUEST_KILL_5_TANK
 const QUEST_TAVERN_BANDIT := QuestDatabase.QUEST_TAVERN_BANDIT
+const BANDIT_QUESTS := QuestDatabase.BANDIT_QUESTS
 const QUEST_DEFS := QuestDatabase.QUEST_DEFS
 
 var quests: Dictionary = {}
@@ -188,6 +189,8 @@ func _lose_carried_resources_on_death() -> void:
 func accept_quest(quest_id: String) -> bool:
 	if not QUEST_DEFS.has(quest_id):
 		return false
+	if is_bandit_quest(quest_id) and quest_id != get_current_bandit_quest_id():
+		return false
 
 	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
 	if q.is_empty():
@@ -235,6 +238,8 @@ func record_enemy_kill(enemy_id: String) -> void:
 
 func complete_quest(quest_id: String) -> bool:
 	if not QUEST_DEFS.has(quest_id):
+		return false
+	if is_bandit_quest(quest_id) and quest_id != get_current_bandit_quest_id():
 		return false
 
 	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
@@ -338,6 +343,34 @@ func clear_completed_quest(quest_id: String) -> bool:
 
 func get_quest_state(quest_id: String) -> Dictionary:
 	return quests.get(quest_id, {}) as Dictionary
+
+func is_bandit_quest(quest_id: String) -> bool:
+	return BANDIT_QUESTS.has(quest_id)
+
+func get_current_bandit_quest_id() -> String:
+	for quest_id in BANDIT_QUESTS:
+		var q: Dictionary = get_quest_state(quest_id)
+		if not bool(q.get("claimed", false)):
+			return quest_id
+	return ""
+
+func get_bandit_quest_index(quest_id: String) -> int:
+	var idx := BANDIT_QUESTS.find(quest_id)
+	if idx < 0:
+		return 0
+	return idx + 1
+
+func filter_offered_quests(quest_ids: Array) -> Array:
+	var filtered: Array[String] = []
+	var current_bandit := get_current_bandit_quest_id()
+	for quest_id_variant in quest_ids:
+		var quest_id := str(quest_id_variant)
+		if is_bandit_quest(quest_id):
+			if quest_id == current_bandit:
+				filtered.append(quest_id)
+		else:
+			filtered.append(quest_id)
+	return filtered
 
 func _make_default_quest_state() -> Dictionary:
 	return {
@@ -674,6 +707,9 @@ func load_game() -> void:
 	var loaded_quests = data.get("quests")
 	if typeof(loaded_quests) == TYPE_DICTIONARY:
 		quests = loaded_quests
+		if quests.has("tavern_bandit") and not quests.has(QuestDatabase.QUEST_TAVERN_BANDIT_1):
+			quests[QuestDatabase.QUEST_TAVERN_BANDIT_1] = quests["tavern_bandit"]
+			quests.erase("tavern_bandit")
 
 	var loaded_tavern_scores = data.get("tavern_hi_scores")
 	if typeof(loaded_tavern_scores) == TYPE_DICTIONARY:
