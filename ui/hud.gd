@@ -31,6 +31,8 @@ extends Control
 @onready var scrap_to_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/ScrapToMineralButton
 @onready var mineral_to_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/MineralToScrapButton
 @onready var buy_artifact_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyArtifactPartButton
+@onready var buy_vacuum_map_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyVacuumMapButton
+@onready var buy_vacuum_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyVacuumPartButton
 @onready var buy_repair_kit_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyRepairKitButton
 @onready var ametista_to_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/AmetistaToMineralButton
 @onready var ametista_to_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/AmetistaToScrapButton
@@ -44,6 +46,7 @@ extends Control
 @onready var claim_station_quest_button: Button = $TraderMenu/Panel/Margin/VBox/TavernBottomBar/ClaimStationQuestButton
 @onready var station_quest_list: VBoxContainer = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/QuestList
 @onready var station_quest_details: RichTextLabel = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/QuestDetails
+@onready var delivery_list: VBoxContainer = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/DeliveryList
 @onready var dialogue_text: RichTextLabel = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/DialogueText
 @onready var dialogue_choices: VBoxContainer = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/DialogueChoices
 @onready var end_dialogue_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/EndDialogueButton
@@ -87,6 +90,7 @@ extends Control
 @onready var missions_tabs: TabContainer = $MissionsMenu/Panel/Margin/VBox/Tabs
 @onready var missions_list: VBoxContainer = $MissionsMenu/Panel/Margin/VBox/Tabs/Missoes/MissionScroll/MissionList
 @onready var inventory_list: VBoxContainer = $MissionsMenu/Panel/Margin/VBox/Tabs/Inventario/InventoryScroll/InventoryList
+@onready var debug_give_resources_button: Button = $MissionsMenu/Panel/Margin/VBox/DebugGiveResourcesButton
 @onready var close_missions_button: Button = $MissionsMenu/Panel/Margin/VBox/CloseMissionsButton
 
 const DEFAULT_STATION_ID := "station_alpha"
@@ -150,10 +154,15 @@ func _ready() -> void:
 	close_map_button.pressed.connect(_on_close_map_pressed)
 	close_trader_button.pressed.connect(_on_close_trader_pressed)
 	close_missions_button.pressed.connect(_on_close_missions_pressed)
+	if debug_give_resources_button != null:
+		debug_give_resources_button.visible = OS.is_debug_build()
+		debug_give_resources_button.pressed.connect(_on_debug_give_resources_pressed)
 
 	scrap_to_mineral_button.pressed.connect(_on_trade_scrap_to_mineral)
 	mineral_to_scrap_button.pressed.connect(_on_trade_mineral_to_scrap)
 	buy_artifact_part_button.pressed.connect(_on_buy_artifact_part)
+	buy_vacuum_map_button.pressed.connect(_on_buy_vacuum_map_pressed)
+	buy_vacuum_part_button.pressed.connect(_on_buy_vacuum_part_pressed)
 	buy_repair_kit_button.pressed.connect(_on_buy_repair_kit_pressed)
 	ametista_to_mineral_button.pressed.connect(_on_trade_ametista_to_mineral)
 	ametista_to_scrap_button.pressed.connect(_on_trade_ametista_to_scrap)
@@ -527,6 +536,8 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 
 	var trades: Dictionary = StationCatalog.get_trades(station_id)
 	var artifact_cost: Dictionary = StationCatalog.get_artifact_part_cost(station_id)
+	var vacuum_map_cost: Dictionary = StationCatalog.get_vacuum_map_cost(station_id)
+	var vacuum_part_cost: Dictionary = StationCatalog.get_vacuum_part_shop_cost(station_id)
 
 	var parts := "%d/%d" % [GameState.artifact_parts_collected, GameState.ARTIFACT_PARTS_REQUIRED]
 	trader_info.text = "%s\nScrap: %d | Mineral: %d | Partes: %s" % [
@@ -535,6 +546,13 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 		mineral,
 		parts
 	]
+	if not vacuum_map_cost.is_empty():
+		if GameState.vacuum_map_bought:
+			trader_info.text += "\nMapa Vacuum: comprado (minimapa marcado)"
+		elif GameState.has_artifact("vacuum") or GameState.vacuum_random_part_collected:
+			trader_info.text += "\nMapa Vacuum: indisponivel"
+		else:
+			trader_info.text += "\nMapa Vacuum: %s" % _format_cost(vacuum_map_cost)
 
 	var s2m: Dictionary = trades.get("scrap_to_mineral", {}) as Dictionary
 	var m2s: Dictionary = trades.get("mineral_to_scrap", {}) as Dictionary
@@ -547,7 +565,23 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 
 	scrap_to_mineral_button.text = "Trocar %s -> %s" % [_format_cost(s2m_give), _format_cost(s2m_recv)]
 	mineral_to_scrap_button.text = "Trocar %s -> %s" % [_format_cost(m2s_give), _format_cost(m2s_recv)]
-	buy_artifact_part_button.text = "Comprar parte (%s)" % _format_cost(artifact_cost)
+	var show_artifact_part := not artifact_cost.is_empty()
+	buy_artifact_part_button.visible = show_artifact_part
+	if show_artifact_part:
+		buy_artifact_part_button.text = "Comprar parte (%s)" % _format_cost(artifact_cost)
+	var show_vacuum_map := not vacuum_map_cost.is_empty() and not GameState.vacuum_map_bought and not GameState.has_artifact("vacuum") and not GameState.vacuum_random_part_collected
+	buy_vacuum_map_button.visible = show_vacuum_map
+	if show_vacuum_map:
+		buy_vacuum_map_button.text = "Mapa para vacuum (marca no minimapa) (%s)" % _format_cost(vacuum_map_cost)
+		buy_vacuum_map_button.disabled = not GameState.can_afford(vacuum_map_cost)
+
+	var vacuum_parts_have := GameState.get_artifact_parts("vacuum")
+	var vacuum_parts_required := ArtifactDatabase.get_parts_required("vacuum")
+	var show_vacuum_part := not vacuum_part_cost.is_empty() and not GameState.vacuum_shop_part_bought and not GameState.has_artifact("vacuum") and vacuum_parts_have < vacuum_parts_required
+	buy_vacuum_part_button.visible = show_vacuum_part
+	if show_vacuum_part:
+		buy_vacuum_part_button.text = "Comprar 1 peca Vacuum (%s)" % _format_cost(vacuum_part_cost)
+		buy_vacuum_part_button.disabled = not GameState.can_afford(vacuum_part_cost)
 
 	var a2m_give: Dictionary = a2m.get("give", {}) as Dictionary
 	var a2m_recv: Dictionary = a2m.get("receive", {}) as Dictionary
@@ -568,8 +602,9 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	scrap_to_mineral_button.disabled = not GameState.can_afford(s2m_give)
 	mineral_to_scrap_button.disabled = not GameState.can_afford(m2s_give)
 
-	var can_buy_part := (not GameState.artifact_completed) and GameState.can_afford(artifact_cost)
-	buy_artifact_part_button.disabled = not can_buy_part
+	if show_artifact_part:
+		var can_buy_part := (not GameState.artifact_completed) and GameState.can_afford(artifact_cost)
+		buy_artifact_part_button.disabled = not can_buy_part
 
 	var kit_cost: Dictionary = StationCatalog.get_repair_kit_cost(station_id)
 	buy_repair_kit_button.text = "Kit de reparacao (+50% HP) (%s)" % _format_cost(kit_cost)
@@ -585,6 +620,7 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	if offered.size() > 0:
 		_offered_quest_id = str(offered[0])
 	_rebuild_station_quest_list(offered)
+	_rebuild_delivery_list(station_id)
 	_update_station_quest_buttons()
 	_update_npc_button_text()
 	_update_vault_ui()
@@ -777,6 +813,23 @@ func _on_buy_artifact_part() -> void:
 		station_id = DEFAULT_STATION_ID
 	var cost: Dictionary = StationCatalog.get_artifact_part_cost(station_id)
 	GameState.try_buy_artifact_part(cost)
+
+func _on_buy_vacuum_map_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var cost: Dictionary = StationCatalog.get_vacuum_map_cost(station_id)
+	GameState.buy_vacuum_map(cost)
+
+func _on_buy_vacuum_part_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var cost: Dictionary = StationCatalog.get_vacuum_part_shop_cost(station_id)
+	GameState.buy_vacuum_shop_part(station_id, cost)
+
+func _on_debug_give_resources_pressed() -> void:
+	GameState.debug_grant_test_resources()
 
 func _on_buy_repair_kit_pressed() -> void:
 	var station_id := _active_station_id
@@ -1330,9 +1383,15 @@ func _on_dialogue_choice(next_node: String) -> void:
 
 			match action:
 				"accept_quest":
-					GameState.accept_quest(quest_id)
+					var station_id := _active_station_id
+					if station_id.is_empty():
+						station_id = DEFAULT_STATION_ID
+					GameState.accept_quest(quest_id, station_id)
 				"claim_quest":
-					GameState.claim_quest(quest_id)
+					var station_id2 := _active_station_id
+					if station_id2.is_empty():
+						station_id2 = DEFAULT_STATION_ID
+					GameState.claim_quest(quest_id, station_id2)
 				"start_bandit_qte":
 					_start_bandit_qte(quest_id)
 
@@ -1782,7 +1841,7 @@ func _on_accept_kill_quest() -> void:
 
 		if station_id == giver_station_id:
 			if not accepted:
-				GameState.accept_quest(_offered_quest_id)
+				GameState.accept_quest(_offered_quest_id, station_id)
 		elif station_id == target_station_id:
 			if accepted and not completed:
 				_start_bandit_qte(_offered_quest_id)
@@ -1790,7 +1849,10 @@ func _on_accept_kill_quest() -> void:
 		_update_station_quest_buttons()
 		return
 
-	GameState.accept_quest(_offered_quest_id)
+	var station_id2 := _active_station_id
+	if station_id2.is_empty():
+		station_id2 = DEFAULT_STATION_ID
+	GameState.accept_quest(_offered_quest_id, station_id2)
 	_update_station_quest_buttons()
 
 func _on_claim_station_quest() -> void:
@@ -1798,8 +1860,67 @@ func _on_claim_station_quest() -> void:
 		return
 	if GameState.is_bandit_quest(_offered_quest_id):
 		return
-	GameState.claim_quest(_offered_quest_id)
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	GameState.claim_quest(_offered_quest_id, station_id)
 	_update_station_quest_buttons()
+
+func _rebuild_delivery_list(station_id: String) -> void:
+	if delivery_list == null:
+		return
+
+	for child in delivery_list.get_children():
+		delivery_list.remove_child(child)
+		child.queue_free()
+
+	var any := false
+	for quest_id_variant in GameState.QUEST_DEFS.keys():
+		var quest_id := str(quest_id_variant)
+		if GameState.is_bandit_quest(quest_id):
+			continue
+
+		var q: Dictionary = GameState.get_quest_state(quest_id)
+		if q.is_empty():
+			continue
+		if not bool(q.get("accepted", false)):
+			continue
+		if not bool(q.get("completed", false)):
+			continue
+		if bool(q.get("claimed", false)) or bool(q.get("archived", false)):
+			continue
+
+		var accepted_station_id := str(q.get("accepted_station_id", ""))
+		if not accepted_station_id.is_empty() and accepted_station_id != station_id:
+			continue
+
+		any = true
+		var def: Dictionary = GameState.QUEST_DEFS.get(quest_id, {}) as Dictionary
+		var title := str(def.get("title", quest_id))
+
+		var b := Button.new()
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.text = "Entregar: %s (%s)" % [title, _format_quest_rewards(def)]
+		b.pressed.connect(_on_deliver_quest.bind(quest_id))
+		delivery_list.add_child(b)
+
+		var sep := HSeparator.new()
+		sep.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		delivery_list.add_child(sep)
+
+	if not any:
+		var l := Label.new()
+		l.text = "Nenhuma missao pronta para entregar nesta estacao."
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		delivery_list.add_child(l)
+
+func _on_deliver_quest(quest_id: String) -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	GameState.claim_quest(quest_id, station_id)
+	_update_hud()
+	_rebuild_delivery_list(station_id)
 
 func _update_station_quest_buttons() -> void:
 	accept_kill_quest_button.disabled = true
@@ -1890,7 +2011,10 @@ func _update_station_quest_buttons() -> void:
 	var progress: int = int(q.get("progress", 0))
 	accept_kill_quest_button.text = "%s: %d/%d" % [title, progress, goal]
 	accept_kill_quest_button.disabled = true
-	claim_station_quest_button.disabled = not GameState.can_claim_quest(_offered_quest_id)
+	var station_id2 := _active_station_id
+	if station_id2.is_empty():
+		station_id2 = DEFAULT_STATION_ID
+	claim_station_quest_button.disabled = not GameState.can_claim_quest_at_station(_offered_quest_id, station_id2)
 	_set_station_quest_details(_offered_quest_id)
 	_set_station_quest_details(_offered_quest_id)
 
@@ -1972,7 +2096,10 @@ func _set_station_quest_details(quest_id: String) -> void:
 	elif accepted:
 		status = "Em progresso"
 
+	var accepted_station_id := str(q.get("accepted_station_id", ""))
 	var delivery_hint := "Entrega em: %s" % StationCatalog.get_station_titles_offering_quest(quest_id)
+	if not accepted_station_id.is_empty():
+		delivery_hint = "Entrega em: %s" % StationCatalog.get_station_title(accepted_station_id)
 	if GameState.is_bandit_quest(quest_id):
 		delivery_hint = "Entrega: fala com o Cacador (Refugio Epsilon)"
 
@@ -2048,7 +2175,10 @@ func _rebuild_missions_list() -> void:
 		label.fit_content = false
 		label.custom_minimum_size = Vector2(0, 140)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		var accepted_station_id := str(q.get("accepted_station_id", ""))
 		var deliver := StationCatalog.get_station_titles_offering_quest(quest_id)
+		if not accepted_station_id.is_empty():
+			deliver = StationCatalog.get_station_title(accepted_station_id)
 		label.text = "[b]%s[/b]\n%s\nProgresso: %d/%d | Estado: %s\nEntrega em: %s\nRecompensa: %s" % [
 			str(def.get("title", quest_id)),
 			str(def.get("description", "")),
@@ -2060,9 +2190,9 @@ func _rebuild_missions_list() -> void:
 		]
 		box.add_child(label)
 
-		if claimed:
+		if completed:
 			var clear := Button.new()
-			clear.text = "Limpar missao"
+			clear.text = "Limpar missao" if claimed else "Limpar (perde recompensa)"
 			clear.pressed.connect(_on_clear_quest.bind(quest_id))
 			box.add_child(clear)
 
@@ -2078,6 +2208,7 @@ func _rebuild_missions_list() -> void:
 
 func _on_clear_quest(quest_id: String) -> void:
 	GameState.clear_completed_quest(quest_id)
+	_rebuild_missions_list()
 
 func _rebuild_inventory_list() -> void:
 	if inventory_list == null:

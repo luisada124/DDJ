@@ -34,6 +34,13 @@ var resources := {
 	"ametista": 0,
 }
 
+# Vacuum: parte aleatória na Zona 1 + mapa que revela localização.
+var vacuum_map_bought: bool = false
+var vacuum_random_part_local: Vector2 = Vector2.ZERO
+var vacuum_random_part_world: Vector2 = Vector2.ZERO # runtime (global), usado pelo minimapa
+var vacuum_random_part_collected: bool = false
+var vacuum_shop_part_bought: bool = false
+
 # Cofres por estacao: recursos guardados nao se perdem na morte.
 var vault_unlocked: Dictionary = {} # station_id -> bool
 var vault_resources: Dictionary = {} # station_id -> {res_type -> int}
@@ -219,7 +226,7 @@ func _lose_carried_resources_on_death() -> void:
 	emit_signal("state_changed")
 	_queue_save()
 
-func accept_quest(quest_id: String) -> bool:
+func accept_quest(quest_id: String, station_id: String = "") -> bool:
 	if not QUEST_DEFS.has(quest_id):
 		return false
 	if is_bandit_quest(quest_id) and quest_id != get_current_bandit_quest_id():
@@ -236,6 +243,8 @@ func accept_quest(quest_id: String) -> bool:
 		return false
 
 	q["accepted"] = true
+	if not station_id.is_empty():
+		q["accepted_station_id"] = station_id
 	quests[quest_id] = q
 	emit_signal("state_changed")
 	_queue_save()
@@ -300,8 +309,26 @@ func can_claim_quest(quest_id: String) -> bool:
 		return false
 	return bool(q.get("completed", false)) and not bool(q.get("claimed", false))
 
-func claim_quest(quest_id: String) -> bool:
+func can_claim_quest_at_station(quest_id: String, station_id: String) -> bool:
 	if not can_claim_quest(quest_id):
+		return false
+	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
+	var accepted_station_id := str(q.get("accepted_station_id", ""))
+	if accepted_station_id.is_empty():
+		return true
+	return accepted_station_id == station_id
+
+func claim_quest(quest_id: String, station_id: String = "") -> bool:
+	if station_id.is_empty():
+		if not can_claim_quest(quest_id):
+			return false
+	else:
+		if not can_claim_quest_at_station(quest_id, station_id):
+			return false
+
+	var q_check: Dictionary = quests.get(quest_id, {}) as Dictionary
+	var accepted_station_id := str(q_check.get("accepted_station_id", ""))
+	if not accepted_station_id.is_empty() and not station_id.is_empty() and accepted_station_id != station_id:
 		return false
 
 	var def: Dictionary = QUEST_DEFS.get(quest_id, {}) as Dictionary
@@ -364,7 +391,9 @@ func clear_completed_quest(quest_id: String) -> bool:
 	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
 	if q.is_empty():
 		return false
-	if not bool(q.get("completed", false)) or not bool(q.get("claimed", false)):
+	# Permite limpar missões concluídas mesmo que o jogador não tenha reclamado a recompensa.
+	# (Se não foi reclamada, a limpeza significa desistir dela.)
+	if not bool(q.get("completed", false)):
 		return false
 
 	q["accepted"] = false
@@ -451,6 +480,7 @@ func filter_offered_quests(quest_ids: Array) -> Array:
 func _make_default_quest_state() -> Dictionary:
 	return {
 		"accepted": false,
+		"accepted_station_id": "",
 		"progress": 0,
 		"completed": false,
 		"claimed": false,
@@ -512,6 +542,62 @@ func buy_repair_kit(cost: Dictionary) -> bool:
 	_queue_save()
 	return true
 
+func buy_vacuum_map(cost: Dictionary) -> bool:
+	if vacuum_map_bought:
+		return false
+	if not can_afford(cost):
+		return false
+	for res_type_variant in cost.keys():
+		var res_type := str(res_type_variant)
+		resources[res_type] = int(resources.get(res_type, 0)) - int(cost[res_type])
+	vacuum_map_bought = true
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
+func buy_artifact_part_by_id(artifact_id: String, cost: Dictionary) -> bool:
+	if not ArtifactDatabase.is_valid_artifact(artifact_id):
+		return false
+	if has_artifact(artifact_id):
+		return false
+	var required := ArtifactDatabase.get_parts_required(artifact_id)
+	if required <= 0:
+		return false
+	if get_artifact_parts(artifact_id) >= required:
+		return false
+	if not can_afford(cost):
+		return false
+	for res_type_variant in cost.keys():
+		var res_type := str(res_type_variant)
+		resources[res_type] = int(resources.get(res_type, 0)) - int(cost[res_type])
+	collect_artifact_part(artifact_id)
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
+func buy_vacuum_shop_part(station_id: String, cost: Dictionary) -> bool:
+	if station_id != "station_epsilon":
+		return false
+	if vacuum_shop_part_bought:
+		return false
+	if has_artifact("vacuum"):
+		return false
+	var required := ArtifactDatabase.get_parts_required("vacuum")
+	if required <= 0:
+		return false
+	if get_artifact_parts("vacuum") >= required:
+		return false
+	if not can_afford(cost):
+		return false
+	for res_type_variant in cost.keys():
+		var res_type := str(res_type_variant)
+		resources[res_type] = int(resources.get(res_type, 0)) - int(cost[res_type_variant])
+	collect_artifact_part("vacuum")
+	vacuum_shop_part_bought = true
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
 func get_repair_kit_count() -> int:
 	return int(consumables.get("repair_kit", 0))
 
@@ -538,6 +624,19 @@ func repair_ship(cost: Dictionary) -> bool:
 	emit_signal("state_changed")
 	_queue_save()
 	return true
+
+func debug_grant_test_resources() -> void:
+	var add: Dictionary = {
+		"scrap": 5000,
+		"mineral": 2500,
+		"ametista": 250,
+	}
+	for res_type_variant in add.keys():
+		var res_type := str(res_type_variant)
+		resources[res_type] = int(resources.get(res_type, 0)) + int(add[res_type_variant])
+	consumables["repair_kit"] = int(consumables.get("repair_kit", 0)) + 20
+	emit_signal("state_changed")
+	_queue_save()
 
 func reset_alien_health() -> void:
 	alien_health = alien_max_health
@@ -762,6 +861,10 @@ func save_game() -> void:
 		"version": SAVE_VERSION,
 		"resources": resources,
 		"consumables": consumables,
+		"vacuum_map_bought": vacuum_map_bought,
+		"vacuum_random_part_local": [vacuum_random_part_local.x, vacuum_random_part_local.y],
+		"vacuum_random_part_collected": vacuum_random_part_collected,
+		"vacuum_shop_part_bought": vacuum_shop_part_bought,
 		"vault_unlocked": vault_unlocked,
 		"vault_resources": vault_resources,
 		"quests": quests,
@@ -813,6 +916,17 @@ func load_game() -> void:
 	# garantir que ametista existe em saves antigos
 	if not resources.has("ametista"):
 		resources["ametista"] = 0
+
+	vacuum_map_bought = bool(data.get("vacuum_map_bought", false))
+	vacuum_random_part_collected = bool(data.get("vacuum_random_part_collected", false))
+	vacuum_shop_part_bought = bool(data.get("vacuum_shop_part_bought", false))
+	var stored_vac = data.get("vacuum_random_part_local")
+	if typeof(stored_vac) == TYPE_ARRAY and (stored_vac as Array).size() >= 2:
+		var a := stored_vac as Array
+		vacuum_random_part_local = Vector2(float(a[0]), float(a[1]))
+	else:
+		vacuum_random_part_local = Vector2.ZERO
+	vacuum_random_part_world = Vector2.ZERO
 
 	var loaded_consumables = data.get("consumables")
 	if typeof(loaded_consumables) == TYPE_DICTIONARY:
@@ -922,6 +1036,14 @@ func _apply_defaults() -> void:
 	_regen_cooldown = 0.0
 	_regen_accum = 0.0
 	boss_planet_resources_unlocked = false
+	vacuum_map_bought = false
+	vacuum_random_part_local = Vector2.ZERO
+	vacuum_random_part_world = Vector2.ZERO
+	vacuum_random_part_collected = false
+	vacuum_shop_part_bought = false
+
+func queue_save() -> void:
+	_queue_save()
 
 func _ensure_quests_initialized() -> void:
 	if quests == null:

@@ -4,6 +4,7 @@ class_name QuestDatabase
 const QUEST_KILL_15_BASIC := "kill_15_basic"
 const QUEST_KILL_10_SNIPER := "kill_10_sniper"
 const QUEST_KILL_5_TANK := "kill_5_tank"
+const QUEST_VACUUM_PART := "vacuum_part"
 const QUEST_TAVERN_BANDIT_1 := "tavern_bandit_1"
 const QUEST_TAVERN_BANDIT_2 := "tavern_bandit_2"
 const QUEST_TAVERN_BANDIT_3 := "tavern_bandit_3"
@@ -41,6 +42,15 @@ const QUEST_DEFS := {
 		"enemy_id": "tank",
 		"goal": 5,
 		"reward": {"scrap": 80, "mineral": 60},
+	},
+	QUEST_VACUUM_PART: {
+		"title": "Filtro Perdido",
+		"description": "O Aspirador precisa de um filtro raro. Mata 8 inimigos basicos e volta para receber a peça.",
+		"enemy_id": "basic",
+		"goal": 8,
+		"giver_station_id": "station_alpha",
+		"reward": {"scrap": 25},
+		"artifact_parts_reward": {"vacuum": 1},
 	},
 	QUEST_TAVERN_BANDIT_1: {
 		"title": "Acerto de Contas I",
@@ -104,7 +114,7 @@ const QUEST_DEFS := {
 }
 
 const NPC_QUEST_POOLS := {
-	"scavenger": [QUEST_KILL_15_BASIC],
+	"scavenger": [QUEST_KILL_15_BASIC, QUEST_VACUUM_PART],
 	"marksman": [QUEST_KILL_10_SNIPER],
 	"bruiser": [QUEST_KILL_5_TANK],
 	"bounty": [QUEST_KILL_15_BASIC, QUEST_KILL_10_SNIPER, QUEST_KILL_5_TANK],

@@ -334,6 +334,14 @@ text = "Trocar"
 layout_mode = 2
 text = "Comprar parte de artefacto"
 
+[node name="BuyVacuumMapButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
+layout_mode = 2
+text = "Comprar mapa para vacuum"
+
+[node name="BuyVacuumPartButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
+layout_mode = 2
+text = "Comprar parte vacuum"
+
 [node name="BuyRepairKitButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
 layout_mode = 2
 text = "Comprar kit de reparacao"
@@ -384,6 +392,16 @@ fit_content = false
 scroll_active = false
 autowrap_mode = 3
 text = "Seleciona uma missao."
+
+[node name="DeliverySeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+layout_mode = 2
+
+[node name="DeliveryTitle" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+layout_mode = 2
+text = "Entregar missoes"
+
+[node name="DeliveryList" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+layout_mode = 2
 
 [node name="MissionsToDialogueSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
@@ -709,6 +727,10 @@ follow_focus = true
 [node name="InventoryList" type="VBoxContainer" parent="MissionsMenu/Panel/Margin/VBox/Tabs/Inventario/InventoryScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="DebugGiveResourcesButton" type="Button" parent="MissionsMenu/Panel/Margin/VBox"]
+layout_mode = 2
+text = "DEBUG: +Recursos"
 
 [node name="CloseMissionsButton" type="Button" parent="MissionsMenu/Panel/Margin/VBox"]
 layout_mode = 2

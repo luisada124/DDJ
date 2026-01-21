@@ -22,7 +22,6 @@ const STATIONS: Dictionary = {
 			"mineral_to_scrap": {"give": {"mineral": 1}, "receive": {"scrap": 8}},
 		},
 		"vault_cost": {"scrap": 60, "mineral": 25},
-		"artifact_part_cost": {"scrap": 80, "mineral": 30},
 		"offered_quests": ["kill_15_basic"],
 	},
 	"station_beta": {
@@ -45,7 +44,6 @@ const STATIONS: Dictionary = {
 			"ametista_to_scrap": {"give": {"ametista": 1}, "receive": {"scrap": 45}},
 		},
 		"vault_cost": {"scrap": 80, "mineral": 45},
-		"artifact_part_cost": {"scrap": 60, "mineral": 40, "ametista": 1},
 		"offered_quests": ["kill_10_sniper", "kill_25_sniper_ametista"],
 	},
 	"station_gamma": {
@@ -68,7 +66,6 @@ const STATIONS: Dictionary = {
 			"ametista_to_scrap": {"give": {"ametista": 1}, "receive": {"scrap": 60}},
 		},
 		"vault_cost": {"scrap": 120, "mineral": 80, "ametista": 1},
-		"artifact_part_cost": {"scrap": 110, "mineral": 55, "ametista": 2},
 		"offered_quests": ["kill_5_tank", "kill_12_tank_ametista"],
 	},
 	"station_delta": {
@@ -89,7 +86,6 @@ const STATIONS: Dictionary = {
 			"mineral_to_scrap": {"give": {"mineral": 1}, "receive": {"scrap": 6}},
 		},
 		"vault_cost": {"scrap": 70, "mineral": 15},
-		"artifact_part_cost": {"scrap": 95, "mineral": 20},
 		"offered_quests": [],
 	},
 	"station_epsilon": {
@@ -110,7 +106,6 @@ const STATIONS: Dictionary = {
 			"mineral_to_scrap": {"give": {"mineral": 2}, "receive": {"scrap": 14}},
 		},
 		"vault_cost": {"scrap": 55, "mineral": 35},
-		"artifact_part_cost": {"scrap": 70, "mineral": 45},
 		"offered_quests": [],
 	},
 	"boss_planet": {
@@ -165,6 +160,19 @@ static func get_repair_kit_cost(_station_id: String) -> Dictionary:
 static func get_ship_repair_cost(_station_id: String) -> Dictionary:
 	# Reparação total (cura para HP máximo) no mecânico.
 	return {"scrap": 35, "mineral": 10}
+
+static func get_vacuum_map_cost(station_id: String) -> Dictionary:
+	# Item: "mapa para vacuum" (revela a localizacao da peca aleatoria na Zona 1).
+	# Mantem como conveniencia: so vende numa estacao da Zona 1.
+	if station_id == "station_alpha":
+		return {"scrap": 45}
+	return {}
+
+static func get_vacuum_part_shop_cost(station_id: String) -> Dictionary:
+	# Venda direta de 1 peça do Vacuum na Estacao Beta.
+	if station_id == "station_epsilon":
+		return {"scrap": 120, "mineral": 30}
+	return {}
 
 static func get_offered_quests(station_id: String) -> Array:
 	var npcs: Array = get_station_npcs(station_id)
