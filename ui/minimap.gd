@@ -75,6 +75,18 @@ func _draw() -> void:
 		draw_circle(p, 6.0, Color(0.4, 0.9, 1.0, 0.95))
 		draw_circle(p, 10.0, Color(0.4, 0.9, 1.0, 0.25))
 
+	# Dica do mapa do Reverse Thruster (apenas se comprado e ainda existir a peca aleatoria)
+	if GameState.reverse_thruster_map_bought and not GameState.reverse_thruster_random_part_collected and GameState.reverse_thruster_random_part_world != Vector2.ZERO:
+		var p_rt: Vector2 = to_map.call(GameState.reverse_thruster_random_part_world)
+		draw_circle(p_rt, 6.0, Color(1.0, 0.55, 0.9, 0.95))
+		draw_circle(p_rt, 10.0, Color(1.0, 0.55, 0.9, 0.25))
+
+	# Dica do mapa do Side Dash (map por missao na Zona 2)
+	if GameState.side_dash_map_unlocked and not GameState.side_dash_random_part_collected and GameState.side_dash_random_part_world != Vector2.ZERO:
+		var p_sd: Vector2 = to_map.call(GameState.side_dash_random_part_world)
+		draw_circle(p_sd, 6.0, Color(0.95, 0.75, 0.25, 0.95))
+		draw_circle(p_sd, 10.0, Color(0.95, 0.75, 0.25, 0.25))
+
 	# Traders reais (planeta/loja)
 	var trader_nodes: Array[Node] = get_tree().get_nodes_in_group("trader")
 	for n: Node in trader_nodes:

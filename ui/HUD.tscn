@@ -342,6 +342,18 @@ text = "Comprar mapa para vacuum"
 layout_mode = 2
 text = "Comprar parte vacuum"
 
+[node name="BuyReverseThrusterPartButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
+layout_mode = 2
+text = "Comprar peca Reverse Thruster"
+
+[node name="BuyReverseThrusterMapButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
+layout_mode = 2
+text = "Comprar mapa Reverse Thruster"
+
+[node name="BuySideDashPartButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
+layout_mode = 2
+text = "Comprar peca Side Dash"
+
 [node name="BuyRepairKitButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
 layout_mode = 2
 text = "Comprar kit de reparacao"

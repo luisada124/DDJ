@@ -24,6 +24,26 @@ const STATIONS: Dictionary = {
 		"vault_cost": {"scrap": 60, "mineral": 25},
 		"offered_quests": ["kill_15_basic"],
 	},
+	"station_zeta": {
+		"title": "Posto Zeta",
+		"prompt": "E - Posto Zeta",
+		"color": Color(0.95, 0.55, 0.25),
+		"tavern": {
+			"base_hi_score": 95,
+			"reward": {"scrap": 55},
+		},
+		"npcs": [
+			{"id": "hrrp", "name": "Hrrp", "type": "marksman"},
+			{"id": "glunk", "name": "Glunk", "type": "bounty"},
+			{"id": "nox", "name": "Nox-7", "type": "scavenger"},
+		],
+		"trades": {
+			"scrap_to_mineral": {"give": {"scrap": 10}, "receive": {"mineral": 1}},
+			"mineral_to_scrap": {"give": {"mineral": 1}, "receive": {"scrap": 8}},
+		},
+		"vault_cost": {"scrap": 70, "mineral": 30},
+		"offered_quests": [],
+	},
 	"station_beta": {
 		"title": "Outpost Beta",
 		"prompt": "E - Outpost Beta",
@@ -172,6 +192,29 @@ static func get_vacuum_part_shop_cost(station_id: String) -> Dictionary:
 	# Venda direta de 1 peça do Vacuum na Estacao Beta.
 	if station_id == "station_epsilon":
 		return {"scrap": 120, "mineral": 30}
+	return {}
+
+static func get_reverse_thruster_shop_part_cost(station_id: String) -> Dictionary:
+	# Reverse Thruster (3 pecas): A e B sao vendidas em 2 estacoes diferentes na Zona 1.
+	if station_id == "station_alpha":
+		return {"scrap": 90, "mineral": 15}
+	if station_id == "station_delta":
+		return {"scrap": 90, "mineral": 15}
+	return {}
+
+static func get_reverse_thruster_map_cost(station_id: String) -> Dictionary:
+	# Mapa que revela a peca aleatoria do Reverse Thruster na Zona 1.
+	if station_id == "station_alpha":
+		return {"scrap": 35}
+	return {}
+
+static func get_side_dash_shop_part_cost(station_id: String) -> Dictionary:
+	# Side Dash (3 pecas): A e B sao vendidas em 2 estacoes diferentes na Zona 2.
+	# Nota: o mesmo station_id pode existir em outras zonas, por isso o UI faz gate pela zona atual.
+	if station_id == "station_beta":
+		return {"scrap": 110, "mineral": 20}
+	if station_id == "station_zeta":
+		return {"scrap": 110, "mineral": 20}
 	return {}
 
 static func get_offered_quests(station_id: String) -> Array:
