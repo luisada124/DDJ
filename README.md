@@ -48,10 +48,7 @@ mudar a cor da explosao
 
 mecanicas a adicionar:
 
-
-
-
-O planeta não está a aparecer. Não sei se não está no sítio certo ou se é a textura. Para utilizar a que já está para as estações, mas em vez de ter uma taverna, e assim tem apenas a interface. Isto é, cliques no "E". Dá para ir coletar os recursos, mas isto só fica disponível depois de derrotar o boss. Ele não está lá, portanto inclui com a textura O inimigo 2 da pasta inimigos. 
+Conversas na taverna ficam sempre em primeiro lugar. Baixo os NPCs. Missões desta interface da taverna: fazer com que elas surjam a partir dos NPCs, isto é, temos de falar com eles. E as missões vão ficar no tab. 
 
 upgrades:
 
