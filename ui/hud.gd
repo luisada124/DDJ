@@ -1631,6 +1631,30 @@ func _rebuild_inventory_list() -> void:
 	var sep1 := HSeparator.new()
 	inventory_list.add_child(sep1)
 
+	var companion_header := Label.new()
+	companion_header.text = "Companheiros"
+	inventory_list.add_child(companion_header)
+
+	var aux_goal := ArtifactDatabase.get_parts_required("aux_ship")
+	var aux_progress := GameState.get_artifact_parts("aux_ship")
+	var aux_done := GameState.has_artifact("aux_ship")
+	var aux_item := RichTextLabel.new()
+	aux_item.bbcode_enabled = true
+	aux_item.scroll_active = false
+	aux_item.fit_content = false
+	aux_item.custom_minimum_size = Vector2(0, 110)
+	aux_item.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	aux_item.text = "[b]%s[/b]\nProgresso: %d/%d\nEstado: %s\nAjuda a matar inimigos automaticamente (dispara lasers)." % [
+		ArtifactDatabase.get_artifact_title("aux_ship"),
+		aux_progress,
+		aux_goal,
+		("Desbloqueado" if aux_done else "Bloqueado"),
+	]
+	inventory_list.add_child(aux_item)
+
+	var sep_comp := HSeparator.new()
+	inventory_list.add_child(sep_comp)
+
 	var gadgets_header := Label.new()
 	gadgets_header.text = "Gadgets (artefactos)"
 	inventory_list.add_child(gadgets_header)
@@ -1638,6 +1662,8 @@ func _rebuild_inventory_list() -> void:
 	# Outros artefactos (gadgets)
 	for artifact_id_variant in ArtifactDatabase.ARTIFACTS.keys():
 		var artifact_id := str(artifact_id_variant)
+		if artifact_id == "aux_ship":
+			continue
 		var title := ArtifactDatabase.get_artifact_title(artifact_id)
 		var goal := ArtifactDatabase.get_parts_required(artifact_id)
 		var progress := GameState.get_artifact_parts(artifact_id)
@@ -1658,6 +1684,8 @@ func _rebuild_inventory_list() -> void:
 				gadget_hint = "Gadget: andar para tras (S)"
 			"side_dash":
 				gadget_hint = "Gadget: dash lateral (Mouse1/Mouse2)"
+			"aux_ship":
+				gadget_hint = "Gadget: nave auxiliar (auto-ataque)"
 
 		item.text = "[b]%s[/b]\nProgresso: %d/%d\nEstado: %s\n%s" % [
 			title,
@@ -1685,6 +1713,16 @@ func _rebuild_inventory_list() -> void:
 		var l2 := Label.new()
 		l2.text = "- Thruster Reverso (S) x%.2f" % GameState.get_reverse_thrust_factor()
 		inventory_list.add_child(l2)
+		any_gadget = true
+	if GameState.has_side_dash():
+		var l3 := Label.new()
+		l3.text = "- Dash Lateral (Mouse1/Mouse2)"
+		inventory_list.add_child(l3)
+		any_gadget = true
+	if GameState.has_aux_ship():
+		var l4 := Label.new()
+		l4.text = "- Nave Auxiliar (auto-ataque)"
+		inventory_list.add_child(l4)
 		any_gadget = true
 
 	if not any_gadget:

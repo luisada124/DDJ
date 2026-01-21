@@ -62,6 +62,30 @@ artifact_id = "side_dash"
 position = Vector2(0, 360)
 artifact_id = "side_dash"
 
+[node name="AuxShipPart1" parent="TestArtifacts" instance=ExtResource("5_artifact_part")]
+position = Vector2(520, 80)
+artifact_id = "aux_ship"
+
+[node name="AuxShipPart2" parent="TestArtifacts" instance=ExtResource("5_artifact_part")]
+position = Vector2(520, -80)
+artifact_id = "aux_ship"
+
+[node name="AuxShipPart3" parent="TestArtifacts" instance=ExtResource("5_artifact_part")]
+position = Vector2(-520, 80)
+artifact_id = "aux_ship"
+
+[node name="AuxShipPart4" parent="TestArtifacts" instance=ExtResource("5_artifact_part")]
+position = Vector2(-520, -80)
+artifact_id = "aux_ship"
+
+[node name="AuxShipPart5" parent="TestArtifacts" instance=ExtResource("5_artifact_part")]
+position = Vector2(0, 560)
+artifact_id = "aux_ship"
+
+[node name="AuxShipPart6" parent="TestArtifacts" instance=ExtResource("5_artifact_part")]
+position = Vector2(0, -560)
+artifact_id = "aux_ship"
+
 [node name="comet" parent="comets" instance=ExtResource("2_htqom")]
 position = Vector2(87, 132)
 

@@ -8,7 +8,7 @@ Resolver problema da descrição das missões. Não estará a aparecer quando se
 meter mais vida na nave e menos inimigos a spawnar
 Meter os artefactos fora do minimapa só estarão disponíveis com mapas depois de os desbloquear. 
 
-Nave auxiliar com gadget. 
+
 Mapa ser obtido como recompensa. 
 Estações têm de ser ou compradas a localização ou encontradas. 
  
