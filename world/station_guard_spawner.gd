@@ -20,7 +20,7 @@ const EnemyScene: PackedScene = preload("res://enemies/Enemy.tscn")
 @export var station_safe_radius: float = 1000.0
 @export var chase_range_override: float = 2600.0
 @export var guard_desired_distance: float = 420.0
-@export var enemy_scale: Vector2 = Vector2(0.4, 0.4)
+@export var enemy_scale: Vector2 = Vector2(0.5, 0.5)
 
 var _guards: Array[Node] = []
 var _timer: Timer

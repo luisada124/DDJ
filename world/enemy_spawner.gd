@@ -3,7 +3,7 @@ extends Node2D
 @export var enemy_scene: PackedScene
 @export var enemies_container_path: NodePath = NodePath("../Enemies")
 
-@export var enemy_scale: Vector2 = Vector2(0.4, 0.4)
+@export var enemy_scale: Vector2 = Vector2(0.5, 0.5)
 @export var spawn_margin: float = 320.0
 @export var min_spawn_distance_from_player: float = 420.0
 
