@@ -4,12 +4,14 @@ extends "res://enemies/enemy.gd"
 @export var artifact_id: String = "relic"
 @export var patrol_anchor_path: NodePath
 @export var require_quest_active: bool = true
+@export var boss_disengage_delay: float = 1.5
 
 var boss_engaged: bool = false
 var _patrol_anchor: Node2D = null
 var _boss_active: bool = true
 var _initial_collision_layer: int = 0
 var _initial_collision_mask: int = 0
+var _engaged_timer: float = 0.0
 
 func _ready() -> void:
 	super._ready()
@@ -22,7 +24,13 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	super._physics_process(delta)
-	boss_engaged = _tracking_player
+	if _tracking_player:
+		boss_engaged = true
+		_engaged_timer = boss_disengage_delay
+	elif boss_engaged:
+		_engaged_timer = maxf(0.0, _engaged_timer - delta)
+		if _engaged_timer <= 0.0:
+			boss_engaged = false
 
 func is_boss_engaged() -> bool:
 	return boss_engaged
@@ -39,6 +47,7 @@ func _refresh_boss_active() -> void:
 func _set_boss_active(active: bool) -> void:
 	_boss_active = active
 	boss_engaged = false
+	_engaged_timer = 0.0
 	visible = active
 	set_process(active)
 	set_physics_process(active)

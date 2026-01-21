@@ -2,6 +2,7 @@ extends "res://world/trader_planet.gd"
 
 @export var resources_path: NodePath = NodePath("BossResources")
 @export var require_quest_active: bool = true
+@export var use_pickup_rewards: bool = false
 
 var _resources_root: Node = null
 var _planet_active: bool = true
@@ -29,6 +30,9 @@ func _refresh_visibility() -> void:
 		_ensure_boss_completion_if_missing()
 
 func _refresh_resources() -> void:
+	if not use_pickup_rewards:
+		_set_resources_active(false)
+		return
 	var unlocked := _planet_active and GameState.is_boss_defeated() and GameState.has_boss_planet_resources_unlocked()
 	_set_resources_active(unlocked)
 

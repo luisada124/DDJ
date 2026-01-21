@@ -75,6 +75,8 @@ extends Control
 @onready var knife_game_prompt: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/KnifeGamePrompt
 @onready var knife_game_result: Label = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/KnifeGameResult
 @onready var knife_game_start_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/KnifeGameStartButton
+@onready var debug_boss_separator: HSeparator = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/DebugBossSeparator
+@onready var debug_boss_planet_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/DebugBossPlanetButton
 @onready var open_upgrades_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mecanico/OpenUpgradesButton
 @onready var repair_ship_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mecanico/RepairShipButton
 
@@ -180,6 +182,11 @@ func _ready() -> void:
 	if debug_give_resources_button != null:
 		debug_give_resources_button.visible = OS.is_debug_build()
 		debug_give_resources_button.pressed.connect(_on_debug_give_resources_pressed)
+	if debug_boss_separator != null:
+		debug_boss_separator.visible = OS.is_debug_build()
+	if debug_boss_planet_button != null:
+		debug_boss_planet_button.visible = OS.is_debug_build()
+		debug_boss_planet_button.pressed.connect(_on_debug_boss_planet_pressed)
 	if debug_unlock_all_gadgets_button != null:
 		debug_unlock_all_gadgets_button.visible = OS.is_debug_build()
 		debug_unlock_all_gadgets_button.pressed.connect(_on_debug_unlock_all_gadgets_pressed)
@@ -808,11 +815,11 @@ func _update_boss_planet_ui() -> void:
 	var defeated := GameState.is_boss_defeated()
 	var unlocked := GameState.has_boss_planet_resources_unlocked()
 	if not defeated:
-		boss_planet_info.text = "Derrota o boss para desbloquear os recursos do planeta."
+		boss_planet_info.text = "Derrota o boss para desbloquear a recompensa."
 	elif unlocked:
-		boss_planet_info.text = "Recursos desbloqueados. Apanha-os no exterior."
+		boss_planet_info.text = "Recompensa ja coletada."
 	else:
-		boss_planet_info.text = "Boss derrotado. Podes libertar os recursos do planeta."
+		boss_planet_info.text = "Boss derrotado. Recompensa: 500 scrap + 200 mineral."
 
 	if boss_planet_collect_button != null:
 		boss_planet_collect_button.visible = defeated and not unlocked
@@ -820,6 +827,8 @@ func _update_boss_planet_ui() -> void:
 
 func _on_boss_planet_collect_pressed() -> void:
 	if GameState.unlock_boss_planet_resources():
+		GameState.add_resource("scrap", 500)
+		GameState.add_resource("mineral", 200)
 		_update_boss_planet_ui()
 
 func _get_boss_node() -> Node:
@@ -1069,6 +1078,16 @@ func _on_buy_aux_ship_part_pressed() -> void:
 
 func _on_debug_give_resources_pressed() -> void:
 	GameState.debug_grant_test_resources()
+
+func _on_debug_boss_planet_pressed() -> void:
+	var quest_id := GameState.QUEST_BOSS_PLANET
+	if not GameState.QUEST_DEFS.has(quest_id):
+		return
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	if GameState.accept_quest(quest_id, station_id):
+		_update_hud()
 
 func _on_debug_unlock_all_gadgets_pressed() -> void:
 	GameState.debug_unlock_all_gadgets()
