@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://d0y5j1y0lqjwf"]
+
+[ext_resource type="Script" path="res://enemies/boss_final.gd" id="1_boss_final_script"]
+[ext_resource type="Texture2D" path="res://textures/boss-final-removebg-preview.png" id="2_boss_final_tex"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_boss_final"]
+radius = 118.0
+
+[node name="BossFinal" type="CharacterBody2D" groups=["enemy","boss"]]
+collision_layer = 8
+collision_mask = 15
+script = ExtResource("1_boss_final_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_boss_final_tex")
+centered = true
+scale = Vector2(1.25, 1.25)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_boss_final")

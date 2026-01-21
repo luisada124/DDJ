@@ -23,7 +23,7 @@ const RelicScene: PackedScene = preload("res://pickups/ArtifactPart.tscn")
 @export var leader_difficulty_multiplier: float = 2.4
 @export var leader_scale: Vector2 = Vector2(0.95, 0.95)
 @export var leader_spawn_distance: float = 900.0
-@export var leader_tint: Color = Color(1.0, 0.25, 0.85, 1.0)
+@export var leader_tint: Color = Color(1.0, 0.15, 0.15, 1.0)
 
 var _active: bool = false
 var _last_enemy_pos: Vector2 = Vector2.ZERO
@@ -63,10 +63,10 @@ func _process(_delta: float) -> void:
 	if GameState.artifact_parts_collected >= required_core:
 		return
 
-	# Condição: todos os gadgets + upgrades >= 8.
+	# Condição: todos os gadgets + upgrades >= 6.
 	if not GameState.has_all_gadgets():
 		return
-	if not GameState.has_upgrades_at_least(8):
+	if not GameState.has_upgrades_at_least(6):
 		return
 
 	GameState.mid_core_event_triggered = true
