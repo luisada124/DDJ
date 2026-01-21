@@ -29,60 +29,15 @@ var resources := {
 var vault_unlocked: Dictionary = {} # station_id -> bool
 var vault_resources: Dictionary = {} # station_id -> {res_type -> int}
 
-const QUEST_KILL_15_BASIC := "kill_15_basic"
-const QUEST_KILL_10_SNIPER := "kill_10_sniper"
-const QUEST_KILL_5_TANK := "kill_5_tank"
-const QUEST_KILL_25_SNIPER_AMETISTA := "kill_25_sniper_ametista"
-const QUEST_KILL_12_TANK_AMETISTA := "kill_12_tank_ametista"
-const QUEST_TAVERN_BANDIT := "tavern_bandit"
-const QUEST_DEFS := {
-	QUEST_KILL_15_BASIC: {
-		"title": "Limpar o Setor",
-		"description": "Mata 15 inimigos basicos.",
-		"enemy_id": "basic",
-		"goal": 15,
-		"reward": {"scrap": 60, "mineral": 25},
-	},
-	QUEST_KILL_10_SNIPER: {
-		"title": "Atiradores",
-		"description": "Mata 10 inimigos sniper.",
-		"enemy_id": "sniper",
-		"goal": 10,
-		"reward": {"scrap": 50, "mineral": 45},
-	},
-	QUEST_KILL_5_TANK: {
-		"title": "Blindados",
-		"description": "Mata 5 inimigos tank.",
-		"enemy_id": "tank",
-		"goal": 5,
-		"reward": {"scrap": 80, "mineral": 60},
-	},
-	QUEST_KILL_25_SNIPER_AMETISTA: {
-		"title": "Olho Roxo",
-		"description": "Mata 25 inimigos sniper (missao dificil).",
-		"enemy_id": "sniper",
-		"goal": 25,
-		"reward": {"scrap": 140, "mineral": 120, "ametista": 1},
-	},
-	QUEST_KILL_12_TANK_AMETISTA: {
-		"title": "Quebra-Cascos",
-		"description": "Mata 12 inimigos tank (missao dificil).",
-		"enemy_id": "tank",
-		"goal": 12,
-		"reward": {"scrap": 220, "mineral": 180, "ametista": 2},
-	},
-	QUEST_TAVERN_BANDIT: {
-		"title": "Acerto de Contas",
-		"description": "Derrota o Bandido na taberna do Mercador Delta e volta ao Cacador no Refugio Epsilon para receber a recompensa.",
-		"goal": 1,
-		"giver_station_id": "station_epsilon",
-		"target_station_id": "station_delta",
-		"reward": {},
-		"artifact_parts_reward": {"reverse_thruster": 3},
-	},
-}
+const QuestDatabase := preload("res://systems/QuestDatabase.gd")
+const QUEST_KILL_15_BASIC := QuestDatabase.QUEST_KILL_15_BASIC
+const QUEST_KILL_10_SNIPER := QuestDatabase.QUEST_KILL_10_SNIPER
+const QUEST_KILL_5_TANK := QuestDatabase.QUEST_KILL_5_TANK
+const QUEST_TAVERN_BANDIT := QuestDatabase.QUEST_TAVERN_BANDIT
+const QUEST_DEFS := QuestDatabase.QUEST_DEFS
 
 var quests: Dictionary = {}
+var tavern_hi_scores: Dictionary = {}
 
 var upgrades := {
 	"hull": 0,      # +HP max
@@ -327,6 +282,18 @@ func claim_quest(quest_id: String) -> bool:
 	q["claimed"] = true
 	quests[quest_id] = q
 
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
+func get_tavern_hi_score(station_id: String) -> int:
+	return int(tavern_hi_scores.get(station_id, 0))
+
+func record_tavern_score(station_id: String, score: int) -> bool:
+	var current := get_tavern_hi_score(station_id)
+	if score <= current:
+		return false
+	tavern_hi_scores[station_id] = score
 	emit_signal("state_changed")
 	_queue_save()
 	return true
@@ -618,6 +585,7 @@ func save_game() -> void:
 		"vault_unlocked": vault_unlocked,
 		"vault_resources": vault_resources,
 		"quests": quests,
+		"tavern_hi_scores": tavern_hi_scores,
 		"upgrades": upgrades,
 		"player_health": player_health,
 		"artifact_parts_collected": artifact_parts_collected,
@@ -676,6 +644,10 @@ func load_game() -> void:
 	if typeof(loaded_quests) == TYPE_DICTIONARY:
 		quests = loaded_quests
 
+	var loaded_tavern_scores = data.get("tavern_hi_scores")
+	if typeof(loaded_tavern_scores) == TYPE_DICTIONARY:
+		tavern_hi_scores = loaded_tavern_scores
+
 	var loaded_upgrades = data.get("upgrades")
 	if typeof(loaded_upgrades) == TYPE_DICTIONARY:
 		for upgrade_id in (loaded_upgrades as Dictionary).keys():
@@ -726,6 +698,7 @@ func _apply_defaults() -> void:
 	vault_resources = {}
 	quests = {}
 	_ensure_quests_initialized()
+	tavern_hi_scores = {}
 	upgrades = {
 		"hull": 0,
 		"blaster": 0,

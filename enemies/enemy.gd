@@ -14,6 +14,8 @@ const STATION_SAFE_MARGIN := 120.0
 @export var desired_distance: float = 300.0   # distância “ideal” ao player
 @export var distance_tolerance: float = 20.0  # margem +/- antes de mexer
 @export var chase_range: float = 2000.0
+@export var detection_range: float = 0.0
+@export var detection_mask: int = 3
 
 @export var max_health: int = 30
 @export var contact_damage: int = 10
@@ -29,6 +31,11 @@ const STATION_SAFE_MARGIN := 120.0
 @export var ametista_drop_chance: float = 0.015
 @export var scrap_amount: int = 1
 @export var mineral_amount: int = 1
+
+@export var patrol_radius: float = 650.0
+@export var patrol_speed: float = 0.0
+@export var patrol_pause_time: float = 0.6
+@export var patrol_retarget_distance: float = 24.0
 var enemy_data: EnemyData
 
 
@@ -39,17 +46,29 @@ var fire_cooldown: float = 0.0
 # Opcional: guardas de estação preenchem isto no spawn.
 var home_station: Node2D = null
 var station_safe_radius: float = 0.0
+var _patrol_center: Vector2
+var _patrol_target: Vector2
+var _patrol_pause_timer: float = 0.0
+var _tracking_player: bool = false
+var _rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
 	enemy_data = EnemyDatabase.get_data(enemy_id)   # <- buscar data
-	EnemyDatabase.apply_to(self, enemy_id)          # <- aplicar stats
+	EnemyDatabase.apply_to(self, enemy_id, difficulty_multiplier)          # <- aplicar stats
 
 	_apply_texture()
 
 	current_health = max_health
 	add_to_group("enemy")
 	player = get_tree().get_first_node_in_group("player") as CharacterBody2D
+	_rng.randomize()
+	_patrol_center = global_position
+	_pick_patrol_target()
+	if detection_range <= 0.0:
+		detection_range = chase_range
+	if patrol_speed <= 0.0:
+		patrol_speed = move_speed * 0.45
 
 
 func _apply_texture() -> void:
@@ -65,32 +84,35 @@ func _apply_texture() -> void:
 func _physics_process(delta: float) -> void:
 	if player == null or not is_instance_valid(player) or not player.is_in_group("player"):
 		player = get_tree().get_first_node_in_group("player") as CharacterBody2D
-		if player == null:
-			return
 
-	var to_player: Vector2 = player.global_position - global_position
-	var distance := to_player.length()
+	var has_player := player != null
+	var to_player := Vector2.ZERO
+	var distance := INF
+	var dir := Vector2.ZERO
+	if has_player:
+		to_player = player.global_position - global_position
+		distance = to_player.length()
+		if distance > 0.001:
+			dir = to_player / distance
 
-	# fora do radar -> não faz nada
-	if distance > chase_range:
-		velocity = Vector2.ZERO
-		return
+	var can_detect := has_player and _can_detect_player(distance)
 
-	var dir := to_player.normalized()
-
-	# Mantém uma órbita: se está muito longe, aproxima; se está muito perto, afasta
-	var min_dist := desired_distance - distance_tolerance
-	var max_dist := desired_distance + distance_tolerance
-
-	if distance < min_dist:
-		# muito perto -> afastar
-		velocity = -dir * move_speed
-	elif distance > max_dist:
-		# muito longe -> aproximar
-		velocity = dir * move_speed
+	if can_detect:
+		_tracking_player = true
+		_handle_chase(distance, dir)
 	else:
 		# está numa boa distância -> paira
 		velocity = Vector2.ZERO
+
+		if _tracking_player:
+			_tracking_player = false
+			_patrol_center = global_position
+			_patrol_pause_timer = patrol_pause_time
+			_pick_patrol_target()
+		_handle_patrol(delta)
+
+	if has_player:
+		_handle_shooting(delta, dir, can_detect, distance)
 
 	# rodar a nave para apontar para o player
 	rotation = dir.angle() - SHIP_FORWARD.angle()
@@ -98,78 +120,77 @@ func _physics_process(delta: float) -> void:
 	_apply_station_safe_radius()
 	move_and_slide()
 
-	# disparar se dentro do chase_range
-	_handle_shooting(delta, dir)
-
-func _apply_station_safe_radius() -> void:
-	var station := _get_station_for_safety()
-	if station == null or player == null:
-		return
-
-	var safe_radius := station_safe_radius
-	if safe_radius <= 0.0:
-		safe_radius = DEFAULT_STATION_SAFE_RADIUS
-
-	# Só ativa a "bolha" se o player estiver mesmo ao pé da estação.
-	var player_station_dist := (player.global_position - station.global_position).length()
-	if player_station_dist > safe_radius:
-		return
-
-	var to_station := station.global_position - global_position
-	var dist_to_station := to_station.length()
-	if dist_to_station <= 0.001:
-		return
-
-	# Se a nave já estiver dentro da bolha, empurra para fora.
-	if dist_to_station < safe_radius:
-		velocity = -to_station.normalized() * move_speed
-		return
-
-	# Se estiver no limite, não deixa avançar para dentro (mas pode recuar/rodar).
-	if dist_to_station <= safe_radius + STATION_SAFE_MARGIN:
-		if velocity.dot(to_station) > 0.0:
-			velocity = Vector2.ZERO
-
-func _get_station_for_safety() -> Node2D:
-	if home_station != null and is_instance_valid(home_station):
-		return home_station
-	if player == null:
-		return null
-
-	var best: Node2D = null
-	var best_dist := INF
-	for n in get_tree().get_nodes_in_group("station"):
-		if n == null or not is_instance_valid(n):
-			continue
-		if not (n is Node2D):
-			continue
-		var s := n as Node2D
-		var d := (player.global_position - s.global_position).length()
-		if d < best_dist:
-			best_dist = d
-			best = s
-
-	var effective_radius := station_safe_radius if station_safe_radius > 0.0 else DEFAULT_STATION_SAFE_RADIUS
-	if best != null and best_dist <= effective_radius * 1.5:
-		return best
-	return null
-
-func _handle_shooting(delta: float, dir_to_player: Vector2) -> void:
+func _handle_shooting(delta: float, dir_to_player: Vector2, can_detect: bool, distance: float) -> void:
 	# contar cooldown
 	fire_cooldown -= delta
 	if fire_cooldown > 0.0:
 		return
 
-	# só dispara se o player estiver relativamente perto
-	if player == null:
+	# so dispara se o player estiver relativamente perto
+	if player == null or not can_detect:
 		return
 
-	var distance := (player.global_position - global_position).length()
 	if distance > chase_range:
 		return
 
 	_shoot(dir_to_player)
 	fire_cooldown = fire_interval
+
+func _handle_chase(distance: float, dir: Vector2) -> void:
+	var min_dist := desired_distance - distance_tolerance
+	var max_dist := desired_distance + distance_tolerance
+
+	if distance < min_dist:
+		velocity = -dir * move_speed
+	elif distance > max_dist:
+		velocity = dir * move_speed
+	else:
+		velocity = Vector2.ZERO
+
+	if dir != Vector2.ZERO:
+		rotation = dir.angle() - SHIP_FORWARD.angle()
+
+func _handle_patrol(delta: float) -> void:
+	if patrol_radius <= 0.0:
+		velocity = Vector2.ZERO
+		return
+
+	if _patrol_pause_timer > 0.0:
+		_patrol_pause_timer -= delta
+		velocity = Vector2.ZERO
+		return
+
+	var to_target := _patrol_target - global_position
+	if to_target.length() <= patrol_retarget_distance:
+		_patrol_pause_timer = patrol_pause_time
+		_pick_patrol_target()
+		velocity = Vector2.ZERO
+		return
+
+	var dir := to_target.normalized()
+	velocity = dir * patrol_speed
+	if dir != Vector2.ZERO:
+		rotation = dir.angle() - SHIP_FORWARD.angle()
+
+func _pick_patrol_target() -> void:
+	var angle := _rng.randf_range(0.0, TAU)
+	var radius := _rng.randf_range(patrol_radius * 0.4, patrol_radius)
+	_patrol_target = _patrol_center + Vector2(cos(angle), sin(angle)) * radius
+
+func _can_detect_player(distance: float) -> bool:
+	if player == null:
+		return false
+	if detection_range > 0.0 and distance > detection_range:
+		return false
+
+	var query := PhysicsRayQueryParameters2D.create(global_position, player.global_position)
+	query.exclude = [self]
+	query.collision_mask = detection_mask
+	query.collide_with_areas = false
+	var hit := get_world_2d().direct_space_state.intersect_ray(query)
+	if hit.is_empty():
+		return false
+	return hit.get("collider") == player
 
 
 func _shoot(dir_to_player: Vector2) -> void:

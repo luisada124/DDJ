@@ -1,3 +1,7 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# Do not commit installers/binaries
+*.exe
+textures/partes artefactos/Wispr Flow Setup.exe

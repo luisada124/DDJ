@@ -353,6 +353,38 @@ layout_mode = 2
 text = "Sair da conversa"
 visible = false
 
+[node name="KnifeGameSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+layout_mode = 2
+
+[node name="KnifeGameTitle" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+layout_mode = 2
+text = "Knife Game"
+
+[node name="KnifeGameInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Press A/D in time. Beat the tavern hi-score."
+
+[node name="KnifeGameHighScore" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+layout_mode = 2
+text = "Hi-score: 0"
+
+[node name="KnifeGameScore" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+layout_mode = 2
+text = "Score: 0"
+
+[node name="KnifeGamePrompt" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+layout_mode = 2
+text = "Press: -"
+
+[node name="KnifeGameResult" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+layout_mode = 2
+text = ""
+
+[node name="KnifeGameStartButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+layout_mode = 2
+text = "Start Knife Game"
+
 [node name="MechanicInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mecanico"]
 layout_mode = 2
 autowrap_mode = 3
