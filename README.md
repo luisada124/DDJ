@@ -83,11 +83,14 @@ Maquina auxiliar: 3
 auto_regen:3
 
 PROMPS:
-
-
-
+1.
+Chat mete so 2 artefactos para passar de zonas. 1 para passar para a 2 e 2 para passar para a 3. E tira os artefactos a mais do centro do mapa
 
 2.
+Chatini, agora preciso de implementar a mudança da zona 2 para a zona 3. Essa mudança vai ser o drop de um artefacto normal, daqueles que nós já temos lá, para passar de zona.
+Preciso que depois de o jogador obter todos os gadgets e tiver pelo menos todos os upgrades a nivel 8, apareca um balao de fala a vir de um inimigo a dizer "Temos de dizimar!" , "A chamar reforços", e Depois disto vem uma patrulha com montes de inimigos. Depois de o jogador matar todos os inimigos dessa patrulha aparece o artefacto para ele poder passar de mundo.
+
+
 
 chat tenho de atribuir as localizacoes de gadgets.
 vamos fazer os gadgets 1 a 1 da lista e PÁRA depois de cada gadget para eu testar e so a seguir  vamos para o proximo  da lista.

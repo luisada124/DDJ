@@ -135,6 +135,7 @@ var _knife_game_score: int = 0
 var _knife_game_sequence_index: int = 0
 var _knife_game_time_left: float = 0.0
 var _speech_time_left: float = 0.0
+var _speech_queue: Array[String] = []
 var _menu_guard: bool = false
 var _fullscreen_toggle_blocked: bool = false
 var _fullscreen_toggle_warned: bool = false
@@ -244,8 +245,13 @@ func _update_speech_bubble(delta: float) -> void:
 
 	_speech_time_left -= delta
 	if _speech_time_left <= 0.0:
-		speech_bubble.visible = false
-		return
+		if _speech_queue.size() > 0:
+			var next_text: String = _speech_queue[0]
+			_speech_queue.remove_at(0)
+			_start_speech(next_text)
+		else:
+			speech_bubble.visible = false
+			return
 
 	var p := get_tree().get_first_node_in_group("player")
 	if p is Node2D:
@@ -264,6 +270,12 @@ func _update_speech_bubble(delta: float) -> void:
 func _show_speech_bubble(text: String) -> void:
 	if speech_bubble == null or speech_label == null:
 		return
+	if speech_bubble.visible and _speech_time_left > 0.0:
+		_speech_queue.append(text)
+		return
+	_start_speech(text)
+
+func _start_speech(text: String) -> void:
 	speech_label.text = text
 	_speech_time_left = 4.5
 	speech_bubble.visible = true

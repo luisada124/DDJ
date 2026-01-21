@@ -39,10 +39,8 @@ func _ensure_position() -> void:
 	GameState.reverse_thruster_random_part_local = position
 	GameState.queue_save()
 
-func _on_body_entered(body: Node2D) -> void:
-	if body != null and body.is_in_group("player"):
-		GameState.reverse_thruster_random_part_collected = true
-		GameState.reverse_thruster_random_part_world = Vector2.ZERO
-		GameState.queue_save()
-	super(body)
-
+func _on_collected(player: Node2D) -> void:
+	GameState.reverse_thruster_random_part_collected = true
+	GameState.reverse_thruster_random_part_world = Vector2.ZERO
+	GameState.queue_save()
+	super(player)

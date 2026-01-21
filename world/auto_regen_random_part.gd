@@ -39,12 +39,11 @@ func _ensure_position() -> void:
 	_set_stored_local(position)
 	GameState.queue_save()
 
-func _on_body_entered(body: Node2D) -> void:
-	if body != null and body.is_in_group("player"):
-		_set_collected(true)
-		_set_world_marker(Vector2.ZERO)
-		GameState.queue_save()
-	super(body)
+func _on_collected(player: Node2D) -> void:
+	_set_collected(true)
+	_set_world_marker(Vector2.ZERO)
+	GameState.queue_save()
+	super(player)
 
 func _is_map_unlocked_for_this_part() -> bool:
 	if part_index == 1:
@@ -78,4 +77,3 @@ func _set_world_marker(v: Vector2) -> void:
 		GameState.auto_regen_part1_world = v
 	else:
 		GameState.auto_regen_part2_world = v
-

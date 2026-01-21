@@ -40,17 +40,16 @@ func _ensure_position() -> void:
 		position = stored
 		return
 
-	var r := bounds_local.grow(-margin)
-	var x := randf_range(r.position.x, r.position.x + r.size.x)
-	var y := randf_range(r.position.y, r.position.y + r.size.y)
+	var r: Rect2 = bounds_local.grow(-margin)
+	var x: float = randf_range(r.position.x, r.position.x + r.size.x)
+	var y: float = randf_range(r.position.y, r.position.y + r.size.y)
 	position = Vector2(x, y)
 
 	GameState.vacuum_random_part_local = position
 	GameState.queue_save()
 
-func _on_body_entered(body: Node2D) -> void:
-	if body != null and body.is_in_group("player"):
-		GameState.vacuum_random_part_collected = true
-		GameState.vacuum_random_part_world = Vector2.ZERO
-		GameState.queue_save()
-	super(body)
+func _on_collected(player: Node2D) -> void:
+	GameState.vacuum_random_part_collected = true
+	GameState.vacuum_random_part_world = Vector2.ZERO
+	GameState.queue_save()
+	super(player)
