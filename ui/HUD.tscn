@@ -169,6 +169,7 @@ layout_mode = 2
 [node name="ResetButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox"]
 layout_mode = 2
 text = "Reset Save"
+visible = false
 
 [node name="CloseButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox"]
 layout_mode = 2
@@ -775,6 +776,10 @@ size_flags_horizontal = 3
 [node name="DebugGiveResourcesButton" type="Button" parent="MissionsMenu/Panel/Margin/VBox"]
 layout_mode = 2
 text = "DEBUG: +Recursos"
+
+[node name="ResetSaveTabButton" type="Button" parent="MissionsMenu/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Reset Save"
 
 [node name="CloseMissionsButton" type="Button" parent="MissionsMenu/Panel/Margin/VBox"]
 layout_mode = 2

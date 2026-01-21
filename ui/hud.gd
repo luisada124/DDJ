@@ -101,6 +101,7 @@ extends Control
 @onready var inventory_list: VBoxContainer = $MissionsMenu/Panel/Margin/VBox/Tabs/Inventario/InventoryScroll/InventoryList
 @onready var debug_give_resources_button: Button = $MissionsMenu/Panel/Margin/VBox/DebugGiveResourcesButton
 @onready var close_missions_button: Button = $MissionsMenu/Panel/Margin/VBox/CloseMissionsButton
+@onready var reset_save_tab_button: Button = $MissionsMenu/Panel/Margin/VBox/ResetSaveTabButton
 
 const DEFAULT_STATION_ID := "station_alpha"
 const BOSS_PLANET_STATION_ID := "boss_planet"
@@ -165,6 +166,8 @@ func _ready() -> void:
 	close_map_button.pressed.connect(_on_close_map_pressed)
 	close_trader_button.pressed.connect(_on_close_trader_pressed)
 	close_missions_button.pressed.connect(_on_close_missions_pressed)
+	if reset_save_tab_button != null:
+		reset_save_tab_button.pressed.connect(_on_reset_pressed)
 	if debug_give_resources_button != null:
 		debug_give_resources_button.visible = OS.is_debug_build()
 		debug_give_resources_button.pressed.connect(_on_debug_give_resources_pressed)

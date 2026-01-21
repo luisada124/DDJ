@@ -83,8 +83,13 @@ Maquina auxiliar: 3
 auto_regen:3
 
 PROMPS:
-1.
-Chat mete so 2 artefactos para passar de zonas. 1 para passar para a 2 e 2 para passar para a 3. E tira os artefactos a mais do centro do mapa
+
+
+Chatini, agora preciso de implementar a mudança da zona 2 para a zona 3. Essa mudança vai ser o drop de um artefacto normal, daqueles que nós já temos lá, para passar de zona.E nesse diálogo, mete algo do género:  "Ah, és novo por estas bandas? Aqui temos um minério especial. Se me apanhas quatro com esta broca, dou-te uma recompensa"
+
+depois disso a UI sai da estacao e a broca de mineracao (gadget) aparece ao pe do player e este tem uma missao de apanhar 4 ametistas para vir devolver a estacao
+
+ZONA 2 PARA 3:
 
 2.
 Chatini, agora preciso de implementar a mudança da zona 2 para a zona 3. Essa mudança vai ser o drop de um artefacto normal, daqueles que nós já temos lá, para passar de zona.

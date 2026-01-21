@@ -102,7 +102,7 @@ var upgrades := {
 	"magnet": 0,    # maior range/velocidade do magnet
 }
 
-const ARTIFACT_PARTS_REQUIRED := 4
+const ARTIFACT_PARTS_REQUIRED := 2
 var artifact_parts_collected: int = 0
 var artifact_completed: bool = false
 
@@ -1266,7 +1266,7 @@ func load_game() -> void:
 			upgrades[upgrade_id] = int(loaded_upgrades[upgrade_id])
 
 	player_health = int(data.get("player_health", player_max_health))
-	artifact_parts_collected = int(data.get("artifact_parts_collected", 0))
+	artifact_parts_collected = min(int(data.get("artifact_parts_collected", 0)), ARTIFACT_PARTS_REQUIRED)
 	artifact_completed = bool(data.get("artifact_completed", false))
 
 	var loaded_artifact_parts = data.get("artifact_parts")

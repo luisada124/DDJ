@@ -48,6 +48,9 @@ part_index = 2
 [node name="AuxShipRandomPart" parent="." instance=ExtResource("5_artifact_part")]
 script = ExtResource("9_aux_ship_random_part")
 
+[node name="RelicPartZone2" parent="." instance=ExtResource("5_artifact_part")]
+position = Vector2(2600, 2600)
+
 [node name="Mining" type="Node2D" parent="."]
 
 [node name="DrillPart" parent="Mining" instance=ExtResource("5_artifact_part")]
