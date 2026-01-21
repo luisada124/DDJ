@@ -30,6 +30,8 @@ extends Control
 @onready var buy_artifact_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyArtifactPartButton
 @onready var buy_vacuum_map_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyVacuumMapButton
 @onready var buy_vacuum_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyVacuumPartButton
+@onready var buy_reverse_thruster_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyReverseThrusterPartButton
+@onready var buy_reverse_thruster_map_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyReverseThrusterMapButton
 @onready var buy_repair_kit_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyRepairKitButton
 @onready var ametista_to_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/AmetistaToMineralButton
 @onready var ametista_to_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/AmetistaToScrapButton
@@ -159,6 +161,8 @@ func _ready() -> void:
 	buy_artifact_part_button.pressed.connect(_on_buy_artifact_part)
 	buy_vacuum_map_button.pressed.connect(_on_buy_vacuum_map_pressed)
 	buy_vacuum_part_button.pressed.connect(_on_buy_vacuum_part_pressed)
+	buy_reverse_thruster_part_button.pressed.connect(_on_buy_reverse_thruster_part_pressed)
+	buy_reverse_thruster_map_button.pressed.connect(_on_buy_reverse_thruster_map_pressed)
 	buy_repair_kit_button.pressed.connect(_on_buy_repair_kit_pressed)
 	ametista_to_mineral_button.pressed.connect(_on_trade_ametista_to_mineral)
 	ametista_to_scrap_button.pressed.connect(_on_trade_ametista_to_scrap)
@@ -524,6 +528,8 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	var artifact_cost: Dictionary = StationCatalog.get_artifact_part_cost(station_id)
 	var vacuum_map_cost: Dictionary = StationCatalog.get_vacuum_map_cost(station_id)
 	var vacuum_part_cost: Dictionary = StationCatalog.get_vacuum_part_shop_cost(station_id)
+	var rt_shop_cost: Dictionary = StationCatalog.get_reverse_thruster_shop_part_cost(station_id)
+	var rt_map_cost: Dictionary = StationCatalog.get_reverse_thruster_map_cost(station_id)
 
 	var parts := "%d/%d" % [GameState.artifact_parts_collected, GameState.ARTIFACT_PARTS_REQUIRED]
 	trader_info.text = "%s\nScrap: %d | Mineral: %d | Partes: %s" % [
@@ -568,6 +574,21 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	if show_vacuum_part:
 		buy_vacuum_part_button.text = "Comprar 1 peca Vacuum (%s)" % _format_cost(vacuum_part_cost)
 		buy_vacuum_part_button.disabled = not GameState.can_afford(vacuum_part_cost)
+
+	var rt_parts_have := GameState.get_artifact_parts("reverse_thruster")
+	var rt_parts_required := ArtifactDatabase.get_parts_required("reverse_thruster")
+	var rt_station_already_bought := bool(GameState.reverse_thruster_shop_parts_bought.get(station_id, false))
+	var show_rt_part := not rt_shop_cost.is_empty() and not GameState.has_artifact("reverse_thruster") and rt_parts_have < rt_parts_required and not rt_station_already_bought
+	buy_reverse_thruster_part_button.visible = show_rt_part
+	if show_rt_part:
+		buy_reverse_thruster_part_button.text = "Comprar 1 peca Reverse Thruster (%s)" % _format_cost(rt_shop_cost)
+		buy_reverse_thruster_part_button.disabled = not GameState.can_afford(rt_shop_cost)
+
+	var show_rt_map := not rt_map_cost.is_empty() and not GameState.reverse_thruster_map_bought and not GameState.has_artifact("reverse_thruster") and not GameState.reverse_thruster_random_part_collected
+	buy_reverse_thruster_map_button.visible = show_rt_map
+	if show_rt_map:
+		buy_reverse_thruster_map_button.text = "Mapa Reverse Thruster (marca no minimapa) (%s)" % _format_cost(rt_map_cost)
+		buy_reverse_thruster_map_button.disabled = not GameState.can_afford(rt_map_cost)
 
 	var a2m_give: Dictionary = a2m.get("give", {}) as Dictionary
 	var a2m_recv: Dictionary = a2m.get("receive", {}) as Dictionary
@@ -774,6 +795,20 @@ func _on_buy_vacuum_part_pressed() -> void:
 		station_id = DEFAULT_STATION_ID
 	var cost: Dictionary = StationCatalog.get_vacuum_part_shop_cost(station_id)
 	GameState.buy_vacuum_shop_part(station_id, cost)
+
+func _on_buy_reverse_thruster_part_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var cost: Dictionary = StationCatalog.get_reverse_thruster_shop_part_cost(station_id)
+	GameState.buy_reverse_thruster_shop_part(station_id, cost)
+
+func _on_buy_reverse_thruster_map_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var cost: Dictionary = StationCatalog.get_reverse_thruster_map_cost(station_id)
+	GameState.buy_reverse_thruster_map(station_id, cost)
 
 func _on_debug_give_resources_pressed() -> void:
 	GameState.debug_grant_test_resources()

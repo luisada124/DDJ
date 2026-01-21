@@ -59,7 +59,6 @@ const QUEST_DEFS := {
 		"giver_station_id": "station_epsilon",
 		"target_station_id": "station_delta",
 		"reward": {},
-		"artifact_parts_reward": {"reverse_thruster": 3},
 		"qte_steps": 6,
 		"qte_time": 1.2,
 	},

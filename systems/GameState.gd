@@ -41,6 +41,13 @@ var vacuum_random_part_world: Vector2 = Vector2.ZERO # runtime (global), usado p
 var vacuum_random_part_collected: bool = false
 var vacuum_shop_part_bought: bool = false
 
+# Reverse Thruster: 2 pecas em mercados (2 estacoes diferentes) + 1 peca aleatoria na Zona 1.
+var reverse_thruster_map_bought: bool = false
+var reverse_thruster_random_part_local: Vector2 = Vector2.ZERO
+var reverse_thruster_random_part_world: Vector2 = Vector2.ZERO # runtime (global), usado pelo minimapa
+var reverse_thruster_random_part_collected: bool = false
+var reverse_thruster_shop_parts_bought: Dictionary = {} # station_id -> bool (compra unica por estacao)
+
 # Cofres por estacao: recursos guardados nao se perdem na morte.
 var vault_unlocked: Dictionary = {} # station_id -> bool
 var vault_resources: Dictionary = {} # station_id -> {res_type -> int}
@@ -577,6 +584,46 @@ func buy_vacuum_shop_part(station_id: String, cost: Dictionary) -> bool:
 	_queue_save()
 	return true
 
+func buy_reverse_thruster_shop_part(station_id: String, cost: Dictionary) -> bool:
+	if station_id != "station_alpha" and station_id != "station_delta":
+		return false
+	if has_artifact("reverse_thruster"):
+		return false
+	var required := ArtifactDatabase.get_parts_required("reverse_thruster")
+	if required <= 0:
+		return false
+	if get_artifact_parts("reverse_thruster") >= required:
+		return false
+	if bool(reverse_thruster_shop_parts_bought.get(station_id, false)):
+		return false
+	if not can_afford(cost):
+		return false
+	for res_type_variant in cost.keys():
+		var res_type := str(res_type_variant)
+		resources[res_type] = int(resources.get(res_type, 0)) - int(cost[res_type_variant])
+	collect_artifact_part("reverse_thruster")
+	reverse_thruster_shop_parts_bought[station_id] = true
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
+func buy_reverse_thruster_map(station_id: String, cost: Dictionary) -> bool:
+	if station_id != "station_alpha":
+		return false
+	if reverse_thruster_map_bought:
+		return false
+	if has_artifact("reverse_thruster") or reverse_thruster_random_part_collected:
+		return false
+	if not can_afford(cost):
+		return false
+	for res_type_variant in cost.keys():
+		var res_type := str(res_type_variant)
+		resources[res_type] = int(resources.get(res_type, 0)) - int(cost[res_type_variant])
+	reverse_thruster_map_bought = true
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
 func get_repair_kit_count() -> int:
 	return int(consumables.get("repair_kit", 0))
 
@@ -844,6 +891,10 @@ func save_game() -> void:
 		"vacuum_random_part_local": [vacuum_random_part_local.x, vacuum_random_part_local.y],
 		"vacuum_random_part_collected": vacuum_random_part_collected,
 		"vacuum_shop_part_bought": vacuum_shop_part_bought,
+		"reverse_thruster_map_bought": reverse_thruster_map_bought,
+		"reverse_thruster_random_part_local": [reverse_thruster_random_part_local.x, reverse_thruster_random_part_local.y],
+		"reverse_thruster_random_part_collected": reverse_thruster_random_part_collected,
+		"reverse_thruster_shop_parts_bought": reverse_thruster_shop_parts_bought,
 		"vault_unlocked": vault_unlocked,
 		"vault_resources": vault_resources,
 		"quests": quests,
@@ -905,6 +956,20 @@ func load_game() -> void:
 	else:
 		vacuum_random_part_local = Vector2.ZERO
 	vacuum_random_part_world = Vector2.ZERO
+	reverse_thruster_map_bought = bool(data.get("reverse_thruster_map_bought", false))
+	reverse_thruster_random_part_collected = bool(data.get("reverse_thruster_random_part_collected", false))
+	var stored_rt = data.get("reverse_thruster_random_part_local")
+	if typeof(stored_rt) == TYPE_ARRAY and (stored_rt as Array).size() >= 2:
+		var a_rt := stored_rt as Array
+		reverse_thruster_random_part_local = Vector2(float(a_rt[0]), float(a_rt[1]))
+	else:
+		reverse_thruster_random_part_local = Vector2.ZERO
+	reverse_thruster_random_part_world = Vector2.ZERO
+	var loaded_rt_shops = data.get("reverse_thruster_shop_parts_bought")
+	if typeof(loaded_rt_shops) == TYPE_DICTIONARY:
+		reverse_thruster_shop_parts_bought = loaded_rt_shops
+	else:
+		reverse_thruster_shop_parts_bought = {}
 
 	var loaded_consumables = data.get("consumables")
 	if typeof(loaded_consumables) == TYPE_DICTIONARY:
@@ -1016,6 +1081,11 @@ func _apply_defaults() -> void:
 	vacuum_random_part_world = Vector2.ZERO
 	vacuum_random_part_collected = false
 	vacuum_shop_part_bought = false
+	reverse_thruster_map_bought = false
+	reverse_thruster_random_part_local = Vector2.ZERO
+	reverse_thruster_random_part_world = Vector2.ZERO
+	reverse_thruster_random_part_collected = false
+	reverse_thruster_shop_parts_bought = {}
 
 func queue_save() -> void:
 	_queue_save()

@@ -87,15 +87,13 @@ auto_regen:3
 
 PROMPS:
 
-1. 
 
-Vamos alterar as pecas de alguns gadgets, o side_dash, a aux_ship e o auto_regen quero que seja so preciso 3 pecas
 
 
 2.
 
-chat tenho de atribuir as localizacoes de todas as partes para todos os gadgets.
-vamos fazer os gadgets 1 a 1 da lista e para depois de cada gadget para eu testar e depois vamos seguindo a lista.
+chat tenho de atribuir as localizacoes de gadgets.
+vamos fazer os gadgets 1 a 1 da lista e PÁRA depois de cada gadget para eu testar e so a seguir  vamos para o proximo  da lista.
 
 para cada gadget nao te esquecas de tirar as localizacoes que temos agora das pecas no mini mapa.
 

@@ -168,6 +168,20 @@ static func get_vacuum_part_shop_cost(station_id: String) -> Dictionary:
 		return {"scrap": 120, "mineral": 30}
 	return {}
 
+static func get_reverse_thruster_shop_part_cost(station_id: String) -> Dictionary:
+	# Reverse Thruster (3 pecas): A e B sao vendidas em 2 estacoes diferentes na Zona 1.
+	if station_id == "station_alpha":
+		return {"scrap": 90, "mineral": 15}
+	if station_id == "station_delta":
+		return {"scrap": 90, "mineral": 15}
+	return {}
+
+static func get_reverse_thruster_map_cost(station_id: String) -> Dictionary:
+	# Mapa que revela a peca aleatoria do Reverse Thruster na Zona 1.
+	if station_id == "station_alpha":
+		return {"scrap": 35}
+	return {}
+
 static func get_offered_quests(station_id: String) -> Array:
 	var npcs: Array = get_station_npcs(station_id)
 	if not npcs.is_empty():

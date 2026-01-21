@@ -14,14 +14,14 @@ const ARTIFACTS: Dictionary = {
 	},
 	"side_dash": {
 		"title": "Dash Lateral",
-		"parts_required": 6,
+		"parts_required": 3,
 		"dash_speed": 900.0,
 		"dash_duration": 0.10,
 		"dash_cooldown": 1.2,
 	},
 	"aux_ship": {
 		"title": "Nave Auxiliar",
-		"parts_required": 6,
+		"parts_required": 3,
 		"fire_interval": 0.45,
 		"laser_damage": 4,
 		"range": 1400.0,
