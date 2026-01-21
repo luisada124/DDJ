@@ -354,6 +354,29 @@ text = "Trocar"
 layout_mode = 2
 text = "Trocar"
 
+[node name="DialogueSeparatorTitle" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+layout_mode = 2
+text = "Conversas"
+
+[node name="DialogueText" type="RichTextLabel" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 140)
+fit_content = false
+scroll_active = false
+autowrap_mode = 3
+text = "..."
+
+[node name="DialogueChoices" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+layout_mode = 2
+
+[node name="EndDialogueButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+layout_mode = 2
+text = "Sair da conversa"
+visible = false
+
+[node name="MissionsToDialogueSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+layout_mode = 2
+
 [node name="TavernInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 autowrap_mode = 3
@@ -377,13 +400,16 @@ text = "NPC 3"
 
 [node name="NPCToMissionsSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
+visible = false
 
 [node name="MissionsSeparatorTitle" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 text = "Missoes"
+visible = false
 
 [node name="QuestList" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
+visible = false
 
 [node name="QuestDetails" type="RichTextLabel" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
@@ -392,23 +418,20 @@ fit_content = false
 scroll_active = false
 autowrap_mode = 3
 text = "Seleciona uma missao."
+visible = false
 
 [node name="DeliverySeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
+visible = false
 
 [node name="DeliveryTitle" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 text = "Entregar missoes"
+visible = false
 
 [node name="DeliveryList" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
-
-[node name="MissionsToDialogueSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
-layout_mode = 2
-
-[node name="DialogueSeparatorTitle" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
-layout_mode = 2
-text = "Conversas"
+visible = false
 
 [node name="BanditQteSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
@@ -442,22 +465,6 @@ text = "Comecar duelo"
 [node name="BanditQteResult" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/BanditQtePanel"]
 layout_mode = 2
 text = ""
-
-[node name="DialogueText" type="RichTextLabel" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
-layout_mode = 2
-custom_minimum_size = Vector2(0, 140)
-fit_content = false
-scroll_active = false
-autowrap_mode = 3
-text = "..."
-
-[node name="DialogueChoices" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
-layout_mode = 2
-
-[node name="EndDialogueButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
-layout_mode = 2
-text = "Sair da conversa"
-visible = false
 
 [node name="KnifeGameSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
@@ -635,6 +642,7 @@ layout_mode = 2
 
 [node name="TavernBottomBar" type="HBoxContainer" parent="TraderMenu/Panel/Margin/VBox"]
 layout_mode = 2
+visible = false
 size_flags_horizontal = 3
 
 [node name="AcceptKillQuestButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/TavernBottomBar"]

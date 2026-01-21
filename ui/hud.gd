@@ -367,10 +367,7 @@ func _set_trader_menu_visible(visible: bool) -> void:
 func _on_trader_tab_changed(_tab: int) -> void:
 	if tavern_bottom_bar == null or trader_tabs == null:
 		return
-	if _active_station_id == BOSS_PLANET_STATION_ID:
-		tavern_bottom_bar.visible = false
-	else:
-		tavern_bottom_bar.visible = trader_tabs.current_tab == TRADER_TAB_TAVERN
+	tavern_bottom_bar.visible = false
 
 func _set_missions_menu_visible(visible: bool) -> void:
 	if _menu_guard:
@@ -614,15 +611,14 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	repair_ship_button.text = "Reparar nave (cura total) (%s)" % _format_cost(repair_cost)
 	repair_ship_button.disabled = GameState.player_health >= GameState.player_max_health or not GameState.can_afford(repair_cost)
 
-	var offered: Array = StationCatalog.get_offered_quests(station_id)
-	offered = GameState.filter_offered_quests(offered)
+	_update_npc_button_text()
+	var offered: Array = _get_offered_quests_for_active_npc()
 	_offered_quest_id = ""
 	if offered.size() > 0:
 		_offered_quest_id = str(offered[0])
 	_rebuild_station_quest_list(offered)
 	_rebuild_delivery_list(station_id)
 	_update_station_quest_buttons()
-	_update_npc_button_text()
 	_update_vault_ui()
 	_update_bandit_qte_ui()
 
@@ -640,10 +636,7 @@ func _update_boss_planet_ui() -> void:
 		trader_tabs.visible = not is_boss_planet
 
 	if tavern_bottom_bar != null:
-		if is_boss_planet:
-			tavern_bottom_bar.visible = false
-		elif trader_tabs != null:
-			tavern_bottom_bar.visible = trader_tabs.current_tab == TRADER_TAB_TAVERN
+		tavern_bottom_bar.visible = false
 
 	if not is_boss_planet:
 		return
@@ -888,9 +881,8 @@ func _update_npc_button_text() -> void:
 				found = true
 				break
 		if not found:
-			var first_npc: Dictionary = _station_npcs[0] as Dictionary
-			_active_npc_id = str(first_npc.get("id", ""))
-			_active_npc_type = str(first_npc.get("type", ""))
+			_active_npc_id = ""
+			_active_npc_type = ""
 
 	var buttons: Array[Button] = [npc1_button, npc2_button, npc3_button]
 	for i in range(buttons.size()):
@@ -907,21 +899,22 @@ func _set_active_npc(npc: Dictionary) -> void:
 	_active_npc_id = str(npc.get("id", ""))
 	_active_npc_type = str(npc.get("type", ""))
 	_refresh_offered_quest()
+	_rebuild_station_quest_list(_get_offered_quests_for_active_npc())
 
 func _refresh_offered_quest() -> void:
 	_offered_quest_id = _pick_offered_quest_for_npc()
 	_update_station_quest_buttons()
 
-func _pick_offered_quest_for_npc() -> String:
+func _get_offered_quests_for_active_npc() -> Array:
 	var station_id := _active_station_id
 	if station_id.is_empty():
 		station_id = DEFAULT_STATION_ID
-	if _active_npc_type.is_empty():
-		return ""
+	if _active_npc_id.is_empty() or _active_npc_type.is_empty():
+		return []
 
 	var pool := QuestDatabase.get_quest_pool(_active_npc_type)
 	if pool.is_empty():
-		return ""
+		return []
 
 	var candidates: Array[String] = []
 	for quest_id_variant in pool:
@@ -930,6 +923,10 @@ func _pick_offered_quest_for_npc() -> String:
 			continue
 		candidates.append(quest_id)
 
+	return GameState.filter_offered_quests(candidates)
+
+func _pick_offered_quest_for_npc() -> String:
+	var candidates := _get_offered_quests_for_active_npc()
 	if candidates.is_empty():
 		return ""
 
@@ -1352,6 +1349,7 @@ func _render_dialogue() -> void:
 	var node_id := str(_dialogue_state.get("node", "start"))
 
 	var nodes := _get_dialogue_nodes(station_id, npc_id)
+	nodes = _inject_npc_quest_nodes(nodes, station_id, npc_id)
 	var node: Dictionary = nodes.get(node_id, {}) as Dictionary
 	if node.is_empty():
 		dialogue_text.text = "..."
@@ -1422,6 +1420,125 @@ func _end_dialogue() -> void:
 			child.queue_free()
 	if end_dialogue_button != null:
 		end_dialogue_button.visible = false
+
+func _inject_npc_quest_nodes(nodes: Dictionary, station_id: String, npc_id: String) -> Dictionary:
+	if nodes.is_empty():
+		return nodes
+	if npc_id == "hunter" or npc_id == "bandit":
+		return nodes
+
+	var quest_id := _pick_offered_quest_for_npc()
+	if quest_id.is_empty():
+		return nodes
+
+	var def: Dictionary = GameState.QUEST_DEFS.get(quest_id, {}) as Dictionary
+	if def.is_empty():
+		return nodes
+
+	var start: Dictionary = nodes.get("start", {}) as Dictionary
+	if start.is_empty():
+		return nodes
+
+	var q: Dictionary = GameState.get_quest_state(quest_id)
+	var accepted := bool(q.get("accepted", false))
+	var completed := bool(q.get("completed", false))
+	var claimed := bool(q.get("claimed", false))
+	var title := str(def.get("title", "Missao"))
+	var description := str(def.get("description", ""))
+	var goal: int = int(def.get("goal", 0))
+	var progress: int = int(q.get("progress", 0))
+
+	var choices: Array = start.get("choices", []) as Array
+	choices = choices.duplicate()
+
+	var quest_choice_index := -1
+	for i in range(choices.size()):
+		if typeof(choices[i]) != TYPE_DICTIONARY:
+			continue
+		var c: Dictionary = choices[i]
+		var next := str(c.get("next", ""))
+		var text := str(c.get("text", ""))
+		if next == "quest" or text.findn("missao") >= 0:
+			quest_choice_index = i
+			break
+
+	if not accepted:
+		if quest_choice_index >= 0:
+			var c: Dictionary = choices[quest_choice_index]
+			c["text"] = "Tens uma missao?"
+			c["next"] = "npc_quest_offer"
+			choices[quest_choice_index] = c
+		else:
+			choices.append({"text": "Tens uma missao?", "next": "npc_quest_offer"})
+		nodes["npc_quest_offer"] = {
+			"text": "Missao: %s\n%s" % [title, description],
+			"choices": [
+				{"text": "Aceitar.", "next": "action:accept_quest:%s:end" % quest_id},
+				{"text": "Agora nao.", "next": "end"},
+			],
+		}
+	elif completed and not claimed:
+		if quest_choice_index >= 0:
+			var c2: Dictionary = choices[quest_choice_index]
+			c2["text"] = "Tenho a missao pronta."
+			c2["next"] = "npc_quest_reward"
+			choices[quest_choice_index] = c2
+		else:
+			choices.append({"text": "Tenho a missao pronta.", "next": "npc_quest_reward"})
+		var can_claim := GameState.can_claim_quest_at_station(quest_id, station_id)
+		var reward_text := "Missao concluida: %s." % title
+		var reward_choices: Array = []
+		if can_claim:
+			reward_text += "\nQueres receber a recompensa?"
+			reward_choices = [
+				{"text": "Receber recompensa.", "next": "action:claim_quest:%s:end" % quest_id},
+				{"text": "Depois.", "next": "end"},
+			]
+		else:
+			var accepted_station_id := str(q.get("accepted_station_id", ""))
+			if not accepted_station_id.is_empty():
+				reward_text += "\nEntrega em: %s." % StationCatalog.get_station_title(accepted_station_id)
+			else:
+				reward_text += "\nEntrega noutra estacao."
+			reward_choices = [
+				{"text": "Ok.", "next": "end"},
+			]
+		nodes["npc_quest_reward"] = {
+			"text": reward_text,
+			"choices": reward_choices,
+		}
+	elif accepted and not completed:
+		if quest_choice_index >= 0:
+			var c3: Dictionary = choices[quest_choice_index]
+			c3["text"] = "Sobre a missao..."
+			c3["next"] = "npc_quest_status"
+			choices[quest_choice_index] = c3
+		else:
+			choices.append({"text": "Sobre a missao...", "next": "npc_quest_status"})
+		nodes["npc_quest_status"] = {
+			"text": "Missao: %s\nProgresso: %d/%d" % [title, progress, goal],
+			"choices": [
+				{"text": "Ok.", "next": "end"},
+			],
+		}
+	else:
+		if quest_choice_index >= 0:
+			var c4: Dictionary = choices[quest_choice_index]
+			c4["text"] = "Sobre a missao..."
+			c4["next"] = "npc_quest_status"
+			choices[quest_choice_index] = c4
+		else:
+			choices.append({"text": "Sobre a missao...", "next": "npc_quest_status"})
+		nodes["npc_quest_status"] = {
+			"text": "Missao: %s.\nSem trabalho novo por agora." % title,
+			"choices": [
+				{"text": "Ok.", "next": "end"},
+			],
+		}
+
+	start["choices"] = choices
+	nodes["start"] = start
+	return nodes
 
 func _get_dialogue_nodes(_station_id: String, npc_id: String) -> Dictionary:
 	# Conversas engraçadas com escolhas.
@@ -1931,7 +2048,10 @@ func _update_station_quest_buttons() -> void:
 	if _offered_quest_id.is_empty():
 		if station_quest_details != null:
 			station_quest_details.bbcode_enabled = true
-			station_quest_details.text = "Seleciona uma missao na lista."
+			if _active_npc_id.is_empty():
+				station_quest_details.text = "Fala com um NPC para ver missoes."
+			else:
+				station_quest_details.text = "Seleciona uma missao na lista."
 		return
 
 	if GameState.is_bandit_quest(_offered_quest_id):
@@ -2026,9 +2146,15 @@ func _rebuild_station_quest_list(offered: Array) -> void:
 		station_quest_list.remove_child(child)
 		child.queue_free()
 
+	if _active_npc_id.is_empty():
+		var hint := Label.new()
+		hint.text = "Fala com um NPC para ver missoes."
+		station_quest_list.add_child(hint)
+		return
+
 	if offered.is_empty():
 		var l := Label.new()
-		l.text = "Sem missoes nesta taberna."
+		l.text = "Sem missoes para este NPC."
 		station_quest_list.add_child(l)
 		return
 
