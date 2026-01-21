@@ -4,6 +4,9 @@ const SHIP_FORWARD := Vector2.UP   # ponta da nave na textura
 
 const EnemyDatabase := preload("res://enemies/EnemyDatabase.gd")
 
+const DEFAULT_STATION_SAFE_RADIUS := 320.0
+const STATION_SAFE_MARGIN := 120.0
+
 @export var enemy_id: String = "basic"
 @export var difficulty_multiplier: float = 1.0
 
@@ -39,6 +42,10 @@ var enemy_data: EnemyData
 var current_health: int
 var player: CharacterBody2D
 var fire_cooldown: float = 0.0
+
+# Opcional: guardas de estação preenchem isto no spawn.
+var home_station: Node2D = null
+var station_safe_radius: float = 0.0
 var _patrol_center: Vector2
 var _patrol_target: Vector2
 var _patrol_pause_timer: float = 0.0
@@ -55,7 +62,6 @@ func _ready() -> void:
 	current_health = max_health
 	add_to_group("enemy")
 	player = get_tree().get_first_node_in_group("player") as CharacterBody2D
-	print("Enemy READY, player =", player)
 	_rng.randomize()
 	_patrol_center = global_position
 	_pick_patrol_target()
@@ -95,6 +101,9 @@ func _physics_process(delta: float) -> void:
 		_tracking_player = true
 		_handle_chase(distance, dir)
 	else:
+		# está numa boa distância -> paira
+		velocity = Vector2.ZERO
+
 		if _tracking_player:
 			_tracking_player = false
 			_patrol_center = global_position
@@ -105,6 +114,10 @@ func _physics_process(delta: float) -> void:
 	if has_player:
 		_handle_shooting(delta, dir, can_detect, distance)
 
+	# rodar a nave para apontar para o player
+	rotation = dir.angle() - SHIP_FORWARD.angle()
+
+	_apply_station_safe_radius()
 	move_and_slide()
 
 func _handle_shooting(delta: float, dir_to_player: Vector2, can_detect: bool, distance: float) -> void:
@@ -179,6 +192,60 @@ func _can_detect_player(distance: float) -> bool:
 		return false
 	return hit.get("collider") == player
 
+func _apply_station_safe_radius() -> void:
+	if player == null:
+		return
+
+	var station := _get_station_for_safety()
+	if station == null:
+		return
+
+	var safe_radius := station_safe_radius
+	if safe_radius <= 0.0:
+		safe_radius = DEFAULT_STATION_SAFE_RADIUS
+
+	# Só ativa a "bolha" se o player estiver mesmo ao pé da estação.
+	var player_station_dist := (player.global_position - station.global_position).length()
+	if player_station_dist > safe_radius:
+		return
+
+	var to_station := station.global_position - global_position
+	var dist_to_station := to_station.length()
+	if dist_to_station <= 0.001:
+		return
+
+	# Se o inimigo já estiver dentro da bolha, empurra para fora.
+	if dist_to_station < safe_radius:
+		velocity = -to_station.normalized() * move_speed
+		return
+
+	# Se estiver no limite, não deixa avançar para dentro.
+	if dist_to_station <= safe_radius + STATION_SAFE_MARGIN:
+		if velocity.dot(to_station) > 0.0:
+			velocity = Vector2.ZERO
+
+func _get_station_for_safety() -> Node2D:
+	if home_station != null and is_instance_valid(home_station):
+		return home_station
+
+	var best: Node2D = null
+	var best_dist := INF
+	for n in get_tree().get_nodes_in_group("station"):
+		if n == null or not is_instance_valid(n):
+			continue
+		if not (n is Node2D):
+			continue
+		var s := n as Node2D
+		var d := (player.global_position - s.global_position).length()
+		if d < best_dist:
+			best_dist = d
+			best = s
+
+	var effective_radius := station_safe_radius if station_safe_radius > 0.0 else DEFAULT_STATION_SAFE_RADIUS
+	if best != null and best_dist <= effective_radius * 1.5:
+		return best
+	return null
+ 
 
 func _shoot(dir_to_player: Vector2) -> void:
 	if laser_scene == null:
@@ -200,14 +267,12 @@ func _shoot(dir_to_player: Vector2) -> void:
 	
 func take_damage(amount: int) -> void:
 	current_health -= amount
-	print("Enemy took damage:", amount, " | HP agora =", current_health)
 
 	if current_health <= 0:
 		die()
 
 
 func die() -> void:
-	print("Enemy morreu!")
 	_spawn_loot()
 	GameState.record_enemy_kill(enemy_id)
 	queue_free()

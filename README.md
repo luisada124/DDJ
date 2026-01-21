@@ -5,20 +5,18 @@ Resolver problema da descrição das missões. Não estará a aparecer quando se
 
 meter mais vida na nave e menos inimigos a spawnar
 Meter os artefactos fora do minimapa só estarão disponíveis com mapas depois de os desbloquear. 
-Temos de trocar a corda para só recolher com um upgrade específico. 
-fazer cometas spawnarem fora da visao do player
 
 Nave auxiliar com gadget. 
 Mapa ser obtido como recompensa. 
 Estações têm de ser ou compradas a localização ou encontradas. 
-Ter cofres em estações para guardar recursos e não perder quando se morre. 
+ 
 
 BALANCEAMENTO:
 
 Zonas específicas com mais inimigos. 
 vida da nava
 jogo mais lento
-Sensações defendidas por muitos inimigos. 
+Estações defendidas por muitos inimigos. 
 Por cooldwon no dash
 
 No mini jogo que nós temos agora, "Playsolder" para derrotar o bandido na missão do caçador,
