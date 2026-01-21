@@ -390,7 +390,7 @@ text = "Knife Game"
 [node name="KnifeGameInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 autowrap_mode = 3
-text = "Press A/D in time. Beat the tavern hi-score."
+text = "Press A S D W in order. 20s per attempt."
 
 [node name="KnifeGameHighScore" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2

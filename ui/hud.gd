@@ -77,6 +77,8 @@ extends Control
 
 const DEFAULT_STATION_ID := "station_alpha"
 const QuestDatabase := preload("res://systems/QuestDatabase.gd")
+const KNIFE_GAME_SEQUENCE := [KEY_A, KEY_S, KEY_D, KEY_W]
+const KNIFE_GAME_ATTEMPT_TIME := 20.0
 
 var _upgrade_buttons: Dictionary
 var _active_trader: Node = null
@@ -89,11 +91,8 @@ var _active_npc_id: String = ""
 var _active_npc_type: String = ""
 var _knife_game_active: bool = false
 var _knife_game_score: int = 0
-var _knife_game_expected_keycode: int = KEY_A
+var _knife_game_sequence_index: int = 0
 var _knife_game_time_left: float = 0.0
-var _knife_game_base_time: float = 1.2
-var _knife_game_min_time: float = 0.35
-var _knife_game_rng := RandomNumberGenerator.new()
 var _menu_guard: bool = false
 
 func _ready() -> void:
@@ -150,15 +149,14 @@ func _ready() -> void:
 	GameState.player_died.connect(_on_player_died)
 	GameState.alien_died.connect(_on_alien_died)
 	_update_hud()
-	_knife_game_rng.randomize()
 
 func _process(delta: float) -> void:
 	if _knife_game_active:
 		_knife_game_time_left -= delta
 		if _knife_game_time_left <= 0.0:
-			_knife_game_fail("Miss: too slow.")
-		else:
-			_update_knife_game_prompt_text()
+			_finish_knife_game("Tempo acabou.")
+			return
+		_update_knife_game_prompt_text()
 
 
 func _input(event: InputEvent) -> void:
@@ -741,15 +739,16 @@ func _on_knife_game_start_pressed() -> void:
 func _start_knife_game() -> void:
 	_knife_game_active = true
 	_knife_game_score = 0
-	_knife_game_time_left = 0.0
+	_knife_game_sequence_index = 0
+	_knife_game_time_left = KNIFE_GAME_ATTEMPT_TIME
 	knife_game_result.text = ""
 	knife_game_start_button.text = "Restart Knife Game"
-	_set_next_knife_prompt()
 	_update_knife_game_ui()
 
 func _stop_knife_game() -> void:
 	_knife_game_active = false
 	_knife_game_score = 0
+	_knife_game_sequence_index = 0
 	_knife_game_time_left = 0.0
 	knife_game_result.text = ""
 	knife_game_start_button.text = "Start Knife Game"
@@ -760,33 +759,17 @@ func _handle_knife_game_input(key_event: InputEventKey) -> bool:
 		return false
 
 	var keycode := key_event.keycode
-	if keycode != KEY_A and keycode != KEY_D:
+	if keycode != KEY_A and keycode != KEY_S and keycode != KEY_D and keycode != KEY_W:
 		return false
 
-	if keycode != _knife_game_expected_keycode:
-		_knife_game_fail("Miss: wrong key.")
+	if keycode != _get_expected_knife_keycode():
+		_finish_knife_game("Erro: tecla errada.")
 		return true
 
 	_knife_game_score += 1
+	_knife_game_sequence_index = (_knife_game_sequence_index + 1) % max(KNIFE_GAME_SEQUENCE.size(), 1)
 	_update_knife_game_ui()
-
-	var station_id := _get_tavern_station_id()
-	if GameState.record_tavern_score(station_id, _knife_game_score):
-		knife_game_result.text = "New hi-score!"
-		_update_knife_game_ui()
-
-	_set_next_knife_prompt()
 	return true
-
-func _set_next_knife_prompt() -> void:
-	if _knife_game_score <= 0:
-		_knife_game_expected_keycode = KEY_A if _knife_game_rng.randi_range(0, 1) == 0 else KEY_D
-	else:
-		_knife_game_expected_keycode = KEY_D if _knife_game_expected_keycode == KEY_A else KEY_A
-
-	var time_window := _knife_game_base_time - float(_knife_game_score) * 0.06
-	_knife_game_time_left = max(_knife_game_min_time, time_window)
-	_update_knife_game_prompt_text()
 
 func _update_knife_game_prompt_text() -> void:
 	if knife_game_prompt == null:
@@ -794,14 +777,46 @@ func _update_knife_game_prompt_text() -> void:
 	if not _knife_game_active:
 		knife_game_prompt.text = "Press: -"
 		return
-	var key_name := "A" if _knife_game_expected_keycode == KEY_A else "D"
+	var key_name := _knife_game_key_name(_get_expected_knife_keycode())
 	knife_game_prompt.text = "Press: %s (%.1fs)" % [key_name, max(_knife_game_time_left, 0.0)]
 
-func _knife_game_fail(reason: String) -> void:
+func _get_expected_knife_keycode() -> int:
+	if KNIFE_GAME_SEQUENCE.is_empty():
+		return KEY_A
+	return int(KNIFE_GAME_SEQUENCE[_knife_game_sequence_index % KNIFE_GAME_SEQUENCE.size()])
+
+func _knife_game_key_name(keycode: int) -> String:
+	match keycode:
+		KEY_A:
+			return "A"
+		KEY_S:
+			return "S"
+		KEY_D:
+			return "D"
+		KEY_W:
+			return "W"
+	return "?"
+
+func _finish_knife_game(reason: String) -> void:
 	_knife_game_active = false
-	knife_game_result.text = reason
+	_knife_game_time_left = 0.0
+	var station_id := _get_tavern_station_id()
+	var result: Dictionary = GameState.record_tavern_score(station_id, _knife_game_score)
+	var new_hi := bool(result.get("new_hi", false))
+	var rewarded := bool(result.get("rewarded", false))
+	var reward: Dictionary = result.get("reward", {}) as Dictionary
+	if new_hi:
+		var reward_text := ""
+		if rewarded:
+			reward_text = " Recompensa: %s" % _format_cost(reward)
+		if not reason.is_empty():
+			knife_game_result.text = "%s Novo hi-score!%s" % [reason, reward_text]
+		else:
+			knife_game_result.text = "Novo hi-score!%s" % reward_text
+	else:
+		knife_game_result.text = reason
 	knife_game_start_button.text = "Start Knife Game"
-	_update_knife_game_prompt_text()
+	_update_knife_game_ui()
 
 func _update_knife_game_ui() -> void:
 	if knife_game_high_score == null or knife_game_score == null:

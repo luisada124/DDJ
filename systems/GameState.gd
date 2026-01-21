@@ -38,6 +38,7 @@ const QUEST_DEFS := QuestDatabase.QUEST_DEFS
 
 var quests: Dictionary = {}
 var tavern_hi_scores: Dictionary = {}
+var tavern_reward_claimed: Dictionary = {}
 
 var upgrades := {
 	"hull": 0,      # +HP max
@@ -287,16 +288,39 @@ func claim_quest(quest_id: String) -> bool:
 	return true
 
 func get_tavern_hi_score(station_id: String) -> int:
-	return int(tavern_hi_scores.get(station_id, 0))
+	var base: int = int(StationCatalog.get_tavern_base_score(station_id))
+	if base < 0:
+		base = 0
+	var current: int = int(tavern_hi_scores.get(station_id, base))
+	if current < base:
+		current = base
+	return current
 
-func record_tavern_score(station_id: String, score: int) -> bool:
+func record_tavern_score(station_id: String, score: int) -> Dictionary:
+	var result := {"new_hi": false, "rewarded": false, "reward": {}}
+	if station_id.is_empty():
+		return result
+
 	var current := get_tavern_hi_score(station_id)
 	if score <= current:
-		return false
+		return result
+
 	tavern_hi_scores[station_id] = score
+	result["new_hi"] = true
+
+	if not bool(tavern_reward_claimed.get(station_id, false)):
+		var reward: Dictionary = StationCatalog.get_tavern_reward(station_id)
+		if not reward.is_empty():
+			for res_type_variant in reward.keys():
+				var res_type := str(res_type_variant)
+				resources[res_type] = int(resources.get(res_type, 0)) + int(reward[res_type])
+			tavern_reward_claimed[station_id] = true
+			result["rewarded"] = true
+			result["reward"] = reward
+
 	emit_signal("state_changed")
 	_queue_save()
-	return true
+	return result
 
 func clear_completed_quest(quest_id: String) -> bool:
 	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
@@ -586,6 +610,7 @@ func save_game() -> void:
 		"vault_resources": vault_resources,
 		"quests": quests,
 		"tavern_hi_scores": tavern_hi_scores,
+		"tavern_reward_claimed": tavern_reward_claimed,
 		"upgrades": upgrades,
 		"player_health": player_health,
 		"artifact_parts_collected": artifact_parts_collected,
@@ -647,6 +672,9 @@ func load_game() -> void:
 	var loaded_tavern_scores = data.get("tavern_hi_scores")
 	if typeof(loaded_tavern_scores) == TYPE_DICTIONARY:
 		tavern_hi_scores = loaded_tavern_scores
+	var loaded_tavern_rewards = data.get("tavern_reward_claimed")
+	if typeof(loaded_tavern_rewards) == TYPE_DICTIONARY:
+		tavern_reward_claimed = loaded_tavern_rewards
 
 	var loaded_upgrades = data.get("upgrades")
 	if typeof(loaded_upgrades) == TYPE_DICTIONARY:
@@ -699,6 +727,7 @@ func _apply_defaults() -> void:
 	quests = {}
 	_ensure_quests_initialized()
 	tavern_hi_scores = {}
+	tavern_reward_claimed = {}
 	upgrades = {
 		"hull": 0,
 		"blaster": 0,
