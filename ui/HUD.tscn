@@ -99,6 +99,18 @@ offset_right = 196.0
 offset_bottom = -16.0
 script = ExtResource("2_minimap")
 
+[node name="SpeechBubble" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 0
+offset_right = 360.0
+offset_bottom = 80.0
+mouse_filter = 2
+
+[node name="SpeechLabel" type="Label" parent="SpeechBubble"]
+layout_mode = 2
+autowrap_mode = 3
+text = ""
+
 [node name="UpgradeMenu" type="Control" parent="."]
 process_mode = 3
 layout_mode = 3
@@ -380,6 +392,18 @@ text = "Comprar mapa Reverse Thruster"
 [node name="BuySideDashPartButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
 layout_mode = 2
 text = "Comprar peca Side Dash"
+
+[node name="BuyAutoRegenMapZone1Button" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
+layout_mode = 2
+text = "Comprar mapa Auto Regen (Z1)"
+
+[node name="BuyAutoRegenMapZone2Button" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
+layout_mode = 2
+text = "Comprar mapa Auto Regen (Z2)"
+
+[node name="BuyAuxShipPartButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
+layout_mode = 2
+text = "Comprar peca Aux Ship"
 
 [node name="BuyRepairKitButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
 layout_mode = 2

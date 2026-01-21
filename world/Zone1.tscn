@@ -108,6 +108,7 @@ patrol_anchor_path = NodePath("../BossPlanet")
 
 [node name="VacuumRandomPart" parent="." instance=ExtResource("5_artifact_part")]
 script = ExtResource("6_vacuum_random_part")
+keep_visible_when_completed = true
 
 [node name="ReverseThrusterRandomPart" parent="." instance=ExtResource("5_artifact_part")]
 script = ExtResource("7_reverse_thruster_random_part")

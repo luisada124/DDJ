@@ -9,6 +9,9 @@ extends Control
 @onready var mineral_label: Label = $ResourcesContainer/ResourcesBox/MineralLabel
 @onready var ametista_label: Label = $ResourcesContainer/ResourcesBox/AmetistaLabel
 
+@onready var speech_bubble: PanelContainer = $SpeechBubble
+@onready var speech_label: Label = $SpeechBubble/SpeechLabel
+
 @onready var upgrade_menu: Control = $UpgradeMenu
 @onready var upgrade_info: Label = $UpgradeMenu/Panel/Margin/VBox/Info
 @onready var upgrade_description: RichTextLabel = $UpgradeMenu/Panel/Margin/VBox/UpgradeDescription
@@ -40,6 +43,9 @@ extends Control
 @onready var buy_reverse_thruster_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyReverseThrusterPartButton
 @onready var buy_reverse_thruster_map_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyReverseThrusterMapButton
 @onready var buy_side_dash_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuySideDashPartButton
+@onready var buy_auto_regen_map_zone1_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyAutoRegenMapZone1Button
+@onready var buy_auto_regen_map_zone2_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyAutoRegenMapZone2Button
+@onready var buy_aux_ship_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyAuxShipPartButton
 @onready var buy_repair_kit_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyRepairKitButton
 @onready var ametista_to_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/AmetistaToMineralButton
 @onready var ametista_to_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/AmetistaToScrapButton
@@ -133,6 +139,8 @@ var _knife_game_active: bool = false
 var _knife_game_score: int = 0
 var _knife_game_sequence_index: int = 0
 var _knife_game_time_left: float = 0.0
+var _speech_time_left: float = 0.0
+var _speech_queue: Array[String] = []
 var _menu_guard: bool = false
 var _fullscreen_toggle_blocked: bool = false
 var _fullscreen_toggle_warned: bool = false
@@ -175,6 +183,9 @@ func _ready() -> void:
 	buy_reverse_thruster_part_button.pressed.connect(_on_buy_reverse_thruster_part_pressed)
 	buy_reverse_thruster_map_button.pressed.connect(_on_buy_reverse_thruster_map_pressed)
 	buy_side_dash_part_button.pressed.connect(_on_buy_side_dash_part_pressed)
+	buy_auto_regen_map_zone1_button.pressed.connect(_on_buy_auto_regen_map_zone1_pressed)
+	buy_auto_regen_map_zone2_button.pressed.connect(_on_buy_auto_regen_map_zone2_pressed)
+	buy_aux_ship_part_button.pressed.connect(_on_buy_aux_ship_part_pressed)
 	buy_repair_kit_button.pressed.connect(_on_buy_repair_kit_pressed)
 	ametista_to_mineral_button.pressed.connect(_on_trade_ametista_to_mineral)
 	ametista_to_scrap_button.pressed.connect(_on_trade_ametista_to_scrap)
@@ -210,6 +221,7 @@ func _ready() -> void:
 	GameState.state_changed.connect(_update_hud)
 	GameState.player_died.connect(_on_player_died)
 	GameState.alien_died.connect(_on_alien_died)
+	GameState.speech_requested.connect(_show_speech_bubble)
 	_update_hud()
 	_update_boss_compass()
 
@@ -230,6 +242,50 @@ func _process(delta: float) -> void:
 
 	_update_boss_compass()
 	_update_boss_health_ui()
+	_update_speech_bubble(delta)
+
+func _update_speech_bubble(delta: float) -> void:
+	if speech_bubble == null:
+		return
+	if not speech_bubble.visible:
+		return
+
+	_speech_time_left -= delta
+	if _speech_time_left <= 0.0:
+		if _speech_queue.size() > 0:
+			var next_text: String = _speech_queue[0]
+			_speech_queue.remove_at(0)
+			_start_speech(next_text)
+		else:
+			speech_bubble.visible = false
+			return
+
+	var p := get_tree().get_first_node_in_group("player")
+	if p is Node2D:
+		var player_pos := (p as Node2D).global_position
+		var cam: Camera2D = get_viewport().get_camera_2d()
+		var screen_pos := player_pos
+		if cam != null:
+			var center: Vector2 = cam.global_position
+			if cam.has_method("get_screen_center_position"):
+				center = cam.get_screen_center_position()
+			var vp_size: Vector2 = get_viewport().get_visible_rect().size
+			var zoom: Vector2 = cam.zoom
+			screen_pos = (player_pos - center) * zoom + vp_size * 0.5
+		speech_bubble.position = screen_pos + Vector2(20, -90)
+
+func _show_speech_bubble(text: String) -> void:
+	if speech_bubble == null or speech_label == null:
+		return
+	if speech_bubble.visible and _speech_time_left > 0.0:
+		_speech_queue.append(text)
+		return
+	_start_speech(text)
+
+func _start_speech(text: String) -> void:
+	speech_label.text = text
+	_speech_time_left = 4.5
+	speech_bubble.visible = true
 
 
 func _input(event: InputEvent) -> void:
@@ -556,6 +612,9 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	var rt_shop_cost: Dictionary = StationCatalog.get_reverse_thruster_shop_part_cost(station_id)
 	var rt_map_cost: Dictionary = StationCatalog.get_reverse_thruster_map_cost(station_id)
 	var sd_shop_cost: Dictionary = StationCatalog.get_side_dash_shop_part_cost(station_id)
+	var ar_map1_cost: Dictionary = StationCatalog.get_auto_regen_map_zone1_cost(station_id)
+	var ar_map2_cost: Dictionary = StationCatalog.get_auto_regen_map_zone2_cost(station_id)
+	var aux_shop_cost: Dictionary = StationCatalog.get_aux_ship_shop_part_cost(station_id)
 
 	var parts := "%d/%d" % [GameState.artifact_parts_collected, GameState.ARTIFACT_PARTS_REQUIRED]
 	trader_info.text = "%s\nScrap: %d | Mineral: %d | Partes: %s" % [
@@ -624,6 +683,26 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	if show_sd_part:
 		buy_side_dash_part_button.text = "Comprar 1 peca Side Dash (%s)" % _format_cost(sd_shop_cost)
 		buy_side_dash_part_button.disabled = not GameState.can_afford(sd_shop_cost)
+
+	var show_ar_map1 := not ar_map1_cost.is_empty() and not GameState.auto_regen_map_zone1_bought and not GameState.has_artifact("auto_regen") and not GameState.auto_regen_part1_collected
+	buy_auto_regen_map_zone1_button.visible = show_ar_map1
+	if show_ar_map1:
+		buy_auto_regen_map_zone1_button.text = "Mapa Auto Regen (peca 1) (%s)" % _format_cost(ar_map1_cost)
+		buy_auto_regen_map_zone1_button.disabled = not GameState.can_afford(ar_map1_cost)
+
+	var show_ar_map2 := GameState.current_zone_id == "mid" and not ar_map2_cost.is_empty() and not GameState.auto_regen_map_zone2_bought and not GameState.has_artifact("auto_regen") and not GameState.auto_regen_part2_collected
+	buy_auto_regen_map_zone2_button.visible = show_ar_map2
+	if show_ar_map2:
+		buy_auto_regen_map_zone2_button.text = "Mapa Auto Regen (peca 2) (%s)" % _format_cost(ar_map2_cost)
+		buy_auto_regen_map_zone2_button.disabled = not GameState.can_afford(ar_map2_cost)
+
+	var aux_have := GameState.get_artifact_parts("aux_ship")
+	var aux_required := ArtifactDatabase.get_parts_required("aux_ship")
+	var show_aux_shop := GameState.current_zone_id == "mid" and not aux_shop_cost.is_empty() and not GameState.aux_ship_shop_part_bought and not GameState.has_artifact("aux_ship") and aux_have < aux_required
+	buy_aux_ship_part_button.visible = show_aux_shop
+	if show_aux_shop:
+		buy_aux_ship_part_button.text = "Comprar 1 peca Aux Ship (%s)" % _format_cost(aux_shop_cost)
+		buy_aux_ship_part_button.disabled = not GameState.can_afford(aux_shop_cost)
 
 	var a2m_give: Dictionary = a2m.get("give", {}) as Dictionary
 	var a2m_recv: Dictionary = a2m.get("receive", {}) as Dictionary
@@ -926,6 +1005,27 @@ func _on_buy_side_dash_part_pressed() -> void:
 		station_id = DEFAULT_STATION_ID
 	var cost: Dictionary = StationCatalog.get_side_dash_shop_part_cost(station_id)
 	GameState.buy_side_dash_shop_part(station_id, cost)
+
+func _on_buy_auto_regen_map_zone1_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var cost: Dictionary = StationCatalog.get_auto_regen_map_zone1_cost(station_id)
+	GameState.buy_auto_regen_map_zone1(station_id, cost)
+
+func _on_buy_auto_regen_map_zone2_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var cost: Dictionary = StationCatalog.get_auto_regen_map_zone2_cost(station_id)
+	GameState.buy_auto_regen_map_zone2(station_id, cost)
+
+func _on_buy_aux_ship_part_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var cost: Dictionary = StationCatalog.get_aux_ship_shop_part_cost(station_id)
+	GameState.buy_aux_ship_shop_part(station_id, cost)
 
 func _on_debug_give_resources_pressed() -> void:
 	GameState.debug_grant_test_resources()

@@ -32,7 +32,7 @@ const ARTIFACTS: Dictionary = {
 	},
 	"auto_regen": {
 		"title": "Regenerador",
-		"parts_required": 3,
+		"parts_required": 2,
 		"regen_delay": 6.0,
 		"regen_rate": 3.0, # HP por segundo
 	},

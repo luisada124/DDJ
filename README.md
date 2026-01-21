@@ -2,7 +2,7 @@ todo:
 
 Meter um menu de upgrades para a nave auxiliar. 
 
-Começamos com o aspirador e depois ele avaria, e temos de apanhar as peças para o teto de volta. 
+
  
 
 Inimigos a spawnar fora Da visão do jogador. 
@@ -34,8 +34,8 @@ No ponto do planeta perdido, não há nem boss inimigo, nem planeta perdido nenh
 Começar a luta com o boss quando o boss detectar o jogador por perto. 
 
 TEXTURAS:
-Mudar a textura da nave com o aparelho. 
-meter no artefactos
+
+
 mudar a cor da explosao
 
 
@@ -76,14 +76,17 @@ Maquina auxiliar: 3
 auto_regen:3
 
 PROMPS:
+1.
+Chat mete so 2 artefactos para passar de zonas. 1 para passar para a 2 e 2 para passar para a 3. E tira os artefactos a mais do centro do mapa
 
+2.
+Chatini, agora preciso de implementar a mudança da zona 2 para a zona 3. Essa mudança vai ser o drop de um artefacto normal, daqueles que nós já temos lá, para passar de zona.
+Preciso que depois de o jogador obter todos os gadgets e tiver pelo menos todos os upgrades a nivel 8, apareca um balao de fala a vir de um inimigo a dizer "Temos de dizimar!" , "A chamar reforços", e Depois disto vem uma patrulha com montes de inimigos. Depois de o jogador matar todos os inimigos dessa patrulha aparece o artefacto para ele poder passar de mundo.
 
 Tens de meter o planeta fora do mapa, e ele não aparece no mapa
 Isto é, ele só aparece quando aceitamos a missão do planeta ao caçador, e depois vai aparecer a seta , e nós temos de ir para lá. Estamos muito mais perto do boss, é que ele vai detectar. Ele tem que ter 10 vezes mais vida e disparar mais rápido. quando derroto o boss e vou ao plenaQuando eu derroto o boss, eu vou ao planeta das recompensas ta das recompensas ta la a dizer que ainda perciso de derrotar o boss
 
 O planeta não aparece no mapa. 
-
-2.
 
 chat tenho de atribuir as localizacoes de gadgets.
 vamos fazer os gadgets 1 a 1 da lista e PÁRA depois de cada gadget para eu testar e so a seguir  vamos para o proximo  da lista.

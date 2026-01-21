@@ -59,5 +59,6 @@ func _on_body_entered(body: Node2D) -> void:
 		return
 
 	if body.is_in_group("ship") and GameState.can_ship_collect_pickups():
+		GameState.record_vacuum_use()
 		GameState.add_resource(resource_type, amount)
 		queue_free()

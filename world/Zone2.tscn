@@ -7,6 +7,8 @@
 [ext_resource type="PackedScene" path="res://pickups/ArtifactPart.tscn" id="5_artifact_part"]
 [ext_resource type="PackedScene" path="res://world/AmetistaMiningComet.tscn" id="6_ametista_mine"]
 [ext_resource type="Script" path="res://world/side_dash_random_part.gd" id="7_side_dash_random_part"]
+[ext_resource type="Script" path="res://world/auto_regen_random_part.gd" id="8_auto_regen_random_part"]
+[ext_resource type="Script" path="res://world/aux_ship_random_part.gd" id="9_aux_ship_random_part"]
 
 [node name="Zone2" type="Node2D"]
 
@@ -34,6 +36,17 @@ station_id = "station_zeta"
 
 [node name="SideDashRandomPart" parent="." instance=ExtResource("5_artifact_part")]
 script = ExtResource("7_side_dash_random_part")
+
+[node name="AutoRegenRandomPart1" parent="." instance=ExtResource("5_artifact_part")]
+script = ExtResource("8_auto_regen_random_part")
+part_index = 1
+
+[node name="AutoRegenRandomPart2" parent="." instance=ExtResource("5_artifact_part")]
+script = ExtResource("8_auto_regen_random_part")
+part_index = 2
+
+[node name="AuxShipRandomPart" parent="." instance=ExtResource("5_artifact_part")]
+script = ExtResource("9_aux_ship_random_part")
 
 [node name="Mining" type="Node2D" parent="."]
 

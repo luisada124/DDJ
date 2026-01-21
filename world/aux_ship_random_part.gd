@@ -4,10 +4,10 @@ extends "res://pickups/artifact_part.gd"
 @export var margin: float = 250.0
 
 func _ready() -> void:
-	artifact_id = "reverse_thruster"
+	artifact_id = "aux_ship"
 	show_on_minimap = false
 
-	if GameState.reverse_thruster_random_part_collected or GameState.has_artifact("reverse_thruster"):
+	if GameState.aux_ship_random_part_collected or GameState.has_artifact("aux_ship"):
 		queue_free()
 		return
 
@@ -16,17 +16,17 @@ func _ready() -> void:
 	call_deferred("_refresh_world_marker")
 
 func _process(delta: float) -> void:
-	if GameState.reverse_thruster_map_bought and not GameState.reverse_thruster_random_part_collected:
-		GameState.reverse_thruster_random_part_world = global_position
+	if GameState.aux_ship_map_unlocked and not GameState.aux_ship_random_part_collected:
+		GameState.aux_ship_random_part_world = global_position
 	super(delta)
 
 func _refresh_world_marker() -> void:
 	if not is_inside_tree():
 		return
-	GameState.reverse_thruster_random_part_world = global_position
+	GameState.aux_ship_random_part_world = global_position
 
 func _ensure_position() -> void:
-	var stored := GameState.reverse_thruster_random_part_local
+	var stored := GameState.aux_ship_random_part_local
 	if stored != Vector2.ZERO:
 		position = stored
 		return
@@ -36,11 +36,11 @@ func _ensure_position() -> void:
 	var y: float = randf_range(r.position.y, r.position.y + r.size.y)
 	position = Vector2(x, y)
 
-	GameState.reverse_thruster_random_part_local = position
+	GameState.aux_ship_random_part_local = position
 	GameState.queue_save()
 
 func _on_collected(player: Node2D) -> void:
-	GameState.reverse_thruster_random_part_collected = true
-	GameState.reverse_thruster_random_part_world = Vector2.ZERO
+	GameState.aux_ship_random_part_collected = true
+	GameState.aux_ship_random_part_world = Vector2.ZERO
 	GameState.queue_save()
 	super(player)

@@ -87,6 +87,22 @@ func _draw() -> void:
 		draw_circle(p_sd, 6.0, Color(0.95, 0.75, 0.25, 0.95))
 		draw_circle(p_sd, 10.0, Color(0.95, 0.75, 0.25, 0.25))
 
+	# Dicas dos mapas do Auto Regen (2 pecas aleatorias na Zona 2)
+	if GameState.auto_regen_map_zone1_bought and not GameState.auto_regen_part1_collected and GameState.auto_regen_part1_world != Vector2.ZERO:
+		var p_ar1: Vector2 = to_map.call(GameState.auto_regen_part1_world)
+		draw_circle(p_ar1, 6.0, Color(0.55, 1.0, 0.55, 0.95))
+		draw_circle(p_ar1, 10.0, Color(0.55, 1.0, 0.55, 0.25))
+	if GameState.auto_regen_map_zone2_bought and not GameState.auto_regen_part2_collected and GameState.auto_regen_part2_world != Vector2.ZERO:
+		var p_ar2: Vector2 = to_map.call(GameState.auto_regen_part2_world)
+		draw_circle(p_ar2, 6.0, Color(0.35, 0.85, 1.0, 0.95))
+		draw_circle(p_ar2, 10.0, Color(0.35, 0.85, 1.0, 0.25))
+
+	# Dica do mapa do Aux Ship (map por missao na Zona 2)
+	if GameState.aux_ship_map_unlocked and not GameState.aux_ship_random_part_collected and GameState.aux_ship_random_part_world != Vector2.ZERO:
+		var p_aux: Vector2 = to_map.call(GameState.aux_ship_random_part_world)
+		draw_circle(p_aux, 6.0, Color(0.9, 0.35, 1.0, 0.95))
+		draw_circle(p_aux, 10.0, Color(0.9, 0.35, 1.0, 0.25))
+
 	# Traders reais (planeta/loja)
 	var trader_nodes: Array[Node] = get_tree().get_nodes_in_group("trader")
 	for n: Node in trader_nodes:
