@@ -55,6 +55,23 @@ var side_dash_random_part_world: Vector2 = Vector2.ZERO # runtime (global), usad
 var side_dash_random_part_collected: bool = false
 var side_dash_shop_parts_bought: Dictionary = {} # station_id -> bool (compra unica por estacao)
 
+# Auto Regen: 2 pecas aleatorias na Zona 2 + 2 mapas (1 vendido na Zona 1, 1 vendido na Zona 2).
+var auto_regen_map_zone1_bought: bool = false
+var auto_regen_map_zone2_bought: bool = false
+var auto_regen_part1_local: Vector2 = Vector2.ZERO
+var auto_regen_part1_world: Vector2 = Vector2.ZERO # runtime
+var auto_regen_part1_collected: bool = false
+var auto_regen_part2_local: Vector2 = Vector2.ZERO
+var auto_regen_part2_world: Vector2 = Vector2.ZERO # runtime
+var auto_regen_part2_collected: bool = false
+
+# Aux Ship: 1 peca por missao na Zona 2, 1 peca à venda, 1 peca aleatoria na Zona 2 + mapa por missao.
+var aux_ship_map_unlocked: bool = false
+var aux_ship_random_part_local: Vector2 = Vector2.ZERO
+var aux_ship_random_part_world: Vector2 = Vector2.ZERO # runtime
+var aux_ship_random_part_collected: bool = false
+var aux_ship_shop_part_bought: bool = false
+
 # Cofres por estacao: recursos guardados nao se perdem na morte.
 var vault_unlocked: Dictionary = {} # station_id -> bool
 var vault_resources: Dictionary = {} # station_id -> {res_type -> int}
@@ -361,6 +378,8 @@ func claim_quest(quest_id: String, station_id: String = "") -> bool:
 	var map_reward := str(def.get("map_reward", ""))
 	if map_reward == "side_dash":
 		side_dash_map_unlocked = true
+	elif map_reward == "aux_ship":
+		aux_ship_map_unlocked = true
 
 	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
 	q["claimed"] = true
@@ -682,6 +701,67 @@ func buy_side_dash_shop_part(station_id: String, cost: Dictionary) -> bool:
 	_queue_save()
 	return true
 
+func buy_auto_regen_map_zone1(station_id: String, cost: Dictionary) -> bool:
+	if station_id != "station_alpha":
+		return false
+	if auto_regen_map_zone1_bought:
+		return false
+	if has_artifact("auto_regen") or auto_regen_part1_collected:
+		return false
+	if not can_afford(cost):
+		return false
+	for res_type_variant in cost.keys():
+		var res_type := str(res_type_variant)
+		resources[res_type] = int(resources.get(res_type, 0)) - int(cost[res_type_variant])
+	auto_regen_map_zone1_bought = true
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
+func buy_auto_regen_map_zone2(station_id: String, cost: Dictionary) -> bool:
+	if current_zone_id != "mid":
+		return false
+	if station_id != "station_zeta":
+		return false
+	if auto_regen_map_zone2_bought:
+		return false
+	if has_artifact("auto_regen") or auto_regen_part2_collected:
+		return false
+	if not can_afford(cost):
+		return false
+	for res_type_variant in cost.keys():
+		var res_type := str(res_type_variant)
+		resources[res_type] = int(resources.get(res_type, 0)) - int(cost[res_type_variant])
+	auto_regen_map_zone2_bought = true
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
+func buy_aux_ship_shop_part(station_id: String, cost: Dictionary) -> bool:
+	if current_zone_id != "mid":
+		return false
+	if station_id != "station_beta":
+		return false
+	if aux_ship_shop_part_bought:
+		return false
+	if has_artifact("aux_ship"):
+		return false
+	var required := ArtifactDatabase.get_parts_required("aux_ship")
+	if required <= 0:
+		return false
+	if get_artifact_parts("aux_ship") >= required:
+		return false
+	if not can_afford(cost):
+		return false
+	for res_type_variant in cost.keys():
+		var res_type := str(res_type_variant)
+		resources[res_type] = int(resources.get(res_type, 0)) - int(cost[res_type_variant])
+	collect_artifact_part("aux_ship")
+	aux_ship_shop_part_bought = true
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
 func get_repair_kit_count() -> int:
 	return int(consumables.get("repair_kit", 0))
 
@@ -957,6 +1037,16 @@ func save_game() -> void:
 		"side_dash_random_part_local": [side_dash_random_part_local.x, side_dash_random_part_local.y],
 		"side_dash_random_part_collected": side_dash_random_part_collected,
 		"side_dash_shop_parts_bought": side_dash_shop_parts_bought,
+		"auto_regen_map_zone1_bought": auto_regen_map_zone1_bought,
+		"auto_regen_map_zone2_bought": auto_regen_map_zone2_bought,
+		"auto_regen_part1_local": [auto_regen_part1_local.x, auto_regen_part1_local.y],
+		"auto_regen_part1_collected": auto_regen_part1_collected,
+		"auto_regen_part2_local": [auto_regen_part2_local.x, auto_regen_part2_local.y],
+		"auto_regen_part2_collected": auto_regen_part2_collected,
+		"aux_ship_map_unlocked": aux_ship_map_unlocked,
+		"aux_ship_random_part_local": [aux_ship_random_part_local.x, aux_ship_random_part_local.y],
+		"aux_ship_random_part_collected": aux_ship_random_part_collected,
+		"aux_ship_shop_part_bought": aux_ship_shop_part_bought,
 		"vault_unlocked": vault_unlocked,
 		"vault_resources": vault_resources,
 		"quests": quests,
@@ -1052,6 +1142,35 @@ func load_game() -> void:
 	if side_dash_shop_parts_bought.has("station_alpha") and not side_dash_shop_parts_bought.has("station_zeta"):
 		side_dash_shop_parts_bought["station_zeta"] = bool(side_dash_shop_parts_bought.get("station_alpha", false))
 		side_dash_shop_parts_bought.erase("station_alpha")
+
+	auto_regen_map_zone1_bought = bool(data.get("auto_regen_map_zone1_bought", false))
+	auto_regen_map_zone2_bought = bool(data.get("auto_regen_map_zone2_bought", false))
+	auto_regen_part1_collected = bool(data.get("auto_regen_part1_collected", false))
+	auto_regen_part2_collected = bool(data.get("auto_regen_part2_collected", false))
+	var stored_ar1 = data.get("auto_regen_part1_local")
+	if typeof(stored_ar1) == TYPE_ARRAY and (stored_ar1 as Array).size() >= 2:
+		var a_ar1 := stored_ar1 as Array
+		auto_regen_part1_local = Vector2(float(a_ar1[0]), float(a_ar1[1]))
+	else:
+		auto_regen_part1_local = Vector2.ZERO
+	auto_regen_part1_world = Vector2.ZERO
+	var stored_ar2 = data.get("auto_regen_part2_local")
+	if typeof(stored_ar2) == TYPE_ARRAY and (stored_ar2 as Array).size() >= 2:
+		var a_ar2 := stored_ar2 as Array
+		auto_regen_part2_local = Vector2(float(a_ar2[0]), float(a_ar2[1]))
+	else:
+		auto_regen_part2_local = Vector2.ZERO
+	auto_regen_part2_world = Vector2.ZERO
+	aux_ship_map_unlocked = bool(data.get("aux_ship_map_unlocked", false))
+	aux_ship_random_part_collected = bool(data.get("aux_ship_random_part_collected", false))
+	aux_ship_shop_part_bought = bool(data.get("aux_ship_shop_part_bought", false))
+	var stored_aux = data.get("aux_ship_random_part_local")
+	if typeof(stored_aux) == TYPE_ARRAY and (stored_aux as Array).size() >= 2:
+		var a_aux := stored_aux as Array
+		aux_ship_random_part_local = Vector2(float(a_aux[0]), float(a_aux[1]))
+	else:
+		aux_ship_random_part_local = Vector2.ZERO
+	aux_ship_random_part_world = Vector2.ZERO
 
 	var loaded_consumables = data.get("consumables")
 	if typeof(loaded_consumables) == TYPE_DICTIONARY:
@@ -1176,6 +1295,19 @@ func _apply_defaults() -> void:
 	side_dash_random_part_world = Vector2.ZERO
 	side_dash_random_part_collected = false
 	side_dash_shop_parts_bought = {}
+	auto_regen_map_zone1_bought = false
+	auto_regen_map_zone2_bought = false
+	auto_regen_part1_local = Vector2.ZERO
+	auto_regen_part1_world = Vector2.ZERO
+	auto_regen_part1_collected = false
+	auto_regen_part2_local = Vector2.ZERO
+	auto_regen_part2_world = Vector2.ZERO
+	auto_regen_part2_collected = false
+	aux_ship_map_unlocked = false
+	aux_ship_random_part_local = Vector2.ZERO
+	aux_ship_random_part_world = Vector2.ZERO
+	aux_ship_random_part_collected = false
+	aux_ship_shop_part_bought = false
 
 func queue_save() -> void:
 	_queue_save()

@@ -217,6 +217,25 @@ static func get_side_dash_shop_part_cost(station_id: String) -> Dictionary:
 		return {"scrap": 110, "mineral": 20}
 	return {}
 
+static func get_auto_regen_map_zone1_cost(station_id: String) -> Dictionary:
+	# Mapa 1: vendido na Zona 1 (escolhi Estacao Alfa).
+	if station_id == "station_alpha":
+		return {"scrap": 40}
+	return {}
+
+static func get_auto_regen_map_zone2_cost(station_id: String) -> Dictionary:
+	# Mapa 2: vendido na Zona 2 (escolhi Posto Zeta).
+	if station_id == "station_zeta":
+		return {"scrap": 50, "mineral": 15}
+	return {}
+
+static func get_aux_ship_shop_part_cost(station_id: String) -> Dictionary:
+	# Aux Ship (3 pecas): 1 peca vendida numa estacao da Zona 2.
+	# O UI faz gate pela zona atual.
+	if station_id == "station_beta":
+		return {"scrap": 140, "mineral": 35}
+	return {}
+
 static func get_offered_quests(station_id: String) -> Array:
 	var npcs: Array = get_station_npcs(station_id)
 	if not npcs.is_empty():

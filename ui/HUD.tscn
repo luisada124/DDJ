@@ -354,6 +354,18 @@ text = "Comprar mapa Reverse Thruster"
 layout_mode = 2
 text = "Comprar peca Side Dash"
 
+[node name="BuyAutoRegenMapZone1Button" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
+layout_mode = 2
+text = "Comprar mapa Auto Regen (Z1)"
+
+[node name="BuyAutoRegenMapZone2Button" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
+layout_mode = 2
+text = "Comprar mapa Auto Regen (Z2)"
+
+[node name="BuyAuxShipPartButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
+layout_mode = 2
+text = "Comprar peca Aux Ship"
+
 [node name="BuyRepairKitButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
 layout_mode = 2
 text = "Comprar kit de reparacao"

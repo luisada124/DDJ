@@ -6,6 +6,8 @@ const QUEST_KILL_10_SNIPER := "kill_10_sniper"
 const QUEST_KILL_5_TANK := "kill_5_tank"
 const QUEST_VACUUM_PART := "vacuum_part"
 const QUEST_SIDE_DASH_MAP := "side_dash_map"
+const QUEST_AUX_SHIP_PART := "aux_ship_part"
+const QUEST_AUX_SHIP_MAP := "aux_ship_map"
 const QUEST_TAVERN_BANDIT_1 := "tavern_bandit_1"
 const QUEST_TAVERN_BANDIT_2 := "tavern_bandit_2"
 const QUEST_TAVERN_BANDIT_3 := "tavern_bandit_3"
@@ -62,6 +64,24 @@ const QUEST_DEFS := {
 		"reward": {"scrap": 40},
 		"artifact_parts_reward": {"side_dash": 1},
 		"map_reward": "side_dash",
+	},
+	QUEST_AUX_SHIP_PART: {
+		"title": "Drone Desligado",
+		"description": "Um drone auxiliar caiu no setor. Mata 14 inimigos sniper e volta para receber uma peca da Nave Auxiliar.",
+		"enemy_id": "sniper",
+		"goal": 14,
+		"giver_station_id": "station_zeta",
+		"reward": {"scrap": 60, "mineral": 25},
+		"artifact_parts_reward": {"aux_ship": 1},
+	},
+	QUEST_AUX_SHIP_MAP: {
+		"title": "Mapa do Drone",
+		"description": "Um cartografo vendeu coordenadas do drone. Mata 10 inimigos basicos e volta para receber o mapa.",
+		"enemy_id": "basic",
+		"goal": 10,
+		"giver_station_id": "station_zeta",
+		"reward": {"scrap": 35},
+		"map_reward": "aux_ship",
 	},
 	QUEST_TAVERN_BANDIT_1: {
 		"title": "Acerto de Contas I",
@@ -125,9 +145,9 @@ const QUEST_DEFS := {
 
 const NPC_QUEST_POOLS := {
 	"scavenger": [QUEST_KILL_15_BASIC, QUEST_VACUUM_PART],
-	"marksman": [QUEST_KILL_10_SNIPER, QUEST_SIDE_DASH_MAP],
+	"marksman": [QUEST_KILL_10_SNIPER, QUEST_SIDE_DASH_MAP, QUEST_AUX_SHIP_PART],
 	"bruiser": [QUEST_KILL_5_TANK],
-	"bounty": [QUEST_KILL_15_BASIC, QUEST_KILL_10_SNIPER, QUEST_KILL_5_TANK],
+	"bounty": [QUEST_KILL_15_BASIC, QUEST_KILL_10_SNIPER, QUEST_KILL_5_TANK, QUEST_AUX_SHIP_MAP],
 	"hunter": [
 		QUEST_TAVERN_BANDIT_1,
 		QUEST_TAVERN_BANDIT_2,

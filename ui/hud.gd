@@ -36,6 +36,9 @@ extends Control
 @onready var buy_reverse_thruster_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyReverseThrusterPartButton
 @onready var buy_reverse_thruster_map_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyReverseThrusterMapButton
 @onready var buy_side_dash_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuySideDashPartButton
+@onready var buy_auto_regen_map_zone1_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyAutoRegenMapZone1Button
+@onready var buy_auto_regen_map_zone2_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyAutoRegenMapZone2Button
+@onready var buy_aux_ship_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyAuxShipPartButton
 @onready var buy_repair_kit_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyRepairKitButton
 @onready var ametista_to_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/AmetistaToMineralButton
 @onready var ametista_to_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/AmetistaToScrapButton
@@ -169,6 +172,9 @@ func _ready() -> void:
 	buy_reverse_thruster_part_button.pressed.connect(_on_buy_reverse_thruster_part_pressed)
 	buy_reverse_thruster_map_button.pressed.connect(_on_buy_reverse_thruster_map_pressed)
 	buy_side_dash_part_button.pressed.connect(_on_buy_side_dash_part_pressed)
+	buy_auto_regen_map_zone1_button.pressed.connect(_on_buy_auto_regen_map_zone1_pressed)
+	buy_auto_regen_map_zone2_button.pressed.connect(_on_buy_auto_regen_map_zone2_pressed)
+	buy_aux_ship_part_button.pressed.connect(_on_buy_aux_ship_part_pressed)
 	buy_repair_kit_button.pressed.connect(_on_buy_repair_kit_pressed)
 	ametista_to_mineral_button.pressed.connect(_on_trade_ametista_to_mineral)
 	ametista_to_scrap_button.pressed.connect(_on_trade_ametista_to_scrap)
@@ -547,6 +553,9 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	var rt_shop_cost: Dictionary = StationCatalog.get_reverse_thruster_shop_part_cost(station_id)
 	var rt_map_cost: Dictionary = StationCatalog.get_reverse_thruster_map_cost(station_id)
 	var sd_shop_cost: Dictionary = StationCatalog.get_side_dash_shop_part_cost(station_id)
+	var ar_map1_cost: Dictionary = StationCatalog.get_auto_regen_map_zone1_cost(station_id)
+	var ar_map2_cost: Dictionary = StationCatalog.get_auto_regen_map_zone2_cost(station_id)
+	var aux_shop_cost: Dictionary = StationCatalog.get_aux_ship_shop_part_cost(station_id)
 
 	var parts := "%d/%d" % [GameState.artifact_parts_collected, GameState.ARTIFACT_PARTS_REQUIRED]
 	trader_info.text = "%s\nScrap: %d | Mineral: %d | Partes: %s" % [
@@ -615,6 +624,26 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	if show_sd_part:
 		buy_side_dash_part_button.text = "Comprar 1 peca Side Dash (%s)" % _format_cost(sd_shop_cost)
 		buy_side_dash_part_button.disabled = not GameState.can_afford(sd_shop_cost)
+
+	var show_ar_map1 := not ar_map1_cost.is_empty() and not GameState.auto_regen_map_zone1_bought and not GameState.has_artifact("auto_regen") and not GameState.auto_regen_part1_collected
+	buy_auto_regen_map_zone1_button.visible = show_ar_map1
+	if show_ar_map1:
+		buy_auto_regen_map_zone1_button.text = "Mapa Auto Regen (peca 1) (%s)" % _format_cost(ar_map1_cost)
+		buy_auto_regen_map_zone1_button.disabled = not GameState.can_afford(ar_map1_cost)
+
+	var show_ar_map2 := GameState.current_zone_id == "mid" and not ar_map2_cost.is_empty() and not GameState.auto_regen_map_zone2_bought and not GameState.has_artifact("auto_regen") and not GameState.auto_regen_part2_collected
+	buy_auto_regen_map_zone2_button.visible = show_ar_map2
+	if show_ar_map2:
+		buy_auto_regen_map_zone2_button.text = "Mapa Auto Regen (peca 2) (%s)" % _format_cost(ar_map2_cost)
+		buy_auto_regen_map_zone2_button.disabled = not GameState.can_afford(ar_map2_cost)
+
+	var aux_have := GameState.get_artifact_parts("aux_ship")
+	var aux_required := ArtifactDatabase.get_parts_required("aux_ship")
+	var show_aux_shop := GameState.current_zone_id == "mid" and not aux_shop_cost.is_empty() and not GameState.aux_ship_shop_part_bought and not GameState.has_artifact("aux_ship") and aux_have < aux_required
+	buy_aux_ship_part_button.visible = show_aux_shop
+	if show_aux_shop:
+		buy_aux_ship_part_button.text = "Comprar 1 peca Aux Ship (%s)" % _format_cost(aux_shop_cost)
+		buy_aux_ship_part_button.disabled = not GameState.can_afford(aux_shop_cost)
 
 	var a2m_give: Dictionary = a2m.get("give", {}) as Dictionary
 	var a2m_recv: Dictionary = a2m.get("receive", {}) as Dictionary
@@ -881,6 +910,27 @@ func _on_buy_side_dash_part_pressed() -> void:
 		station_id = DEFAULT_STATION_ID
 	var cost: Dictionary = StationCatalog.get_side_dash_shop_part_cost(station_id)
 	GameState.buy_side_dash_shop_part(station_id, cost)
+
+func _on_buy_auto_regen_map_zone1_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var cost: Dictionary = StationCatalog.get_auto_regen_map_zone1_cost(station_id)
+	GameState.buy_auto_regen_map_zone1(station_id, cost)
+
+func _on_buy_auto_regen_map_zone2_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var cost: Dictionary = StationCatalog.get_auto_regen_map_zone2_cost(station_id)
+	GameState.buy_auto_regen_map_zone2(station_id, cost)
+
+func _on_buy_aux_ship_part_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var cost: Dictionary = StationCatalog.get_aux_ship_shop_part_cost(station_id)
+	GameState.buy_aux_ship_shop_part(station_id, cost)
 
 func _on_debug_give_resources_pressed() -> void:
 	GameState.debug_grant_test_resources()
