@@ -4,6 +4,7 @@ signal state_changed
 signal player_died
 signal alien_died
 signal speech_requested(text: String)
+signal speech_requested_at(text: String, world_pos: Vector2)
 
 const SAVE_PATH := "user://save.json"
 const SAVE_VERSION := 1
@@ -45,6 +46,10 @@ var vacuum_shop_part_bought: bool = false
 var vacuum_intro_uses_left: int = 30
 var vacuum_broken_once: bool = false
 var vacuum_is_broken: bool = false
+
+# Evento de transicao Zona 2 -> Zona 3 (patrulha + drop de relíquia).
+var mid_core_event_triggered: bool = false
+var mid_core_patrol_cleared: bool = false
 
 # Reverse Thruster: 2 pecas em mercados (2 estacoes diferentes) + 1 peca aleatoria na Zona 1.
 var reverse_thruster_map_bought: bool = false
@@ -243,6 +248,20 @@ func _break_vacuum() -> void:
 	emit_signal("speech_requested", "Pressione F para sair.")
 	emit_signal("state_changed")
 	_queue_save()
+
+func has_all_gadgets() -> bool:
+	for artifact_id_variant in ArtifactDatabase.ARTIFACTS.keys():
+		var artifact_id := str(artifact_id_variant)
+		if not has_artifact(artifact_id):
+			return false
+	return true
+
+func has_upgrades_at_least(min_level: int) -> bool:
+	for upgrade_id_variant in upgrades.keys():
+		var upgrade_id := str(upgrade_id_variant)
+		if get_upgrade_level(upgrade_id) < min_level:
+			return false
+	return true
 
 func is_vault_unlocked(station_id: String) -> bool:
 	return bool(vault_unlocked.get(station_id, false))
@@ -1098,6 +1117,8 @@ func save_game() -> void:
 		"vacuum_intro_uses_left": vacuum_intro_uses_left,
 		"vacuum_broken_once": vacuum_broken_once,
 		"vacuum_is_broken": vacuum_is_broken,
+		"mid_core_event_triggered": mid_core_event_triggered,
+		"mid_core_patrol_cleared": mid_core_patrol_cleared,
 		"reverse_thruster_map_bought": reverse_thruster_map_bought,
 		"reverse_thruster_random_part_local": [reverse_thruster_random_part_local.x, reverse_thruster_random_part_local.y],
 		"reverse_thruster_random_part_collected": reverse_thruster_random_part_collected,
@@ -1174,6 +1195,8 @@ func load_game() -> void:
 	vacuum_intro_uses_left = int(data.get("vacuum_intro_uses_left", 30))
 	vacuum_broken_once = bool(data.get("vacuum_broken_once", false))
 	vacuum_is_broken = bool(data.get("vacuum_is_broken", false))
+	mid_core_event_triggered = bool(data.get("mid_core_event_triggered", false))
+	mid_core_patrol_cleared = bool(data.get("mid_core_patrol_cleared", false))
 	var stored_vac = data.get("vacuum_random_part_local")
 	if typeof(stored_vac) == TYPE_ARRAY and (stored_vac as Array).size() >= 2:
 		var a := stored_vac as Array
@@ -1363,6 +1386,8 @@ func _apply_defaults() -> void:
 	vacuum_intro_uses_left = 30
 	vacuum_broken_once = false
 	vacuum_is_broken = false
+	mid_core_event_triggered = false
+	mid_core_patrol_cleared = false
 	reverse_thruster_map_bought = false
 	reverse_thruster_random_part_local = Vector2.ZERO
 	reverse_thruster_random_part_world = Vector2.ZERO
@@ -1388,6 +1413,25 @@ func _apply_defaults() -> void:
 	aux_ship_shop_part_bought = false
 
 func queue_save() -> void:
+	_queue_save()
+
+func debug_unlock_all_gadgets() -> void:
+	# Helper de debug: desbloqueia todos os gadgets (nao inclui relíquias de viagem).
+	for artifact_id_variant in ArtifactDatabase.ARTIFACTS.keys():
+		var artifact_id := str(artifact_id_variant)
+		var required: int = ArtifactDatabase.get_parts_required(artifact_id)
+		if required <= 0:
+			continue
+		artifact_parts[artifact_id] = required
+		if not unlocked_artifacts.has(artifact_id):
+			unlocked_artifacts.append(artifact_id)
+
+	# Garantias especificas.
+	vacuum_is_broken = false
+	vacuum_broken_once = true
+	vacuum_intro_uses_left = 0
+
+	emit_signal("state_changed")
 	_queue_save()
 
 func _ensure_quests_initialized() -> void:
