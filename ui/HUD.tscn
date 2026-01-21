@@ -210,8 +210,15 @@ layout_mode = 2
 autowrap_mode = 3
 text = "Escolhe uma zona. (M) fecha"
 
-[node name="ZoneList" type="VBoxContainer" parent="MapMenu/Panel/Margin/VBox"]
+[node name="ZoneScroll" type="ScrollContainer" parent="MapMenu/Panel/Margin/VBox"]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+follow_focus = true
+
+[node name="ZoneList" type="VBoxContainer" parent="MapMenu/Panel/Margin/VBox/ZoneScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="CloseMapButton" type="Button" parent="MapMenu/Panel/Margin/VBox"]
 layout_mode = 2
@@ -270,11 +277,31 @@ layout_mode = 2
 [node name="Taberna" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
 layout_mode = 2
 
+[node name="TabernaScroll" type="ScrollContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+follow_focus = true
+
+[node name="TabernaContent" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+
 [node name="Mecanico" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
 layout_mode = 2
 
 [node name="Cofre" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
 layout_mode = 2
+
+[node name="CofreScroll" type="ScrollContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+follow_focus = true
+
+[node name="CofreContent" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="Info" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
 layout_mode = 2
@@ -301,35 +328,35 @@ text = "Trocar"
 layout_mode = 2
 text = "Trocar"
 
-[node name="TavernInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+[node name="TavernInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 autowrap_mode = 3
 text = "Taberna: fala com NPCs para obter missoes."
 
-[node name="NPC1Button" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+[node name="NPC1Button" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 text = "NPC: Cacador (missoes)"
 
-[node name="NPC2Button" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+[node name="NPC2Button" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 text = "NPC 2"
 
-[node name="NPC3Button" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+[node name="NPC3Button" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 text = "NPC 3"
 
-[node name="AcceptKillQuestButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+[node name="AcceptKillQuestButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 text = "Aceitar missao"
 
-[node name="ClaimStationQuestButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+[node name="ClaimStationQuestButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 text = "Entregar missao (recompensa)"
 
-[node name="QuestList" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+[node name="QuestList" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 
-[node name="QuestDetails" type="RichTextLabel" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+[node name="QuestDetails" type="RichTextLabel" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 120)
 fit_content = false
@@ -337,7 +364,7 @@ scroll_active = false
 autowrap_mode = 3
 text = "Seleciona uma missao."
 
-[node name="DialogueText" type="RichTextLabel" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+[node name="DialogueText" type="RichTextLabel" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 140)
 fit_content = false
@@ -345,43 +372,43 @@ scroll_active = false
 autowrap_mode = 3
 text = "..."
 
-[node name="DialogueChoices" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+[node name="DialogueChoices" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 
-[node name="EndDialogueButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+[node name="EndDialogueButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 text = "Sair da conversa"
 visible = false
 
-[node name="KnifeGameSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+[node name="KnifeGameSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 
-[node name="KnifeGameTitle" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+[node name="KnifeGameTitle" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 text = "Knife Game"
 
-[node name="KnifeGameInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+[node name="KnifeGameInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 autowrap_mode = 3
 text = "Press A/D in time. Beat the tavern hi-score."
 
-[node name="KnifeGameHighScore" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+[node name="KnifeGameHighScore" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 text = "Hi-score: 0"
 
-[node name="KnifeGameScore" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+[node name="KnifeGameScore" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 text = "Score: 0"
 
-[node name="KnifeGamePrompt" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+[node name="KnifeGamePrompt" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 text = "Press: -"
 
-[node name="KnifeGameResult" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+[node name="KnifeGameResult" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 text = ""
 
-[node name="KnifeGameStartButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+[node name="KnifeGameStartButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 text = "Start Knife Game"
 
@@ -394,16 +421,16 @@ text = "Mecanico: upgrades so podem ser feitos nas estacoes."
 layout_mode = 2
 text = "Abrir upgrades (U)"
 
-[node name="VaultInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre"]
+[node name="VaultInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent"]
 layout_mode = 2
 autowrap_mode = 3
 text = "Cofre: compra e guarda recursos (nao perdes na morte)."
 
-[node name="BuyVaultButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre"]
+[node name="BuyVaultButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent"]
 layout_mode = 2
 text = "Comprar cofre"
 
-[node name="VaultStatus" type="RichTextLabel" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre"]
+[node name="VaultStatus" type="RichTextLabel" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 150)
 fit_content = false
@@ -411,40 +438,40 @@ scroll_active = false
 autowrap_mode = 3
 text = "..."
 
-[node name="VaultButtons" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre"]
+[node name="VaultButtons" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent"]
 layout_mode = 2
 
-[node name="DepositAllButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons"]
+[node name="DepositAllButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons"]
 layout_mode = 2
 text = "Depositar tudo (Scrap/Mineral/Ametista)"
 
-[node name="WithdrawAllButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons"]
+[node name="WithdrawAllButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons"]
 layout_mode = 2
 text = "Levantar tudo (Scrap/Mineral/Ametista)"
 
-[node name="PercentSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons"]
+[node name="PercentSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons"]
 layout_mode = 2
 
-[node name="PercentInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons"]
+[node name="PercentInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons"]
 layout_mode = 2
 autowrap_mode = 3
 text = "Depositar/levantar por percentagem (0–100%)"
 
-[node name="ScrapRow" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons"]
+[node name="ScrapRow" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons"]
 layout_mode = 2
 
-[node name="ScrapHeader" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow"]
+[node name="ScrapHeader" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/ScrapRow"]
 layout_mode = 2
 text = "Scrap"
 
-[node name="ScrapControls" type="HBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow"]
+[node name="ScrapControls" type="HBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/ScrapRow"]
 layout_mode = 2
 
-[node name="ScrapPercent" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow/ScrapControls"]
+[node name="ScrapPercent" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/ScrapRow/ScrapControls"]
 layout_mode = 2
 text = "100%"
 
-[node name="ScrapSlider" type="HSlider" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow/ScrapControls"]
+[node name="ScrapSlider" type="HSlider" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/ScrapRow/ScrapControls"]
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 0.0
@@ -452,29 +479,29 @@ max_value = 100.0
 step = 5.0
 value = 100.0
 
-[node name="DepositScrapButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow/ScrapControls"]
+[node name="DepositScrapButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/ScrapRow/ScrapControls"]
 layout_mode = 2
 text = "Depositar"
 
-[node name="WithdrawScrapButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/ScrapRow/ScrapControls"]
+[node name="WithdrawScrapButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/ScrapRow/ScrapControls"]
 layout_mode = 2
 text = "Levantar"
 
-[node name="MineralRow" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons"]
+[node name="MineralRow" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons"]
 layout_mode = 2
 
-[node name="MineralHeader" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow"]
+[node name="MineralHeader" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/MineralRow"]
 layout_mode = 2
 text = "Mineral"
 
-[node name="MineralControls" type="HBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow"]
+[node name="MineralControls" type="HBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/MineralRow"]
 layout_mode = 2
 
-[node name="MineralPercent" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow/MineralControls"]
+[node name="MineralPercent" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/MineralRow/MineralControls"]
 layout_mode = 2
 text = "100%"
 
-[node name="MineralSlider" type="HSlider" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow/MineralControls"]
+[node name="MineralSlider" type="HSlider" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/MineralRow/MineralControls"]
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 0.0
@@ -482,29 +509,29 @@ max_value = 100.0
 step = 5.0
 value = 100.0
 
-[node name="DepositMineralButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow/MineralControls"]
+[node name="DepositMineralButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/MineralRow/MineralControls"]
 layout_mode = 2
 text = "Depositar"
 
-[node name="WithdrawMineralButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/MineralRow/MineralControls"]
+[node name="WithdrawMineralButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/MineralRow/MineralControls"]
 layout_mode = 2
 text = "Levantar"
 
-[node name="AmetistaRow" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons"]
+[node name="AmetistaRow" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons"]
 layout_mode = 2
 
-[node name="AmetistaHeader" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow"]
+[node name="AmetistaHeader" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/AmetistaRow"]
 layout_mode = 2
 text = "Ametista"
 
-[node name="AmetistaControls" type="HBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow"]
+[node name="AmetistaControls" type="HBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/AmetistaRow"]
 layout_mode = 2
 
-[node name="AmetistaPercent" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow/AmetistaControls"]
+[node name="AmetistaPercent" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/AmetistaRow/AmetistaControls"]
 layout_mode = 2
 text = "100%"
 
-[node name="AmetistaSlider" type="HSlider" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow/AmetistaControls"]
+[node name="AmetistaSlider" type="HSlider" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/AmetistaRow/AmetistaControls"]
 layout_mode = 2
 size_flags_horizontal = 3
 min_value = 0.0
@@ -512,11 +539,11 @@ max_value = 100.0
 step = 5.0
 value = 100.0
 
-[node name="DepositAmetistaButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow/AmetistaControls"]
+[node name="DepositAmetistaButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/AmetistaRow/AmetistaControls"]
 layout_mode = 2
 text = "Depositar"
 
-[node name="WithdrawAmetistaButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/VaultButtons/AmetistaRow/AmetistaControls"]
+[node name="WithdrawAmetistaButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/AmetistaRow/AmetistaControls"]
 layout_mode = 2
 text = "Levantar"
 
@@ -582,8 +609,15 @@ size_flags_vertical = 3
 [node name="Missoes" type="VBoxContainer" parent="MissionsMenu/Panel/Margin/VBox/Tabs"]
 layout_mode = 2
 
-[node name="MissionList" type="VBoxContainer" parent="MissionsMenu/Panel/Margin/VBox/Tabs/Missoes"]
+[node name="MissionScroll" type="ScrollContainer" parent="MissionsMenu/Panel/Margin/VBox/Tabs/Missoes"]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+follow_focus = true
+
+[node name="MissionList" type="VBoxContainer" parent="MissionsMenu/Panel/Margin/VBox/Tabs/Missoes/MissionScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="Inventario" type="VBoxContainer" parent="MissionsMenu/Panel/Margin/VBox/Tabs"]
 layout_mode = 2
@@ -600,3 +634,4 @@ size_flags_horizontal = 3
 [node name="CloseMissionsButton" type="Button" parent="MissionsMenu/Panel/Margin/VBox"]
 layout_mode = 2
 text = "Fechar"
+
