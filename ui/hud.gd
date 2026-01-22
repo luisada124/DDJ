@@ -412,12 +412,18 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 
 	if event.is_action_pressed("interact") and _active_trader != null and not trader_menu.visible:
+		# Descobrir a estação automaticamente na primeira interação
+		if not _active_station_id.is_empty() and not GameState.is_station_discovered(_active_station_id):
+			GameState.discover_station(_active_station_id)
 		_set_trader_menu_visible(true)
 		get_viewport().set_input_as_handled()
 		return
 
 	if event.is_action_pressed("open_upgrades"):
 		if _active_station != null:
+			# Descobrir a estação automaticamente na primeira interação
+			if not _active_station_id.is_empty() and not GameState.is_station_discovered(_active_station_id):
+				GameState.discover_station(_active_station_id)
 			_set_upgrade_menu_visible(not upgrade_menu.visible)
 			get_viewport().set_input_as_handled()
 		return
