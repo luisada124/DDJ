@@ -43,10 +43,15 @@ func _update_timer_wait_time() -> void:
 	spawn_timer.wait_time = _get_spawn_interval(GameState.current_zone_id)
 
 func _on_spawn_timer_timeout() -> void:
+	# Zona 3 (core) é reservada para o boss final.
+	if GameState.current_zone_id == "core":
+		return
 	_spawn_enemy()
 	_update_timer_wait_time()
 
 func _spawn_enemy() -> void:
+	if GameState.current_zone_id == "core":
+		return
 	var max_allowed := _get_max_enemies(GameState.current_zone_id)
 	if _count_enemies() >= max_allowed:
 		return
@@ -105,7 +110,7 @@ func _get_max_enemies(zone_id: String) -> int:
 		"mid":
 			return mid_max_enemies
 		"core":
-			return core_max_enemies
+			return 0
 		_:
 			return outer_max_enemies
 
