@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://c2022r782cuvy"]
 
-[ext_resource type="Texture2D" uid="uid://drfquk3homeyn" path="res://textures/fundozona3.png" id="1_dss6q"]
-[ext_resource type="Script" path="res://world/zone3_boss_controller.gd" id="2_zone3_boss_controller"]
+[ext_resource type="Texture2D" uid="uid://bjrm3amgjxcyo" path="res://textures/ChatGPT Image Jan 5, 2026, 12_57_27 AM.png" id="1_uuf5n"]
+[ext_resource type="Script" uid="uid://b42refxbrmobu" path="res://world/zone3_boss_controller.gd" id="2_zone3_boss_controller"]
 
 [node name="Zone3" type="Node2D"]
 
@@ -13,7 +13,7 @@ motion_mirroring = Vector2(860, 571)
 [node name="SpaceBackground" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer"]
 texture_repeat = 2
 position = Vector2(2048, 2048.5)
-texture = ExtResource("1_dss6q")
+texture = ExtResource("1_uuf5n")
 region_enabled = true
 region_rect = Rect2(0, 0, 4096, 4096)
 

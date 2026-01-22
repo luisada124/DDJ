@@ -1,6 +1,6 @@
 [gd_scene load_steps=12 format=3 uid="uid://dwnoooka70fwj"]
 
-[ext_resource type="Texture2D" uid="uid://td7kqwf0gshu" path="res://textures/fundoZona2.png" id="1_bal8j"]
+[ext_resource type="Texture2D" uid="uid://bjrm3amgjxcyo" path="res://textures/ChatGPT Image Jan 5, 2026, 12_57_27 AM.png" id="1_cf0f5"]
 [ext_resource type="PackedScene" uid="uid://cshejja03gcoo" path="res://world/comet.tscn" id="2_comet"]
 [ext_resource type="Script" uid="uid://bh6ub2jiqfrcn" path="res://world/comet_spawner.gd" id="3_spawner"]
 [ext_resource type="PackedScene" uid="uid://dcummglqr736p" path="res://world/TraderPlanet.tscn" id="4_trader"]
@@ -22,7 +22,7 @@ motion_mirroring = Vector2(860, 571)
 [node name="SpaceBackground" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer"]
 texture_repeat = 2
 position = Vector2(2048, 2049)
-texture = ExtResource("1_bal8j")
+texture = ExtResource("1_cf0f5")
 region_enabled = true
 region_rect = Rect2(0, 0, 4096, 4096)
 
