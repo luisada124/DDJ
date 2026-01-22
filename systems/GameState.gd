@@ -142,49 +142,49 @@ var zone_pois_world: Array = []
 
 const UPGRADE_DEFS := {
 	"hull": {
-		"title": "Hull",
+		"title": "Casco",
 		"description": "+10 HP máximo por nível.",
 		"max_level": 10,
 		"base_cost": {"scrap": 10, "mineral": 0},
 		"growth": 1.35,
 	},
 	"blaster": {
-		"title": "Blaster",
+		"title": "Disparador",
 		"description": "Dispara mais rápido (reduz o intervalo entre tiros).",
 		"max_level": 10,
 		"base_cost": {"scrap": 12, "mineral": 2},
 		"growth": 1.35,
 	},
 	"laser_damage": {
-		"title": "Laser Damage",
+		"title": "Dano do Laser",
 		"description": "Aumenta o dano do laser (+10% por nivel).",
 		"max_level": 10,
 		"base_cost": {"scrap": 16, "mineral": 6},
 		"growth": 1.35,
 	},
 	"laser_speed": {
-		"title": "Laser Speed",
+		"title": "Velocidade do Laser",
 		"description": "Dispara lasers mais rapidos (+10% velocidade por nivel).",
 		"max_level": 10,
 		"base_cost": {"scrap": 12, "mineral": 4},
 		"growth": 1.35,
 	},
 	"engine": {
-		"title": "Engine",
+		"title": "Motor",
 		"description": "Mais aceleração (+12% por nível).",
 		"max_level": 10,
 		"base_cost": {"scrap": 14, "mineral": 4},
 		"growth": 1.35,
 	},
 	"thrusters": {
-		"title": "Thrusters",
+		"title": "Propulsores",
 		"description": "Mais velocidade máxima (+10% por nível).",
 		"max_level": 10,
 		"base_cost": {"scrap": 14, "mineral": 4},
 		"growth": 1.35,
 	},
 	"magnet": {
-		"title": "Magnet",
+		"title": "Ima",
 		"description": "Aumenta o magnet dos drops (+20% range e +15% speed por nível).",
 		"max_level": 10,
 		"base_cost": {"scrap": 8, "mineral": 6},
@@ -192,28 +192,28 @@ const UPGRADE_DEFS := {
 	},
 
 	"aux_fire_rate": {
-		"title": "Aux Fire Rate",
+		"title": "Cadencia Aux",
 		"description": "Nave auxiliar dispara mais rapido (+8% cadencia por nivel).",
 		"max_level": 10,
 		"base_cost": {"scrap": 10, "mineral": 8},
 		"growth": 1.35,
 	},
 	"aux_damage": {
-		"title": "Aux Damage",
+		"title": "Dano Aux",
 		"description": "Aumenta o dano do laser da nave auxiliar (+12% por nivel).",
 		"max_level": 10,
 		"base_cost": {"scrap": 14, "mineral": 10},
 		"growth": 1.35,
 	},
 	"aux_range": {
-		"title": "Aux Range",
+		"title": "Alcance Aux",
 		"description": "Aumenta o alcance da nave auxiliar (+8% por nivel).",
 		"max_level": 10,
 		"base_cost": {"scrap": 12, "mineral": 8},
 		"growth": 1.35,
 	},
 	"aux_laser_speed": {
-		"title": "Aux Laser Speed",
+		"title": "Velocidade Laser Aux",
 		"description": "Aumenta a velocidade dos lasers da nave auxiliar (+10% por nivel).",
 		"max_level": 10,
 		"base_cost": {"scrap": 12, "mineral": 6},
@@ -1707,8 +1707,12 @@ func _recalculate_zone_unlocks() -> void:
 			unlocked_zones.append(zone_id)
 
 func _recalculate_player_stats() -> void:
+	var old_max := player_max_health
 	player_max_health = BASE_PLAYER_MAX_HEALTH + get_upgrade_level("hull") * 10
-	player_health = clamp(player_health, 0, player_max_health)
+	if player_health >= old_max:
+		player_health = player_max_health
+	else:
+		player_health = clamp(player_health, 0, player_max_health)
 
 func _queue_save() -> void:
 	if _save_queued:

@@ -1,6 +1,7 @@
 extends StaticBody2D
 
 const CometDatabase := preload("res://world/CometDatabase.gd")
+const DROP_MULTIPLIER := 2
 
 @export var comet_id: String = "meteor_01"
 @export var speed: float = 40.0
@@ -8,7 +9,7 @@ const CometDatabase := preload("res://world/CometDatabase.gd")
 @export var min_scrap: int = 1
 @export var max_scrap: int = 3
 @export var mineral_drop_chance: float = 0.15
-@export var ametista_drop_chance: float = 0.02
+@export var ametista_drop_chance: float = 0.01
 @export var explosion_scene: PackedScene  # opcional: partículas/FX
 
 @export var max_health: int = 30
@@ -134,5 +135,5 @@ func _spawn_loot(root: Node) -> void:
 			loot.set("resource_type", "mineral")
 		else:
 			loot.set("resource_type", "scrap")
-		loot.set("amount", 1)
+		loot.set("amount", DROP_MULTIPLIER)
 		root.call_deferred("add_child", loot)

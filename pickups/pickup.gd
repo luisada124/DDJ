@@ -5,6 +5,8 @@ extends Area2D
 @export var spin_speed: float = 2.0
 @export var magnet_range: float = 140.0
 @export var magnet_speed: float = 420.0
+@export var despawn_seconds: float = 300.0
+@export var despawn_scrap_only: bool = true
 
 var _player: Node2D
 var _default_texture: Texture2D
@@ -15,6 +17,7 @@ func _ready() -> void:
 	if has_node("Sprite2D"):
 		_default_texture = ($Sprite2D as Sprite2D).texture
 	_update_visuals()
+	_start_despawn_timer()
 
 func _process(delta: float) -> void:
 	rotation += spin_speed * delta  # efeito a girar
@@ -61,4 +64,16 @@ func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group("ship") and GameState.can_ship_collect_pickups():
 		GameState.record_vacuum_use()
 		GameState.add_resource(resource_type, amount)
+		queue_free()
+
+func _start_despawn_timer() -> void:
+	if despawn_seconds <= 0.0:
+		return
+	if despawn_scrap_only and resource_type != "scrap":
+		return
+	var timer := get_tree().create_timer(despawn_seconds)
+	timer.timeout.connect(_on_despawn_timeout)
+
+func _on_despawn_timeout() -> void:
+	if is_inside_tree():
 		queue_free()

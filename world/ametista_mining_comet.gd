@@ -2,6 +2,7 @@ extends StaticBody2D
 
 const AMETISTA_TEXTURE: Texture2D = preload("res://textures/ametista-block.png")
 
+@export var spawn_chance: float = 0.15
 @export var mine_duration: float = 3.0
 @export var yield_amount: int = 1
 
@@ -9,12 +10,17 @@ var _in_range: bool = false
 var _mining: bool = false
 var _progress: float = 0.0
 var _depleted: bool = false
+var _rng := RandomNumberGenerator.new()
 
 @onready var _sprite: Sprite2D = $Sprite2D
 @onready var _prompt: Label = $Prompt
 @onready var _range_area: Area2D = $RangeArea
 
 func _ready() -> void:
+	_rng.randomize()
+	if _rng.randf() > spawn_chance:
+		queue_free()
+		return
 	add_to_group("ametista_mine")
 	if _sprite != null and AMETISTA_TEXTURE != null:
 		_sprite.texture = AMETISTA_TEXTURE

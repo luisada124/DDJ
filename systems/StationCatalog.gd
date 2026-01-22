@@ -18,8 +18,8 @@ const STATIONS: Dictionary = {
 			{"id": "mnem", "name": "Mnem-8", "type": "bounty"},
 		],
 		"trades": {
-			"scrap_to_mineral": {"give": {"scrap": 10}, "receive": {"mineral": 1}},
-			"mineral_to_scrap": {"give": {"mineral": 1}, "receive": {"scrap": 8}},
+			"scrap_to_mineral": {"give": {"scrap": 8}, "receive": {"mineral": 1}},
+			"mineral_to_scrap": {"give": {"mineral": 1}, "receive": {"scrap": 10}},
 		},
 		"vault_cost": {"scrap": 60, "mineral": 25},
 		"offered_quests": ["kill_15_basic"],
@@ -38,8 +38,8 @@ const STATIONS: Dictionary = {
 			{"id": "nox", "name": "Nox-7", "type": "scavenger"},
 		],
 		"trades": {
-			"scrap_to_mineral": {"give": {"scrap": 10}, "receive": {"mineral": 1}},
-			"mineral_to_scrap": {"give": {"mineral": 1}, "receive": {"scrap": 8}},
+			"scrap_to_mineral": {"give": {"scrap": 8}, "receive": {"mineral": 1}},
+			"mineral_to_scrap": {"give": {"mineral": 1}, "receive": {"scrap": 10}},
 		},
 		"vault_cost": {"scrap": 70, "mineral": 30},
 		"offered_quests": [],
@@ -58,10 +58,10 @@ const STATIONS: Dictionary = {
 			{"id": "snee", "name": "Snee-Snack", "type": "bounty"},
 		],
 		"trades": {
-			"scrap_to_mineral": {"give": {"scrap": 8}, "receive": {"mineral": 1}},
-			"mineral_to_scrap": {"give": {"mineral": 1}, "receive": {"scrap": 10}},
-			"ametista_to_mineral": {"give": {"ametista": 1}, "receive": {"mineral": 30}},
-			"ametista_to_scrap": {"give": {"ametista": 1}, "receive": {"scrap": 45}},
+			"scrap_to_mineral": {"give": {"scrap": 6}, "receive": {"mineral": 1}},
+			"mineral_to_scrap": {"give": {"mineral": 1}, "receive": {"scrap": 12}},
+			"ametista_to_mineral": {"give": {"ametista": 1}, "receive": {"mineral": 36}},
+			"ametista_to_scrap": {"give": {"ametista": 1}, "receive": {"scrap": 55}},
 		},
 		"vault_cost": {"scrap": 80, "mineral": 45},
 		"offered_quests": ["kill_10_sniper", "kill_25_sniper_ametista"],
@@ -80,10 +80,10 @@ const STATIONS: Dictionary = {
 			{"id": "rrrl", "name": "Rrrl", "type": "bruiser"},
 		],
 		"trades": {
-			"scrap_to_mineral": {"give": {"scrap": 12}, "receive": {"mineral": 2}},
-			"mineral_to_scrap": {"give": {"mineral": 2}, "receive": {"scrap": 15}},
-			"ametista_to_mineral": {"give": {"ametista": 1}, "receive": {"mineral": 40}},
-			"ametista_to_scrap": {"give": {"ametista": 1}, "receive": {"scrap": 60}},
+			"scrap_to_mineral": {"give": {"scrap": 10}, "receive": {"mineral": 2}},
+			"mineral_to_scrap": {"give": {"mineral": 2}, "receive": {"scrap": 18}},
+			"ametista_to_mineral": {"give": {"ametista": 1}, "receive": {"mineral": 48}},
+			"ametista_to_scrap": {"give": {"ametista": 1}, "receive": {"scrap": 72}},
 		},
 		"vault_cost": {"scrap": 120, "mineral": 80, "ametista": 1},
 		"offered_quests": ["kill_5_tank", "kill_12_tank_ametista"],
@@ -102,8 +102,8 @@ const STATIONS: Dictionary = {
 			{"id": "snee", "name": "Snee-Snack", "type": "scavenger"},
 		],
 		"trades": {
-			"scrap_to_mineral": {"give": {"scrap": 14}, "receive": {"mineral": 2}},
-			"mineral_to_scrap": {"give": {"mineral": 1}, "receive": {"scrap": 6}},
+			"scrap_to_mineral": {"give": {"scrap": 12}, "receive": {"mineral": 2}},
+			"mineral_to_scrap": {"give": {"mineral": 1}, "receive": {"scrap": 8}},
 		},
 		"vault_cost": {"scrap": 70, "mineral": 15},
 		"offered_quests": [],
@@ -122,8 +122,8 @@ const STATIONS: Dictionary = {
 			{"id": "rrrl", "name": "Rrrl", "type": "bruiser"},
 		],
 		"trades": {
-			"scrap_to_mineral": {"give": {"scrap": 6}, "receive": {"mineral": 1}},
-			"mineral_to_scrap": {"give": {"mineral": 2}, "receive": {"scrap": 14}},
+			"scrap_to_mineral": {"give": {"scrap": 5}, "receive": {"mineral": 1}},
+			"mineral_to_scrap": {"give": {"mineral": 2}, "receive": {"scrap": 16}},
 		},
 		"vault_cost": {"scrap": 55, "mineral": 35},
 		"offered_quests": [],
@@ -190,7 +190,7 @@ static func get_station_npcs(station_id: String) -> Array:
 
 static func get_repair_kit_cost(_station_id: String) -> Dictionary:
 	# Consumível: cura 50% do HP máximo e pode ser usado fora da estação.
-	return {"scrap": 80}
+	return {"scrap": 30}
 
 static func get_ship_repair_cost(_station_id: String) -> Dictionary:
 	# Reparação total (cura para HP máximo) no mecânico.
@@ -200,7 +200,7 @@ static func get_vacuum_map_cost(station_id: String) -> Dictionary:
 	# Item: "mapa para vacuum" (revela a localizacao da peca aleatoria na Zona 1).
 	# Mantem como conveniencia: so vende numa estacao da Zona 1.
 	if station_id == "station_alpha":
-		return {"scrap": 45}
+		return {"scrap": 35}
 	return {}
 
 static func get_station_alpha_map_cost(station_id: String) -> Dictionary:
@@ -212,49 +212,49 @@ static func get_station_alpha_map_cost(station_id: String) -> Dictionary:
 static func get_vacuum_part_shop_cost(station_id: String) -> Dictionary:
 	# Venda direta de 1 peça do Vacuum na Estacao Beta.
 	if station_id == "station_epsilon":
-		return {"scrap": 120, "mineral": 30}
+		return {"scrap": 100, "mineral": 25}
 	return {}
 
 static func get_reverse_thruster_shop_part_cost(station_id: String) -> Dictionary:
 	# Reverse Thruster (3 pecas): A e B sao vendidas em 2 estacoes diferentes na Zona 1.
 	if station_id == "station_alpha":
-		return {"scrap": 90, "mineral": 15}
+		return {"scrap": 75, "mineral": 10}
 	if station_id == "station_delta":
-		return {"scrap": 90, "mineral": 15}
+		return {"scrap": 75, "mineral": 10}
 	return {}
 
 static func get_reverse_thruster_map_cost(station_id: String) -> Dictionary:
 	# Mapa que revela a peca aleatoria do Reverse Thruster na Zona 1.
 	if station_id == "station_alpha":
-		return {"scrap": 35}
+		return {"scrap": 30}
 	return {}
 
 static func get_side_dash_shop_part_cost(station_id: String) -> Dictionary:
 	# Side Dash (3 pecas): A e B sao vendidas em 2 estacoes diferentes na Zona 2.
 	# Nota: o mesmo station_id pode existir em outras zonas, por isso o UI faz gate pela zona atual.
 	if station_id == "station_beta":
-		return {"scrap": 110, "mineral": 20}
+		return {"scrap": 90, "mineral": 15}
 	if station_id == "station_zeta":
-		return {"scrap": 110, "mineral": 20}
+		return {"scrap": 90, "mineral": 15}
 	return {}
 
 static func get_auto_regen_map_zone1_cost(station_id: String) -> Dictionary:
 	# Mapa 1: vendido na Zona 1 (escolhi Estacao Alfa).
 	if station_id == "station_alpha":
-		return {"scrap": 40}
+		return {"scrap": 30}
 	return {}
 
 static func get_auto_regen_map_zone2_cost(station_id: String) -> Dictionary:
 	# Mapa 2: vendido na Zona 2 (escolhi Posto Zeta).
 	if station_id == "station_zeta":
-		return {"scrap": 50, "mineral": 15}
+		return {"scrap": 40, "mineral": 10}
 	return {}
 
 static func get_aux_ship_shop_part_cost(station_id: String) -> Dictionary:
 	# Aux Ship (3 pecas): 1 peca vendida numa estacao da Zona 2.
 	# O UI faz gate pela zona atual.
 	if station_id == "station_beta":
-		return {"scrap": 140, "mineral": 35}
+		return {"scrap": 110, "mineral": 25}
 	return {}
 
 static func get_offered_quests(station_id: String) -> Array:
