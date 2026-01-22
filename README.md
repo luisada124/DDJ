@@ -2,7 +2,7 @@ todo:
 
 FUNDO ARRANJAR
  
-
+Meter o boss da fase 1 mais f*dido. 
 
 ter dIALOGO do Warp no no boss 1. 
 

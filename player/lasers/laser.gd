@@ -2,6 +2,7 @@ extends Area2D
 
 @export var speed: float = 800.0
 @export var damage: int = 5
+@export var damage_upgrade_id: String = ""
 
 var direction: Vector2 = Vector2.UP
 var inherited_velocity: Vector2 = Vector2.ZERO
@@ -13,9 +14,13 @@ var from_player: bool = true
 const _LAYER_PLAYER := 1
 const _LAYER_COMET := 2
 const _LAYER_ENEMY := 8
+const _BASE_PROJECTILE_SCALE := 1.35
+const _PROJECTILE_SCALE_PER_DAMAGE_LEVEL := 0.045
+const _MAX_PROJECTILE_SCALE := 2.0
 
 func _ready() -> void:
 	# Ajusta colisões conforme o dono do tiro (evita lasers do player a baterem no player)
+	_apply_projectile_size()
 	if from_player:
 		_apply_player_color()
 		collision_mask = _LAYER_COMET | _LAYER_ENEMY
@@ -23,14 +28,38 @@ func _ready() -> void:
 		collision_mask = _LAYER_PLAYER
 
 
+func _apply_projectile_size() -> void:
+	var sprite: Sprite2D = null
+	var collision: CollisionShape2D = null
+	if has_node("Sprite2D"):
+		sprite = $Sprite2D as Sprite2D
+	if has_node("CollisionShape2D"):
+		collision = $CollisionShape2D as CollisionShape2D
+	if sprite == null and collision == null:
+		return
+
+	var scale_mult := _BASE_PROJECTILE_SCALE
+	if from_player:
+		var upgrade_id := damage_upgrade_id
+		if upgrade_id == "":
+			upgrade_id = "laser_damage"
+		var level := GameState.get_upgrade_level(upgrade_id)
+		scale_mult += float(level) * _PROJECTILE_SCALE_PER_DAMAGE_LEVEL
+	scale_mult = minf(scale_mult, _MAX_PROJECTILE_SCALE)
+
+	var s := Vector2.ONE * scale_mult
+	if sprite != null:
+		sprite.scale = s
+	if collision != null:
+		collision.scale = s
+
 func _apply_player_color() -> void:
 	if not has_node("Sprite2D"):
 		return
 	var sprite := $Sprite2D as Sprite2D
 	var level := GameState.get_upgrade_level("laser_damage")
-	var max_level := GameState.get_upgrade_max_level("laser_damage")
 	if level >= 5:
-		sprite.modulate = Color(0.0, 1.0, 0.0)
+		sprite.modulate = Color(1.0, 1.0, 0.0)
 	else:
 		sprite.modulate = Color(1, 1, 1)
 

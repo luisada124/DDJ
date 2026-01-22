@@ -102,6 +102,7 @@ func _fire(dir: Vector2) -> void:
 		return
 
 	laser.set("from_player", true)
+	laser.set("damage_upgrade_id", "aux_damage")
 	laser.set("direction", dir)
 	laser.rotation = dir.angle() - Vector2.UP.angle()
 	laser.set("damage", GameState.get_aux_ship_laser_damage())
