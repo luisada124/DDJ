@@ -6,10 +6,6 @@ Meter o boss da fase 1 mais f*dido.
 
 ter dIALOGO do Warp no no boss 1. 
 
-
-
-
-
 Tamanho das estações. 
 
 
@@ -55,8 +51,6 @@ reverse_thruster: 3
 Zona 2:
 
 broca de mineracao: 1 
-
-Vai ser obtida logo numa estação perto do spawn da zona 2 e Vai ser um tropa que lhe vai dar para desde que ele faça recolha de 4 ametistas para ele. Se ele não cumprir e não lhe as devolver, também não consegue fazer mais missões nesse gás, e esse gás vai ter missões boas. 
 
 side_dash: 3
 Maquina auxiliar: 3
