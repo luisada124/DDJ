@@ -80,9 +80,7 @@ auto_regen:3
 PROMPS:
 
 
-Chat quando o player chega a zona dois pela primeira vez e suposto estar ao pe dele uma estacao que tem um npc .  nesse diálogo, mete algo do género:  "Ah, és novo por estas bandas? Aqui temos um minério especial. Se me apanhas quatro com esta broca, dou-te uma recompensa"
 
-depois disso a UI sai da estacao e a broca de mineracao (gadget) aparece ao pe do player e este tem uma missao de apanhar 4 ametistas para vir devolver a estacao
 
 
 

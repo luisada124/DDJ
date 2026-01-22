@@ -1,15 +1,16 @@
-[gd_scene load_steps=7 format=3 uid="uid://dwnoooka70fwj"]
+[gd_scene load_steps=12 format=3 uid="uid://dwnoooka70fwj"]
 
 [ext_resource type="Texture2D" uid="uid://td7kqwf0gshu" path="res://textures/fundoZona2.png" id="1_bal8j"]
 [ext_resource type="PackedScene" uid="uid://cshejja03gcoo" path="res://world/comet.tscn" id="2_comet"]
 [ext_resource type="Script" uid="uid://bh6ub2jiqfrcn" path="res://world/comet_spawner.gd" id="3_spawner"]
-[ext_resource type="PackedScene" path="res://world/TraderPlanet.tscn" id="4_trader"]
-[ext_resource type="PackedScene" path="res://pickups/ArtifactPart.tscn" id="5_artifact_part"]
+[ext_resource type="PackedScene" uid="uid://dcummglqr736p" path="res://world/TraderPlanet.tscn" id="4_trader"]
+[ext_resource type="PackedScene" uid="uid://bi51iiu6cmm24" path="res://pickups/ArtifactPart.tscn" id="5_artifact_part"]
 [ext_resource type="PackedScene" path="res://world/AmetistaMiningComet.tscn" id="6_ametista_mine"]
-[ext_resource type="Script" path="res://world/side_dash_random_part.gd" id="7_side_dash_random_part"]
-[ext_resource type="Script" path="res://world/auto_regen_random_part.gd" id="8_auto_regen_random_part"]
-[ext_resource type="Script" path="res://world/aux_ship_random_part.gd" id="9_aux_ship_random_part"]
-[ext_resource type="Script" path="res://world/zone2_core_gate_event.gd" id="10_core_gate_event"]
+[ext_resource type="Script" uid="uid://dgvh1vtxxfcj1" path="res://world/side_dash_random_part.gd" id="7_side_dash_random_part"]
+[ext_resource type="Script" uid="uid://c6sfwp2xxl6nj" path="res://world/auto_regen_random_part.gd" id="8_auto_regen_random_part"]
+[ext_resource type="Script" uid="uid://t8ffo8mcsoat" path="res://world/aux_ship_random_part.gd" id="9_aux_ship_random_part"]
+[ext_resource type="Script" uid="uid://crabtahpd0koa" path="res://world/zone2_core_gate_event.gd" id="10_core_gate_event"]
+[ext_resource type="Script" uid="uid://r8gorrv0yv1t" path="res://world/zone2_intro.gd" id="11_zone2_intro"]
 
 [node name="Zone2" type="Node2D"]
 
@@ -20,7 +21,7 @@ motion_mirroring = Vector2(860, 571)
 
 [node name="SpaceBackground" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer"]
 texture_repeat = 2
-position = Vector2(2048, 2048.5)
+position = Vector2(2048, 2049)
 texture = ExtResource("1_bal8j")
 region_enabled = true
 region_rect = Rect2(0, 0, 4096, 4096)
@@ -37,32 +38,33 @@ station_id = "station_zeta"
 
 [node name="SideDashRandomPart" parent="." instance=ExtResource("5_artifact_part")]
 script = ExtResource("7_side_dash_random_part")
+bounds_local = Rect2(-3072, -3072, 6144, 6144)
+margin = 250.0
 
 [node name="AutoRegenRandomPart1" parent="." instance=ExtResource("5_artifact_part")]
 script = ExtResource("8_auto_regen_random_part")
 part_index = 1
+bounds_local = Rect2(-3072, -3072, 6144, 6144)
+margin = 250.0
 
 [node name="AutoRegenRandomPart2" parent="." instance=ExtResource("5_artifact_part")]
 script = ExtResource("8_auto_regen_random_part")
 part_index = 2
+bounds_local = Rect2(-3072, -3072, 6144, 6144)
+margin = 250.0
 
 [node name="AuxShipRandomPart" parent="." instance=ExtResource("5_artifact_part")]
 script = ExtResource("9_aux_ship_random_part")
+bounds_local = Rect2(-3072, -3072, 6144, 6144)
+margin = 250.0
 
 [node name="CoreGateEvent" type="Node2D" parent="."]
 script = ExtResource("10_core_gate_event")
 
+[node name="Zone2Intro" type="Node2D" parent="."]
+script = ExtResource("11_zone2_intro")
+
 [node name="Mining" type="Node2D" parent="."]
-
-[node name="DrillPart" parent="Mining" instance=ExtResource("5_artifact_part")]
-position = Vector2(240, -160)
-artifact_id = "mining_drill"
-
-[node name="AmetistaComet1" parent="Mining" instance=ExtResource("6_ametista_mine")]
-position = Vector2(-200, 180)
-
-[node name="AmetistaComet2" parent="Mining" instance=ExtResource("6_ametista_mine")]
-position = Vector2(520, 260)
 
 [node name="AmetistaComet3" parent="Mining" instance=ExtResource("6_ametista_mine")]
 position = Vector2(1200, -900)

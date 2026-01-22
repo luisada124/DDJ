@@ -8,6 +8,7 @@ const QUEST_VACUUM_PART := "vacuum_part"
 const QUEST_SIDE_DASH_MAP := "side_dash_map"
 const QUEST_AUX_SHIP_PART := "aux_ship_part"
 const QUEST_AUX_SHIP_MAP := "aux_ship_map"
+const QUEST_MINE_4_AMETISTA := "mine_4_ametista"
 const QUEST_TAVERN_BANDIT_1 := "tavern_bandit_1"
 const QUEST_TAVERN_BANDIT_2 := "tavern_bandit_2"
 const QUEST_TAVERN_BANDIT_3 := "tavern_bandit_3"
@@ -83,6 +84,15 @@ const QUEST_DEFS := {
 		"reward": {"scrap": 35},
 		"map_reward": "aux_ship",
 	},
+	QUEST_MINE_4_AMETISTA: {
+		"title": "Minerio Especial",
+		"description": "Usa a Broca de Mineracao para apanhar 4 ametistas em cometas especiais. Depois volta ao Posto Kappa.",
+		"resource_type": "ametista",
+		"goal": 4,
+		"giver_station_id": "station_kappa",
+		"reward": {"scrap": 80},
+		"discover_station_reward": "station_beta",
+	},
 	QUEST_TAVERN_BANDIT_1: {
 		"title": "Acerto de Contas I",
 		"description": "Bandido 1/5: derrota-o na taberna do Mercador Delta e volta ao Cacador no Refugio Epsilon.",
@@ -148,6 +158,7 @@ const NPC_QUEST_POOLS := {
 	"marksman": [QUEST_KILL_10_SNIPER, QUEST_SIDE_DASH_MAP, QUEST_AUX_SHIP_PART],
 	"bruiser": [QUEST_KILL_5_TANK],
 	"bounty": [QUEST_KILL_15_BASIC, QUEST_KILL_10_SNIPER, QUEST_KILL_5_TANK, QUEST_AUX_SHIP_MAP],
+	"miner": [QUEST_MINE_4_AMETISTA],
 	"hunter": [
 		QUEST_TAVERN_BANDIT_1,
 		QUEST_TAVERN_BANDIT_2,
