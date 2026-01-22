@@ -105,6 +105,7 @@ func _fire(dir: Vector2) -> void:
 	laser.set("direction", dir)
 	laser.rotation = dir.angle() - Vector2.UP.angle()
 	laser.set("damage", GameState.get_aux_ship_laser_damage())
+	laser.set("speed", GameState.get_aux_ship_laser_speed())
 
 	var inherited := Vector2.ZERO
 	if _follow_target != null and is_instance_valid(_follow_target):

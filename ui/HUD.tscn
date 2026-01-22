@@ -177,6 +177,10 @@ text = "Blaster"
 layout_mode = 2
 text = "Laser Damage"
 
+[node name="LaserSpeedButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox/MainShipList"]
+layout_mode = 2
+text = "Laser Speed"
+
 [node name="EngineButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox/MainShipList"]
 layout_mode = 2
 text = "Engine"
@@ -213,6 +217,10 @@ text = "Aux Damage"
 [node name="AuxRangeButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox/AuxShipList"]
 layout_mode = 2
 text = "Aux Range"
+
+[node name="AuxLaserSpeedButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox/AuxShipList"]
+layout_mode = 2
+text = "Aux Laser Speed"
 
 [node name="UpgradeDescription" type="RichTextLabel" parent="UpgradeMenu/Panel/Margin/VBox"]
 layout_mode = 2
