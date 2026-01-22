@@ -139,6 +139,7 @@ var unlocked_zones: PackedStringArray = PackedStringArray(["outer"])
 # Runtime data (nao vai para o save): usado pelo minimapa/POIs.
 var zone_bounds_world: Rect2 = Rect2(-512, -512, 1024, 1024)
 var zone_pois_world: Array = []
+var intro_pending: bool = false
 
 const UPGRADE_DEFS := {
 	"hull": {

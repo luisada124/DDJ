@@ -257,6 +257,7 @@ func _ready() -> void:
 	GameState.speech_requested_timed.connect(_show_speech_bubble_timed)
 	_update_hud()
 	_update_boss_compass()
+	call_deferred("_maybe_play_intro")
 
 func _process(delta: float) -> void:
 	if _bandit_qte_active:
@@ -366,6 +367,18 @@ func _start_speech(text: String, has_anchor: bool, world_pos: Vector2, duration:
 	_speech_anchor_world = world_pos
 	_speech_time_left = maxf(0.1, duration)
 	speech_bubble.visible = true
+
+func _maybe_play_intro() -> void:
+	if not GameState.intro_pending:
+		return
+	GameState.intro_pending = false
+	var lines := [
+		"Eu sou o Ricky... os humanos apanharam-me!",
+		"Estao a levar-me preso na nave deles!",
+		"Consegui escapar. Tenho de voltar para a minha nave.",
+	]
+	for line in lines:
+		GameState.emit_signal("speech_requested_timed", line, 5.0)
 
 
 func _input(event: InputEvent) -> void:
