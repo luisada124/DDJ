@@ -22,6 +22,8 @@ scale = Vector2(0.5, 0.5)
 [node name="EnemySpawner" type="Node2D" parent="."]
 script = ExtResource("7_enemy_spawner")
 enemy_scene = ExtResource("4_rqm65")
+outer_spawn_margin = 1350.0
+outer_no_spawn_square_half_size = 900.0
 
 [node name="SpawnTimer" type="Timer" parent="EnemySpawner"]
 wait_time = 3.0
