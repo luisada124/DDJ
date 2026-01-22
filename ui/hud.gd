@@ -614,7 +614,9 @@ func _update_upgrade_menu(scrap: int, mineral: int) -> void:
 			button.disabled = true
 			button.modulate = Color(0.6, 0.6, 0.6)
 			continue
-		if level >= 5:
+		if level >= max_level:
+			button_color = Color(0.2, 0.6, 1.0)
+		elif level >= 5:
 			button_color = Color(0.0, 1.0, 0.0)
 		button.modulate = button_color
 
