@@ -25,6 +25,8 @@ jogo mais lento
 Estações defendidas por muitos inimigos. 
 Por cooldwon no dash
 
+Dá-me a lista de todos os itens do jogo para compra na loja. Essa lista, sabendo os drops dos meteoros e e recompensas das missões e drops dos inimigos que os kits de reparações têm de ser usados muitas vezes, portanto uma beca mais para o baratinho. 
+
 
 desSpawn de materiais
 

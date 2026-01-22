@@ -822,7 +822,7 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 		buy_artifact_part_button.disabled = not can_buy_part
 
 	var kit_cost: Dictionary = StationCatalog.get_repair_kit_cost(station_id)
-	buy_repair_kit_button.text = "Kit de reparacao (+50% HP) (%s)" % _format_cost(kit_cost)
+	buy_repair_kit_button.text = "Kit de reparacao (+50%% HP) (%s)" % _format_cost(kit_cost)
 	buy_repair_kit_button.disabled = not GameState.can_afford(kit_cost)
 
 	var repair_cost: Dictionary = StationCatalog.get_ship_repair_cost(station_id)

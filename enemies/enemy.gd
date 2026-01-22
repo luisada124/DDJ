@@ -8,6 +8,7 @@ const EnemyDatabase := preload("res://enemies/EnemyDatabase.gd")
 
 const DEFAULT_STATION_SAFE_RADIUS := 450.0
 const STATION_SAFE_MARGIN := 60.0
+const DROP_MULTIPLIER := 2
 
 @export var enemy_id: String = "basic"
 @export var difficulty_multiplier: float = 1.0
@@ -30,7 +31,7 @@ const STATION_SAFE_MARGIN := 60.0
 @export var min_drops: int = 1
 @export var max_drops: int = 3
 @export var mineral_drop_chance: float = 0.25
-@export var ametista_drop_chance: float = 0.015
+@export var ametista_drop_chance: float = 0.008
 @export var scrap_amount: int = 1
 @export var mineral_amount: int = 1
 
@@ -298,15 +299,15 @@ func _spawn_loot() -> void:
 		)
 		if randf() < mineral_drop_chance:
 			loot.set("resource_type", "mineral")
-			loot.set("amount", mineral_amount)
+			loot.set("amount", mineral_amount * DROP_MULTIPLIER)
 		else:
 			loot.set("resource_type", "scrap")
-			loot.set("amount", scrap_amount)
+			loot.set("amount", scrap_amount * DROP_MULTIPLIER)
 
 		var in_zone2 := GameState.current_zone_id == "mid"
 		if in_zone2 and randf() < ametista_drop_chance:
 			loot.set("resource_type", "ametista")
-			loot.set("amount", 1)
+			loot.set("amount", DROP_MULTIPLIER)
 		var root := get_tree().current_scene
 		if root != null:
 			root.call_deferred("add_child", loot)
