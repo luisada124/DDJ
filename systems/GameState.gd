@@ -32,6 +32,10 @@ var consumables := {
 var _regen_cooldown: float = 0.0
 var _regen_accum: float = 0.0
 
+# Estacoes descobertas (minimapa). No inicio: apenas Refugio Epsilon.
+var discovered_station_ids: PackedStringArray = PackedStringArray([])
+var alpha_station_map_bought: bool = false
+
 var resources := {
 	"scrap": 0,
 	"mineral": 0,
@@ -1156,11 +1160,48 @@ func reset_save() -> void:
 	save_game()
 	emit_signal("state_changed")
 
+func is_station_discovered(station_id: String) -> bool:
+	if station_id.is_empty():
+		return false
+	return discovered_station_ids.has(station_id)
+
+func discover_station(station_id: String) -> void:
+	if station_id.is_empty():
+		return
+	if discovered_station_ids.has(station_id):
+		return
+	discovered_station_ids.append(station_id)
+	emit_signal("state_changed")
+	_queue_save()
+
+func buy_alpha_station_map(cost: Dictionary) -> bool:
+	if alpha_station_map_bought:
+		return false
+	if cost.is_empty():
+		return false
+	if not can_afford(cost):
+		return false
+
+	for res_type_variant in cost.keys():
+		var res_type := str(res_type_variant)
+		resources[res_type] = int(resources.get(res_type, 0)) - int(cost[res_type_variant])
+	alpha_station_map_bought = true
+	discover_station("station_alpha")
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
 func save_game() -> void:
+	var discovered: Array[String] = []
+	for sid in discovered_station_ids:
+		discovered.append(str(sid))
+
 	var data := {
 		"version": SAVE_VERSION,
 		"resources": resources,
 		"consumables": consumables,
+		"discovered_stations": discovered,
+		"alpha_station_map_bought": alpha_station_map_bought,
 		"vacuum_map_bought": vacuum_map_bought,
 		"vacuum_random_part_local": [vacuum_random_part_local.x, vacuum_random_part_local.y],
 		"vacuum_random_part_collected": vacuum_random_part_collected,
@@ -1239,6 +1280,21 @@ func load_game() -> void:
 	# garantir que ametista existe em saves antigos
 	if not resources.has("ametista"):
 		resources["ametista"] = 0
+
+	alpha_station_map_bought = bool(data.get("alpha_station_map_bought", false))
+	discovered_station_ids = PackedStringArray([])
+	var stored_discovered: Variant = data.get("discovered_stations")
+	if typeof(stored_discovered) == TYPE_ARRAY:
+		for sid_variant in (stored_discovered as Array):
+			var sid := str(sid_variant)
+			if sid.is_empty():
+				continue
+			if not discovered_station_ids.has(sid):
+				discovered_station_ids.append(sid)
+
+	# Garantia: Refugio Epsilon aparece sempre no inicio.
+	if not discovered_station_ids.has("station_epsilon"):
+		discovered_station_ids.append("station_epsilon")
 
 	vacuum_map_bought = bool(data.get("vacuum_map_bought", false))
 	vacuum_random_part_collected = bool(data.get("vacuum_random_part_collected", false))
@@ -1432,6 +1488,8 @@ func _apply_defaults() -> void:
 	_regen_cooldown = 0.0
 	_regen_accum = 0.0
 	boss_planet_resources_unlocked = false
+	discovered_station_ids = PackedStringArray(["station_epsilon"])
+	alpha_station_map_bought = false
 	vacuum_map_bought = false
 	vacuum_random_part_local = Vector2.ZERO
 	vacuum_random_part_world = Vector2.ZERO

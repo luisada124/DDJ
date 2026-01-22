@@ -107,10 +107,22 @@ func _draw() -> void:
 	var trader_nodes: Array[Node] = get_tree().get_nodes_in_group("trader")
 	for n: Node in trader_nodes:
 		if n is Node2D:
-			var c := trader_color
 			var sid: Variant = n.get("station_id")
+			var station_id := ""
 			if sid != null:
-				c = StationCatalog.get_station_color(str(sid))
+				station_id = str(sid)
+
+			# Boss planet é tratado por um marcador separado.
+			if station_id == "boss_planet":
+				continue
+
+			# Estacoes só aparecem no minimapa depois de descobertas.
+			if not station_id.is_empty() and not GameState.is_station_discovered(station_id):
+				continue
+
+			var c := trader_color
+			if not station_id.is_empty():
+				c = StationCatalog.get_station_color(station_id)
 			draw_circle(to_map.call((n as Node2D).global_position), 4.0, c)
 
 	# Jogador

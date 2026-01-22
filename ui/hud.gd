@@ -44,6 +44,7 @@ extends Control
 @onready var mineral_to_scrap_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/MineralToScrapButton
 @onready var buy_artifact_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyArtifactPartButton
 @onready var buy_vacuum_map_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyVacuumMapButton
+@onready var buy_alpha_station_map_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyAlphaStationMapButton
 @onready var buy_vacuum_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyVacuumPartButton
 @onready var buy_reverse_thruster_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyReverseThrusterPartButton
 @onready var buy_reverse_thruster_map_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyReverseThrusterMapButton
@@ -203,6 +204,7 @@ func _ready() -> void:
 	mineral_to_scrap_button.pressed.connect(_on_trade_mineral_to_scrap)
 	buy_artifact_part_button.pressed.connect(_on_buy_artifact_part)
 	buy_vacuum_map_button.pressed.connect(_on_buy_vacuum_map_pressed)
+	buy_alpha_station_map_button.pressed.connect(_on_buy_alpha_station_map_pressed)
 	buy_vacuum_part_button.pressed.connect(_on_buy_vacuum_part_pressed)
 	buy_reverse_thruster_part_button.pressed.connect(_on_buy_reverse_thruster_part_pressed)
 	buy_reverse_thruster_map_button.pressed.connect(_on_buy_reverse_thruster_map_pressed)
@@ -698,6 +700,7 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	var trades: Dictionary = StationCatalog.get_trades(station_id)
 	var artifact_cost: Dictionary = StationCatalog.get_artifact_part_cost(station_id)
 	var vacuum_map_cost: Dictionary = StationCatalog.get_vacuum_map_cost(station_id)
+	var alpha_station_map_cost: Dictionary = StationCatalog.get_station_alpha_map_cost(station_id)
 	var vacuum_part_cost: Dictionary = StationCatalog.get_vacuum_part_shop_cost(station_id)
 	var rt_shop_cost: Dictionary = StationCatalog.get_reverse_thruster_shop_part_cost(station_id)
 	var rt_map_cost: Dictionary = StationCatalog.get_reverse_thruster_map_cost(station_id)
@@ -741,6 +744,12 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	if show_vacuum_map:
 		buy_vacuum_map_button.text = "Mapa para vacuum (marca no minimapa) (%s)" % _format_cost(vacuum_map_cost)
 		buy_vacuum_map_button.disabled = not GameState.can_afford(vacuum_map_cost)
+
+	var show_alpha_station_map := not alpha_station_map_cost.is_empty() and not GameState.alpha_station_map_bought and not GameState.is_station_discovered("station_alpha")
+	buy_alpha_station_map_button.visible = show_alpha_station_map
+	if show_alpha_station_map:
+		buy_alpha_station_map_button.text = "Mapa para Estacao Alfa (marca no minimapa) (%s)" % _format_cost(alpha_station_map_cost)
+		buy_alpha_station_map_button.disabled = not GameState.can_afford(alpha_station_map_cost)
 
 	var vacuum_parts_have := GameState.get_artifact_parts("vacuum")
 	var vacuum_parts_required := ArtifactDatabase.get_parts_required("vacuum")
@@ -1069,6 +1078,13 @@ func _on_buy_vacuum_map_pressed() -> void:
 		station_id = DEFAULT_STATION_ID
 	var cost: Dictionary = StationCatalog.get_vacuum_map_cost(station_id)
 	GameState.buy_vacuum_map(cost)
+
+func _on_buy_alpha_station_map_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var cost: Dictionary = StationCatalog.get_station_alpha_map_cost(station_id)
+	GameState.buy_alpha_station_map(cost)
 
 func _on_buy_vacuum_part_pressed() -> void:
 	var station_id := _active_station_id
@@ -1685,7 +1701,7 @@ func _on_dialogue_choice(next_node: String) -> void:
 		var parts := next_node.split(":", false)
 		if parts.size() >= 3:
 			var action := str(parts[1])
-			var quest_id := str(parts[2])
+			var arg := str(parts[2])
 			var next_after := "end"
 			if parts.size() >= 4:
 				next_after = str(parts[3])
@@ -1695,14 +1711,16 @@ func _on_dialogue_choice(next_node: String) -> void:
 					var station_id := _active_station_id
 					if station_id.is_empty():
 						station_id = DEFAULT_STATION_ID
-					GameState.accept_quest(quest_id, station_id)
+					GameState.accept_quest(arg, station_id)
 				"claim_quest":
 					var station_id2 := _active_station_id
 					if station_id2.is_empty():
 						station_id2 = DEFAULT_STATION_ID
-					GameState.claim_quest(quest_id, station_id2)
+					GameState.claim_quest(arg, station_id2)
 				"start_bandit_qte":
-					_start_bandit_qte(quest_id)
+					_start_bandit_qte(arg)
+				"discover_station":
+					GameState.discover_station(arg)
 
 			_update_station_quest_buttons()
 			_update_bandit_qte_ui()
@@ -1851,7 +1869,7 @@ func _inject_npc_quest_nodes(nodes: Dictionary, station_id: String, npc_id: Stri
 	nodes["start"] = start
 	return nodes
 
-func _get_dialogue_nodes(_station_id: String, npc_id: String) -> Dictionary:
+func _get_dialogue_nodes(station_id: String, npc_id: String) -> Dictionary:
 	# Conversas engraçadas com escolhas.
 	match npc_id:
 		"hunter":
@@ -2193,7 +2211,7 @@ func _get_dialogue_nodes(_station_id: String, npc_id: String) -> Dictionary:
 				},
 			}
 		"vexa":
-			return {
+			var nodes: Dictionary = {
 				"start": {
 					"text": "[b]Vexa[/b]: Bem-vindo. Aqui servimos duas coisas: silencio e historias.\n[b]Tu[/b]: E comida?\n[b]Vexa[/b]: As historias alimentam. (mentira, mas funciona.)",
 					"choices": [
@@ -2215,6 +2233,33 @@ func _get_dialogue_nodes(_station_id: String, npc_id: String) -> Dictionary:
 					],
 				},
 			}
+
+			# Refugio Epsilon: Vexa revela o Mercador Delta e marca no minimapa.
+			if station_id == "station_epsilon":
+				var start: Dictionary = nodes.get("start", {}) as Dictionary
+				var choices: Array = (start.get("choices", []) as Array).duplicate()
+
+				if GameState.is_station_discovered("station_delta"):
+					nodes["delta_info"] = {
+						"text": "[b]Vexa[/b]: O Mercador Delta ja esta marcado. Nao te percas... a nao ser que queiras.\n[b]Tu[/b]: Reconfortante.",
+						"choices": [
+							{"text": "Vou la ver.", "next": "end"},
+						],
+					}
+					choices.insert(0, {"text": "E sobre o Mercador Delta...", "next": "delta_info"})
+				else:
+					nodes["delta_info"] = {
+						"text": "[b]Vexa[/b]: Mercador Delta? Vendedores, gargalhadas e negociacoes suspeitas.\nFica longe daqui: segue para o quadrante inferior-esquerdo da zona.\n(Pronto. Marquei-te no mapa.)",
+						"choices": [
+							{"text": "Perfeito.", "next": "end"},
+						],
+					}
+					choices.insert(0, {"text": "Onde fica o Mercador Delta?", "next": "action:discover_station:station_delta:delta_info"})
+
+				start["choices"] = choices
+				nodes["start"] = start
+
+			return nodes
 		"oomu":
 			return {
 				"start": {

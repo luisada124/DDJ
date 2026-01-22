@@ -262,9 +262,3 @@ dano_boss = dano × (0.95 + 0.30 * (boss_mult - 1.0)) (sobe menos que HP)
 
 FAZER
 
-chat agora vamos retirar todas as localizacoes de estacoes do minimap numa fase inicial.
-Quando o jogo comeca apenas o refugio epsilon vai estar disponivel.
-
-No refugio Epsilon, é suposto implementarmos no NPC Vexa uma conversa sobre a estação mercador delta d forma ao jogador ficar a saber onde e esta localizacao e a partir de ai essa estacao mercador delta aparece no mapa no player
-
-Depois mete ai um mapa a venda na estacao mercador delta com um mapa para a estacao alpha e só a partir do momento que o jogador compra esse mapa e que fica disponivel no minimapa a estacao alpha
