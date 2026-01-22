@@ -237,8 +237,6 @@ func _check_collisions() -> void:
 				invincible_timer = INVINCIBILITY_TIME
 
 func _unhandled_input(event: InputEvent) -> void:
-	if _controlling_alien:
-		return
 	if event.is_action_pressed("eva_toggle"):
 		_toggle_eva()
 		get_viewport().set_input_as_handled()
