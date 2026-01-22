@@ -34,7 +34,7 @@ extends Control
 @onready var close_button: Button = $UpgradeMenu/Panel/Margin/VBox/CloseButton
 
 @onready var map_menu: Control = $MapMenu
-@onready var map_zone_list: VBoxContainer = $MapMenu/Panel/Margin/VBox/ZoneScroll/ZoneList
+@onready var map_zone_list: VBoxContainer = $MapMenu/Panel/Margin/VBox/Tabs/Zonas/ZoneList
 @onready var close_map_button: Button = $MapMenu/Panel/Margin/VBox/CloseMapButton
 
 @onready var trader_menu: Control = $TraderMenu
