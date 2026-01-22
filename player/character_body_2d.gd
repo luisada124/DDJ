@@ -51,6 +51,7 @@ func shoot() -> void:
 		laser.inherited_velocity = velocity
 		laser.from_player = true  # <- garante que é tiro do player
 		laser.damage = GameState.get_player_laser_damage()
+		laser.speed = GameState.get_player_laser_speed()
 		get_tree().current_scene.add_child(laser)
 
 
