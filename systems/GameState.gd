@@ -315,7 +315,7 @@ func give_zone2_mining_drill_near_player() -> bool:
 		_queue_save()
 		return false
 
-	var spawn_global := player.global_position + Vector2(160, 40)
+	var spawn_global := player.global_position + Vector2(-320, -40)
 	mining_drill_part_local = zone_node.to_local(spawn_global)
 
 	var part_scene: PackedScene = load("res://pickups/ArtifactPart.tscn")

@@ -6,7 +6,8 @@ const ArtifactPartScene: PackedScene = preload("res://pickups/ArtifactPart.tscn"
 const INTRO_STATION_ID := "station_kappa"
 
 @export var station_offset_from_player: Vector2 = Vector2(260, 120)
-@export var drill_offset_from_player: Vector2 = Vector2(160, 40)
+@export var drill_offset_from_player: Vector2 = Vector2(-320, -40)
+@export var drill_min_distance_from_station: float = 240.0
 
 func _ready() -> void:
 	call_deferred("_setup")
@@ -69,6 +70,20 @@ func _ensure_drill_part(player: Node2D) -> void:
 		var target_global := player.global_position + drill_offset_from_player
 		GameState.mining_drill_part_local = to_local(target_global)
 		GameState.queue_save()
+	elif GameState.zone2_intro_station_local != Vector2.ZERO:
+		var drill_local := GameState.mining_drill_part_local
+		if drill_local.distance_to(GameState.zone2_intro_station_local) < drill_min_distance_from_station:
+			var target_global := player.global_position + drill_offset_from_player
+			var new_local := to_local(target_global)
+			if new_local.distance_to(GameState.zone2_intro_station_local) < drill_min_distance_from_station:
+				var dir := new_local - GameState.zone2_intro_station_local
+				if dir.length() < 0.001:
+					dir = Vector2.LEFT
+				else:
+					dir = dir.normalized()
+				new_local = GameState.zone2_intro_station_local + dir * drill_min_distance_from_station
+			GameState.mining_drill_part_local = new_local
+			GameState.queue_save()
 
 	if ArtifactPartScene == null:
 		return
