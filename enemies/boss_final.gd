@@ -233,6 +233,24 @@ func _spawn_phase_minions(phase: int) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.randomize()
 
+	# Obter câmera e calcular área visível
+	var camera: Camera2D = get_viewport().get_camera_2d()
+	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
+	var zoom: Vector2 = Vector2(1.0, 1.0)
+	var cam_pos: Vector2 = player.global_position
+	if camera != null:
+		zoom = camera.zoom
+		cam_pos = camera.global_position
+	
+	var world_view_size: Vector2 = viewport_size / zoom
+	var spawn_margin: float = 200.0  # Margem extra para garantir que está fora da tela
+	
+	# Calcular limites da área visível
+	var left: float = cam_pos.x - world_view_size.x / 2.0 - spawn_margin
+	var right: float = cam_pos.x + world_view_size.x / 2.0 + spawn_margin
+	var top: float = cam_pos.y - world_view_size.y / 2.0 - spawn_margin
+	var bottom: float = cam_pos.y + world_view_size.y / 2.0 + spawn_margin
+
 	var count: int = max(0, phase_minion_count)
 	for i in range(count):
 		var inst: Node = EnemyScene.instantiate()
@@ -247,9 +265,21 @@ func _spawn_phase_minions(phase: int) -> void:
 			diff = 2.2 * _get_balance_multiplier()
 		e.set("difficulty_multiplier", diff)
 		e.scale = Vector2(0.5, 0.5)
-		var angle: float = rng.randf_range(0.0, TAU)
-		var radius: float = rng.randf_range(540.0, 920.0)
-		e.global_position = player.global_position + Vector2(cos(angle), sin(angle)) * radius
+		
+		# Spawnar fora da área de visão - escolher um lado aleatório
+		var side: int = rng.randi_range(0, 3)
+		var spawn_pos: Vector2
+		match side:
+			0:  # Topo
+				spawn_pos = Vector2(rng.randf_range(left, right), top)
+			1:  # Fundo
+				spawn_pos = Vector2(rng.randf_range(left, right), bottom)
+			2:  # Esquerda
+				spawn_pos = Vector2(left, rng.randf_range(top, bottom))
+			_:  # Direita
+				spawn_pos = Vector2(right, rng.randf_range(top, bottom))
+		
+		e.global_position = spawn_pos
 		root.add_child(e)
 
 func _update_phase() -> void:
