@@ -137,6 +137,7 @@ var _active_station: Node = null
 var _active_station_id: String = ""
 var _offered_quest_id: String = ""
 var _dialogue_state: Dictionary = {}
+var _dynamic_dialogue_text: String = ""
 var _station_npcs: Array = []
 var _active_npc_id: String = ""
 var _active_npc_type: String = ""
@@ -1762,7 +1763,11 @@ func _render_dialogue() -> void:
 		end_dialogue_button.visible = false
 		return
 
-	dialogue_text.text = str(node.get("text", ""))
+	var raw_text := str(node.get("text", ""))
+	if raw_text == "__DYNAMIC__":
+		dialogue_text.text = _dynamic_dialogue_text
+	else:
+		dialogue_text.text = raw_text
 	var choices: Array = node.get("choices", []) as Array
 
 	for choice_variant in choices:
@@ -1792,8 +1797,30 @@ func _on_dialogue_choice(next_node: String) -> void:
 						station_id = DEFAULT_STATION_ID
 					GameState.accept_quest(arg, station_id)
 					if arg == QuestDatabase.QUEST_MINE_4_AMETISTA:
-						GameState.give_zone2_mining_drill_near_player()
+						var avoid_pos := Vector2.ZERO
+						if _active_station != null and _active_station is Node2D:
+							avoid_pos = (_active_station as Node2D).global_position
+						GameState.give_zone2_mining_drill_near_player(avoid_pos)
 						_set_trader_menu_visible(false)
+				"try_start_humans":
+					var station_id3 := _active_station_id
+					if station_id3.is_empty():
+						station_id3 = DEFAULT_STATION_ID
+
+					var req: Dictionary = GameState.get_zone2_core_horde_requirements()
+					var ok: bool = bool(req.get("ok", false))
+					if not ok:
+						_dynamic_dialogue_text = str(req.get("message", ""))
+						_dialogue_state["node"] = "humans_not_ready"
+						_render_dialogue()
+						return
+
+					# Está pronto: fecha o menu primeiro para o evento correr com o jogo a decorrer.
+					GameState.accept_quest(GameState.QUEST_DEFEAT_HUMANS, station_id3)
+					_end_dialogue()
+					_set_trader_menu_visible(false)
+					GameState.try_request_zone2_core_horde()
+					return
 				"claim_quest":
 					var station_id2 := _active_station_id
 					if station_id2.is_empty():
@@ -1823,6 +1850,7 @@ func _on_dialogue_choice(next_node: String) -> void:
 
 func _end_dialogue() -> void:
 	_dialogue_state = {}
+	_dynamic_dialogue_text = ""
 	if dialogue_text != null:
 		dialogue_text.text = ""
 	if dialogue_choices != null:
@@ -2386,9 +2414,36 @@ func _get_dialogue_nodes(station_id: String, npc_id: String) -> Dictionary:
 			# Posto Kappa (Zona 2): intro de mineração.
 			if station_id == "station_kappa":
 				nodes["start"] = {
-					"text": "[b]Vexa[/b]: Ah, és novo por estas bandas?\nAqui temos um minério especial. Se me apanhas quatro com esta broca, dou-te uma recompensa.",
+					"text": "[b]Vexa[/b]: Ah, és novo por estas bandas?\nAqui temos um minério especial. Se me apanhas quatro com esta broca, dou-te uma recompensa.\n\n[b]Vexa[/b]: Achas que estas preparado para enfrentar os Humanos?",
 					"choices": [
-						{"text": "Missao.", "next": "quest"},
+						{"text": "Sim.", "next": "try_humans"},
+						{"text": "Nao.", "next": "humans_no"},
+						{"text": "Sobre a broca...", "next": "quest"},
+						{"text": "Adeus.", "next": "end"},
+					],
+				}
+				nodes["try_humans"] = {
+					"text": "[b]Tu[/b]: Sim.\n[b]Vexa[/b]: Entao que comece.",
+					"choices": [
+						{"text": "Vamos a isso.", "next": "action:try_start_humans:ok:end"},
+						{"text": "Espera.", "next": "end"},
+					],
+				}
+				nodes["humans_not_ready"] = {
+					"text": "__DYNAMIC__",
+					"choices": [
+						{"text": "Ok.", "next": "end"},
+					],
+				}
+				nodes["humans_started"] = {
+					"text": "__DYNAMIC__",
+					"choices": [
+						{"text": "Fechar.", "next": "end"},
+					],
+				}
+				nodes["humans_no"] = {
+					"text": "[b]Vexa[/b]: Sensato. Humanos gostam de certezas... e de tiros.",
+					"choices": [
 						{"text": "Ok.", "next": "end"},
 					],
 				}

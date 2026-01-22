@@ -1,9 +1,11 @@
 todo:
 
-Meter um menu de upgrades para a nave auxiliar. 
+FUNDO ARRANJAR
  
 
- A partir do momento em que se começam os bosses, não se pode trocar de zona. 
+Bosse final muito mais difícil. 
+
+ ter dIALOGO do Warp no no boss 1. 
 
 Inimigos a spawnar fora Da visão do jogador. 
 

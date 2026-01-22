@@ -36,6 +36,8 @@ func _ready() -> void:
 	if GameState.current_zone_id != "mid":
 		return
 
+	GameState.zone2_core_horde_requested.connect(_on_horde_requested)
+
 	# Se já limpou a patrulha e ainda não tem a 2ª relíquia, respawna o drop.
 	if GameState.mid_core_patrol_cleared and GameState.artifact_parts_collected < ZoneCatalog.get_required_artifact_parts("core"):
 		_spawn_relic(_get_player_pos_or_center())
@@ -44,6 +46,16 @@ func _ready() -> void:
 	# Se o evento já foi iniciado mas não foi concluído (ex: saiu da zona), reinicia a patrulha.
 	if GameState.mid_core_event_triggered and not GameState.mid_core_patrol_cleared and GameState.artifact_parts_collected < ZoneCatalog.get_required_artifact_parts("core"):
 		call_deferred("_start_event")
+
+func _on_horde_requested() -> void:
+	# Pedido vindo do diálogo (Posto Kappa).
+	if GameState.current_zone_id != "mid":
+		return
+	if GameState.mid_core_patrol_cleared:
+		return
+	if _active:
+		return
+	_start_event()
 
 func _process(_delta: float) -> void:
 	if _leader != null and is_instance_valid(_leader):
@@ -64,14 +76,7 @@ func _process(_delta: float) -> void:
 		return
 
 	# Condição: todos os gadgets + media dos upgrades >= 8.
-	if not GameState.has_all_gadgets():
-		return
-	if GameState.get_average_ship_upgrade_level() < 8.0:
-		return
-
-	GameState.mid_core_event_triggered = true
-	GameState.queue_save()
-	_start_event()
+	return
 
 func _start_event() -> void:
 	if _active:
@@ -228,6 +233,7 @@ func _on_leader_died(_enemy: Node2D, leader: Node2D) -> void:
 	if leader == null:
 		return
 	GameState.mid_core_patrol_cleared = true
+	GameState.complete_quest(GameState.QUEST_DEFEAT_HUMANS)
 	GameState.queue_save()
 	_spawn_relic(leader.global_position)
 

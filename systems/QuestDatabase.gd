@@ -18,6 +18,7 @@ const QUEST_AUTO_REGEN_PART_QUEST := "auto_regen_part_quest"
 const QUEST_AUX_SHIP_PART := "aux_ship_part"
 const QUEST_AUX_SHIP_MAP := "aux_ship_map"
 const QUEST_MINE_4_AMETISTA := "mine_4_ametista"
+const QUEST_DEFEAT_HUMANS := "defeat_humans"
 const QUEST_DISCOVER_2_STATIONS := "discover_2_stations"
 const QUEST_TAVERN_BANDIT_1 := "tavern_bandit_1"
 const QUEST_TAVERN_BANDIT_2 := "tavern_bandit_2"
@@ -178,6 +179,13 @@ const QUEST_DEFS := {
 		"reward": {"scrap": 80},
 		"discover_station_reward": "station_beta",
 	},
+	QUEST_DEFEAT_HUMANS: {
+		"title": "Derrotar os Humanos",
+		"description": "Achas que estas preparado para enfrentar os Humanos? Chama a patrulha e derrota o lider.",
+		"goal": 1,
+		"giver_station_id": "station_kappa",
+		"reward": {"scrap": 160, "mineral": 60},
+	},
 	QUEST_TAVERN_BANDIT_1: {
 		"title": "Acerto de Contas I",
 		"description": "Bandido 1/5: derrota-o na taberna do Mercador Delta e volta ao Cacador no Refugio Epsilon.",
@@ -251,7 +259,7 @@ const NPC_QUEST_POOLS := {
 	"marksman": [QUEST_KILL_10_SNIPER, QUEST_KILL_8_SNIPER_ZONE1, QUEST_KILL_25_SNIPER_AMETISTA, QUEST_SIDE_DASH_MAP, QUEST_AUX_SHIP_PART],
 	"bruiser": [],  # Removido QUEST_KILL_5_TANK - tanks não existem na Zona 1 onde bruiser está
 	"bounty": [QUEST_KILL_15_BASIC, QUEST_KILL_10_SNIPER, QUEST_KILL_5_TANK, QUEST_AUX_SHIP_MAP, QUEST_REVERSE_THRUSTER_PART_QUEST, QUEST_DISCOVER_2_STATIONS],
-	"miner": [QUEST_MINE_4_AMETISTA, QUEST_COLLECT_100_MINERAL],
+	"miner": [QUEST_MINE_4_AMETISTA, QUEST_DEFEAT_HUMANS, QUEST_COLLECT_100_MINERAL],
 	"hunter": [
 		QUEST_TAVERN_BANDIT_1,
 		QUEST_TAVERN_BANDIT_2,

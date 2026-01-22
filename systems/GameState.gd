@@ -6,6 +6,7 @@ signal alien_died
 signal speech_requested(text: String)
 signal speech_requested_at(text: String, world_pos: Vector2)
 signal speech_requested_timed(text: String, duration: float)
+signal zone2_core_horde_requested
 
 const SAVE_PATH := "user://save.json"
 const SAVE_VERSION := 1
@@ -106,6 +107,7 @@ const QUEST_KILL_10_SNIPER := QuestDatabase.QUEST_KILL_10_SNIPER
 const QUEST_KILL_5_TANK := QuestDatabase.QUEST_KILL_5_TANK
 const QUEST_TAVERN_BANDIT := QuestDatabase.QUEST_TAVERN_BANDIT
 const QUEST_BOSS_PLANET := QuestDatabase.QUEST_BOSS_PLANET
+const QUEST_DEFEAT_HUMANS := QuestDatabase.QUEST_DEFEAT_HUMANS
 const BANDIT_QUESTS := QuestDatabase.BANDIT_QUESTS
 const QUEST_DEFS := QuestDatabase.QUEST_DEFS
 
@@ -294,7 +296,7 @@ func _record_resource_gain(type: String, amount: int) -> void:
 		emit_signal("state_changed")
 		_queue_save()
 
-func give_zone2_mining_drill_near_player() -> bool:
+func give_zone2_mining_drill_near_player(avoid_world_pos: Vector2 = Vector2.ZERO) -> bool:
 	# Dá a broca (1 peça) ao jogador via pickup ao pé do player.
 	if has_artifact("mining_drill"):
 		return false
@@ -319,7 +321,14 @@ func give_zone2_mining_drill_near_player() -> bool:
 		_queue_save()
 		return false
 
-	var spawn_global := player.global_position + Vector2(-320, -40)
+	var spawn_global := player.global_position + Vector2(-520, 0)
+	if avoid_world_pos != Vector2.ZERO:
+		var d := spawn_global.distance_to(avoid_world_pos)
+		if d < 260.0:
+			var away := (player.global_position - avoid_world_pos).normalized()
+			if away == Vector2.ZERO:
+				away = Vector2.RIGHT
+			spawn_global = player.global_position + away * 520.0
 	mining_drill_part_local = zone_node.to_local(spawn_global)
 
 	var part_scene: PackedScene = load("res://pickups/ArtifactPart.tscn")
@@ -393,6 +402,49 @@ func has_all_gadgets() -> bool:
 		if not has_artifact(artifact_id):
 			return false
 	return true
+
+func get_missing_gadgets() -> Array[String]:
+	var missing: Array[String] = []
+	for artifact_id_variant in ArtifactDatabase.ARTIFACTS.keys():
+		var artifact_id := str(artifact_id_variant)
+		if not has_artifact(artifact_id):
+			missing.append(artifact_id)
+	return missing
+
+func try_request_zone2_core_horde() -> Dictionary:
+	# Devolve {ok: bool, message: String}
+	var req := get_zone2_core_horde_requirements()
+	if not bool(req.get("ok", false)):
+		return req
+
+	mid_core_event_triggered = true
+	_queue_save()
+	emit_signal("zone2_core_horde_requested")
+	return {"ok": true, "message": "Ok. A chamar reforcos..."}
+
+func get_zone2_core_horde_requirements() -> Dictionary:
+	# Devolve {ok: bool, message: String} sem efeitos secundários.
+	if current_zone_id != "mid":
+		return {"ok": false, "message": "Isto so pode ser feito na Zona 2."}
+	if mid_core_patrol_cleared:
+		return {"ok": false, "message": "Os Humanos ja foram derrotados."}
+	if mid_core_event_triggered:
+		return {"ok": false, "message": "A patrulha ja foi chamada."}
+
+	var missing := get_missing_gadgets()
+	var avg := get_average_ship_upgrade_level()
+	if not missing.is_empty() or avg < 8.0:
+		var msg := "Ainda tens de ficar mais forte."
+		if not missing.is_empty():
+			var titles: Array[String] = []
+			for gid in missing:
+				titles.append(ArtifactDatabase.get_artifact_title(gid))
+			msg += "\nObtem os gadgets que te faltam: %s." % ", ".join(titles)
+		if avg < 8.0:
+			msg += "\nUpgrades a nvl 8 (media atual: %.1f)." % avg
+		return {"ok": false, "message": msg}
+
+	return {"ok": true, "message": "Ok. A chamar reforcos..."}
 
 func has_upgrades_at_least(min_level: int) -> bool:
 	for upgrade_id_variant in upgrades.keys():
@@ -1259,6 +1311,7 @@ func collect_artifact_part(artifact_id: String = "relic") -> void:
 	if artifact_id == "relic":
 		if artifact_completed:
 			return
+		var prev_relics: int = artifact_parts_collected
 
 		artifact_parts_collected = min(artifact_parts_collected + 1, ARTIFACT_PARTS_REQUIRED)
 		if artifact_parts_collected >= ARTIFACT_PARTS_REQUIRED:
@@ -1269,6 +1322,10 @@ func collect_artifact_part(artifact_id: String = "relic") -> void:
 			resources["mineral"] = int(resources.get("mineral", 0)) + 25
 
 		_recalculate_zone_unlocks()
+		var required_core: int = ZoneCatalog.get_required_artifact_parts("core")
+		if prev_relics < required_core and artifact_parts_collected >= required_core:
+			emit_signal("speech_requested", "Agora ja tenho o que preciso para viajar para o nucleo")
+			emit_signal("speech_requested", "Pressione M")
 		emit_signal("state_changed")
 		_queue_save()
 		return
