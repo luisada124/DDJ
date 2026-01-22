@@ -188,6 +188,12 @@ static func get_vacuum_map_cost(station_id: String) -> Dictionary:
 		return {"scrap": 35}
 	return {}
 
+static func get_station_alpha_map_cost(station_id: String) -> Dictionary:
+	# Item: mapa que revela a Estacao Alfa no minimapa (comprado no Mercador Delta).
+	if station_id == "station_delta":
+		return {"scrap": 55}
+	return {}
+
 static func get_vacuum_part_shop_cost(station_id: String) -> Dictionary:
 	# Venda direta de 1 peça do Vacuum na Estacao Beta.
 	if station_id == "station_epsilon":

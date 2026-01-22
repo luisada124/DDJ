@@ -7,6 +7,11 @@ extends Node2D
 @export var spawn_margin: float = 320.0
 @export var min_spawn_distance_from_player: float = 420.0
 
+# Zona 1 (outer): evitar spawn "em cima" do jogador.
+# Isto cria uma "zona preta" (quadrado) sem spawns à volta do player.
+@export var outer_spawn_margin: float = 1200.0
+@export var outer_no_spawn_square_half_size: float = 900.0
+
 @export var outer_spawn_interval: float = 4.5
 @export var mid_spawn_interval: float = 2.0
 @export var core_spawn_interval: float = 1.3
@@ -89,7 +94,7 @@ func _spawn_enemy() -> void:
 	if enemy is Node2D:
 		var enemy_2d := enemy as Node2D
 		enemy_2d.scale = enemy_scale
-		enemy_2d.global_position = _pick_spawn_position(camera, player.global_position)
+		enemy_2d.global_position = _pick_spawn_position(camera, player.global_position, GameState.current_zone_id)
 
 	_get_container().add_child(enemy)
 
@@ -143,18 +148,26 @@ func _get_zone_difficulty(zone_id: String) -> float:
 	var mult := float(def.get("difficulty_multiplier", 1.0))
 	return clamp(mult, 0.25, 10.0)
 
-func _pick_spawn_position(camera: Camera2D, player_pos: Vector2) -> Vector2:
+func _pick_spawn_position(camera: Camera2D, player_pos: Vector2, zone_id: String) -> Vector2:
 	var viewport_size := get_viewport().get_visible_rect().size
 	var zoom := camera.zoom
 	var world_view_size := viewport_size / zoom
 	var cam_pos := camera.global_position
 
-	var left := cam_pos.x - world_view_size.x / 2.0 - spawn_margin
-	var right := cam_pos.x + world_view_size.x / 2.0 + spawn_margin
-	var top := cam_pos.y - world_view_size.y / 2.0 - spawn_margin
-	var bottom := cam_pos.y + world_view_size.y / 2.0 + spawn_margin
+	var margin := spawn_margin
+	if zone_id == "outer":
+		margin = outer_spawn_margin
 
-	for _i in range(8):
+	var left := cam_pos.x - world_view_size.x / 2.0 - margin
+	var right := cam_pos.x + world_view_size.x / 2.0 + margin
+	var top := cam_pos.y - world_view_size.y / 2.0 - margin
+	var bottom := cam_pos.y + world_view_size.y / 2.0 + margin
+
+	var best: Vector2 = Vector2(randf_range(left, right), top)
+	var best_score: float = -INF
+	var tries: int = 22 if zone_id == "outer" else 8
+
+	for _i in range(tries):
 		var side := randi() % 4
 		var spawn_pos: Vector2
 		match side:
@@ -167,7 +180,21 @@ func _pick_spawn_position(camera: Camera2D, player_pos: Vector2) -> Vector2:
 			_:
 				spawn_pos = Vector2(right, randf_range(top, bottom)) # direita
 
-		if spawn_pos.distance_to(player_pos) >= min_spawn_distance_from_player:
+		# Zona preta (quadrado) em torno do jogador, sem spawns (Zona 1).
+		if zone_id == "outer":
+			var dx := absf(spawn_pos.x - player_pos.x)
+			var dy := absf(spawn_pos.y - player_pos.y)
+			if dx <= outer_no_spawn_square_half_size and dy <= outer_no_spawn_square_half_size:
+				continue
+
+		# Score: o mais longe possível do jogador (reduz spawns "ao lado" da nave).
+		var score := spawn_pos.distance_to(player_pos)
+		if score > best_score:
+			best_score = score
+			best = spawn_pos
+
+		# Para zonas não-outer, basta respeitar a distância mínima e sair cedo.
+		if zone_id != "outer" and score >= min_spawn_distance_from_player:
 			return spawn_pos
 
-	return Vector2(randf_range(left, right), top)
+	return best

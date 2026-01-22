@@ -82,14 +82,14 @@ auto_regen:3
 PROMPS:
 
 
-Chatini, agora preciso de implementar a mudança da zona 2 para a zona 3. Essa mudança vai ser o drop de um artefacto normal, daqueles que nós já temos lá, para passar de zona.E nesse diálogo, mete algo do género:  "Ah, és novo por estas bandas? Aqui temos um minério especial. Se me apanhas quatro com esta broca, dou-te uma recompensa"
+Chat quando o player chega a zona dois pela primeira vez e suposto estar ao pe dele uma estacao que tem um npc .  nesse diálogo, mete algo do género:  "Ah, és novo por estas bandas? Aqui temos um minério especial. Se me apanhas quatro com esta broca, dou-te uma recompensa"
 
 depois disso a UI sai da estacao e a broca de mineracao (gadget) aparece ao pe do player e este tem uma missao de apanhar 4 ametistas para vir devolver a estacao
 
 
 
 
-se tiveres duvidas pergunta-me
+LOCALIZACAO DE PARTES PARA GADGETS
 
 Zone 1 Gadgets
 
@@ -264,9 +264,3 @@ dano_boss = dano × (0.95 + 0.30 * (boss_mult - 1.0)) (sobe menos que HP)
 
 FAZER
 
-chat agora vamos retirar todas as localizacoes de estacoes do minimap numa fase inicial.
-Quando o jogo comeca apenas o refugio epsilon vai estar disponivel.
-
-No refugio Epsilon, é suposto implementarmos no NPC Vexa uma conversa sobre a estação mercador delta d forma ao jogador ficar a saber onde e esta localizacao e a partir de ai essa estacao mercador delta aparece no mapa no player
-
-Depois mete ai um mapa a venda na estacao mercador delta com um mapa para a estacao alpha e só a partir do momento que o jogador compra esse mapa e que fica disponivel no minimapa a estacao alpha

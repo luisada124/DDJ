@@ -418,6 +418,10 @@ text = "Comprar parte de artefacto"
 layout_mode = 2
 text = "Comprar mapa para vacuum"
 
+[node name="BuyAlphaStationMapButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
+layout_mode = 2
+text = "Comprar mapa para Estacao Alfa"
+
 [node name="BuyVacuumPartButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
 layout_mode = 2
 text = "Comprar parte vacuum"
