@@ -462,6 +462,7 @@ text = "Comprar mapa Auto Regen (Z1)"
 
 [node name="BuyAutoRegenMapZone2Button" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
 layout_mode = 2
+text = "Comprar mapa Auto Regen (Z2)"
 
 [node name="BuyKappaStationMapButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
 layout_mode = 2
@@ -470,7 +471,10 @@ text = "Comprar mapa para Posto Kappa"
 [node name="BuyBetaStationMapButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
 layout_mode = 2
 text = "Comprar mapa para Posto Beta"
-text = "Comprar mapa Auto Regen (Z2)"
+
+[node name="BuyZetaStationMapButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
+layout_mode = 2
+text = "Comprar mapa para Posto Zeta"
 
 [node name="BuyAuxShipPartButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
 layout_mode = 2
