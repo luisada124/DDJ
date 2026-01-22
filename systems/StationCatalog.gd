@@ -250,6 +250,18 @@ static func get_auto_regen_map_zone2_cost(station_id: String) -> Dictionary:
 		return {"scrap": 40, "mineral": 10}
 	return {}
 
+static func get_kappa_station_map_cost(station_id: String) -> Dictionary:
+	# Mapa muito caro para a estação Kappa, vendido no próprio Posto Kappa.
+	if station_id == "station_kappa":
+		return {"scrap": 500, "mineral": 300, "ametista": 5}
+	return {}
+
+static func get_beta_station_map_cost(station_id: String) -> Dictionary:
+	# Mapa muito caro para a estação Beta, vendido no Posto Kappa.
+	if station_id == "station_kappa":
+		return {"scrap": 600, "mineral": 400, "ametista": 8}
+	return {}
+
 static func get_aux_ship_shop_part_cost(station_id: String) -> Dictionary:
 	# Aux Ship (3 pecas): 1 peca vendida numa estacao da Zona 2.
 	# O UI faz gate pela zona atual.

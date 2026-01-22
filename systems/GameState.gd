@@ -37,6 +37,8 @@ var _regen_accum: float = 0.0
 # Estacoes descobertas (minimapa). No inicio: apenas Refugio Epsilon.
 var discovered_station_ids: PackedStringArray = PackedStringArray([])
 var alpha_station_map_bought: bool = false
+var kappa_station_map_bought: bool = false
+var beta_station_map_bought: bool = false
 
 # Zona 2 intro (Posto Kappa + broca).
 var zone2_intro_station_local: Vector2 = Vector2.ZERO
@@ -111,6 +113,8 @@ var quests: Dictionary = {}
 var tavern_hi_scores: Dictionary = {}
 var tavern_reward_claimed: Dictionary = {}
 var boss_planet_resources_unlocked: bool = false
+# Rastrear bosses mortos (uma vez por campanha)
+var defeated_bosses: Array[String] = []
 
 var upgrades := {
 	"hull": 0,      # +HP max
@@ -1382,6 +1386,40 @@ func buy_alpha_station_map(cost: Dictionary) -> bool:
 	_queue_save()
 	return true
 
+func buy_kappa_station_map(cost: Dictionary) -> bool:
+	if kappa_station_map_bought:
+		return false
+	if cost.is_empty():
+		return false
+	if not can_afford(cost):
+		return false
+
+	for res_type_variant in cost.keys():
+		var res_type := str(res_type_variant)
+		resources[res_type] = int(resources.get(res_type, 0)) - int(cost[res_type_variant])
+	kappa_station_map_bought = true
+	discover_station("station_kappa")
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
+func buy_beta_station_map(cost: Dictionary) -> bool:
+	if beta_station_map_bought:
+		return false
+	if cost.is_empty():
+		return false
+	if not can_afford(cost):
+		return false
+
+	for res_type_variant in cost.keys():
+		var res_type := str(res_type_variant)
+		resources[res_type] = int(resources.get(res_type, 0)) - int(cost[res_type_variant])
+	beta_station_map_bought = true
+	discover_station("station_beta")
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
 func save_game() -> void:
 	var discovered: Array[String] = []
 	for sid in discovered_station_ids:
@@ -1393,6 +1431,9 @@ func save_game() -> void:
 		"consumables": consumables,
 		"discovered_stations": discovered,
 		"alpha_station_map_bought": alpha_station_map_bought,
+		"kappa_station_map_bought": kappa_station_map_bought,
+		"beta_station_map_bought": beta_station_map_bought,
+		"defeated_bosses": defeated_bosses,
 		"zone2_intro_station_local": [zone2_intro_station_local.x, zone2_intro_station_local.y],
 		"zone2_drill_given": zone2_drill_given,
 		"mining_drill_part_local": [mining_drill_part_local.x, mining_drill_part_local.y],
@@ -1476,6 +1517,20 @@ func load_game() -> void:
 		resources["ametista"] = 0
 
 	alpha_station_map_bought = bool(data.get("alpha_station_map_bought", false))
+	kappa_station_map_bought = bool(data.get("kappa_station_map_bought", false))
+	beta_station_map_bought = bool(data.get("beta_station_map_bought", false))
+	
+	# Carregar bosses mortos
+	defeated_bosses = []
+	var loaded_defeated_bosses: Variant = data.get("defeated_bosses")
+	if typeof(loaded_defeated_bosses) == TYPE_ARRAY:
+		for boss_id_variant in (loaded_defeated_bosses as Array):
+			var boss_id := str(boss_id_variant)
+			if not boss_id.is_empty() and not defeated_bosses.has(boss_id):
+				defeated_bosses.append(boss_id)
+	elif typeof(loaded_defeated_bosses) == TYPE_PACKED_STRING_ARRAY:
+		defeated_bosses = loaded_defeated_bosses
+	
 	discovered_station_ids = PackedStringArray([])
 	var stored_discovered: Variant = data.get("discovered_stations")
 	if typeof(stored_discovered) == TYPE_ARRAY:
@@ -1700,6 +1755,9 @@ func _apply_defaults() -> void:
 	boss_planet_resources_unlocked = false
 	discovered_station_ids = PackedStringArray(["station_epsilon"])
 	alpha_station_map_bought = false
+	kappa_station_map_bought = false
+	beta_station_map_bought = false
+	defeated_bosses = []
 	zone2_intro_station_local = Vector2.ZERO
 	zone2_drill_given = false
 	mining_drill_part_local = Vector2.ZERO

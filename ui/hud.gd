@@ -54,6 +54,8 @@ extends Control
 @onready var buy_side_dash_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuySideDashPartButton
 @onready var buy_auto_regen_map_zone1_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyAutoRegenMapZone1Button
 @onready var buy_auto_regen_map_zone2_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyAutoRegenMapZone2Button
+@onready var buy_kappa_station_map_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyKappaStationMapButton
+@onready var buy_beta_station_map_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyBetaStationMapButton
 @onready var buy_aux_ship_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyAuxShipPartButton
 @onready var buy_repair_kit_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyRepairKitButton
 @onready var ametista_to_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/AmetistaToMineralButton
@@ -216,6 +218,8 @@ func _ready() -> void:
 	buy_side_dash_part_button.pressed.connect(_on_buy_side_dash_part_pressed)
 	buy_auto_regen_map_zone1_button.pressed.connect(_on_buy_auto_regen_map_zone1_pressed)
 	buy_auto_regen_map_zone2_button.pressed.connect(_on_buy_auto_regen_map_zone2_pressed)
+	buy_kappa_station_map_button.pressed.connect(_on_buy_kappa_station_map_pressed)
+	buy_beta_station_map_button.pressed.connect(_on_buy_beta_station_map_pressed)
 	buy_aux_ship_part_button.pressed.connect(_on_buy_aux_ship_part_pressed)
 	buy_repair_kit_button.pressed.connect(_on_buy_repair_kit_pressed)
 	ametista_to_mineral_button.pressed.connect(_on_trade_ametista_to_mineral)
@@ -767,6 +771,8 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	var sd_shop_cost: Dictionary = StationCatalog.get_side_dash_shop_part_cost(station_id)
 	var ar_map1_cost: Dictionary = StationCatalog.get_auto_regen_map_zone1_cost(station_id)
 	var ar_map2_cost: Dictionary = StationCatalog.get_auto_regen_map_zone2_cost(station_id)
+	var kappa_map_cost: Dictionary = StationCatalog.get_kappa_station_map_cost(station_id)
+	var beta_map_cost: Dictionary = StationCatalog.get_beta_station_map_cost(station_id)
 	var aux_shop_cost: Dictionary = StationCatalog.get_aux_ship_shop_part_cost(station_id)
 
 	var parts := "%d/%d" % [GameState.artifact_parts_collected, GameState.ARTIFACT_PARTS_REQUIRED]
@@ -854,6 +860,18 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	if show_ar_map2:
 		buy_auto_regen_map_zone2_button.text = "Mapa Auto Regen (peca 2) (%s)" % _format_cost(ar_map2_cost)
 		buy_auto_regen_map_zone2_button.disabled = not GameState.can_afford(ar_map2_cost)
+
+	var show_kappa_map := not kappa_map_cost.is_empty() and not GameState.kappa_station_map_bought and not GameState.is_station_discovered("station_kappa")
+	buy_kappa_station_map_button.visible = show_kappa_map
+	if show_kappa_map:
+		buy_kappa_station_map_button.text = "Mapa para Posto Kappa (marca no minimapa) (%s)" % _format_cost(kappa_map_cost)
+		buy_kappa_station_map_button.disabled = not GameState.can_afford(kappa_map_cost)
+
+	var show_beta_map := not beta_map_cost.is_empty() and not GameState.beta_station_map_bought and not GameState.is_station_discovered("station_beta")
+	buy_beta_station_map_button.visible = show_beta_map
+	if show_beta_map:
+		buy_beta_station_map_button.text = "Mapa para Posto Beta (marca no minimapa) (%s)" % _format_cost(beta_map_cost)
+		buy_beta_station_map_button.disabled = not GameState.can_afford(beta_map_cost)
 
 	var aux_have := GameState.get_artifact_parts("aux_ship")
 	var aux_required := ArtifactDatabase.get_parts_required("aux_ship")
@@ -1187,6 +1205,20 @@ func _on_buy_auto_regen_map_zone2_pressed() -> void:
 		station_id = DEFAULT_STATION_ID
 	var cost: Dictionary = StationCatalog.get_auto_regen_map_zone2_cost(station_id)
 	GameState.buy_auto_regen_map_zone2(station_id, cost)
+
+func _on_buy_kappa_station_map_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var cost: Dictionary = StationCatalog.get_kappa_station_map_cost(station_id)
+	GameState.buy_kappa_station_map(cost)
+
+func _on_buy_beta_station_map_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var cost: Dictionary = StationCatalog.get_beta_station_map_cost(station_id)
+	GameState.buy_beta_station_map(cost)
 
 func _on_buy_aux_ship_part_pressed() -> void:
 	var station_id := _active_station_id
@@ -3105,21 +3137,37 @@ func _on_zone_selected(zone_id: String) -> void:
 	_set_map_menu_visible(false)
 
 func _has_active_boss() -> bool:
-	# Verificar se há um boss ativo no grupo "boss"
+	# Verificar se há um boss ativo e engajado (lutando) no grupo "boss"
 	var boss_nodes: Array[Node] = get_tree().get_nodes_in_group("boss")
+	var player: Node2D = get_tree().get_first_node_in_group("player")
+	if player == null:
+		return false
+	
 	for boss in boss_nodes:
 		if boss != null and is_instance_valid(boss):
 			# Verificar se o boss está visível e ativo
 			if boss is CanvasItem:
 				var canvas_boss := boss as CanvasItem
-				if canvas_boss.visible:
-					# Verificar se tem HP (se tiver o método/atributo)
-					var hp_variant: Variant = boss.get("current_health")
-					if hp_variant != null:
-						var hp := int(hp_variant)
-						if hp > 0:
-							return true
-					else:
-						# Se não tem HP, assume que está ativo se está visível
+				if not canvas_boss.visible:
+					continue
+				
+				# Verificar se tem HP (se tiver o método/atributo)
+				var hp_variant: Variant = boss.get("current_health")
+				if hp_variant != null:
+					var hp := int(hp_variant)
+					if hp <= 0:
+						continue
+				
+				# Verificar se o boss está engajado (lutando)
+				if boss.has_method("is_boss_engaged"):
+					if boss.is_boss_engaged():
+						return true
+				
+				# Se não tem método is_boss_engaged, verificar distância ao jogador
+				if boss is Node2D:
+					var boss_2d := boss as Node2D
+					var dist := boss_2d.global_position.distance_to(player.global_position)
+					# Se o boss está perto (dentro de 1000 unidades), considera engajado
+					if dist < 1000.0:
 						return true
 	return false
