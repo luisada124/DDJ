@@ -63,10 +63,10 @@ func _process(_delta: float) -> void:
 	if GameState.artifact_parts_collected >= required_core:
 		return
 
-	# Condição: todos os gadgets + upgrades >= 6.
+	# Condição: todos os gadgets + media dos upgrades >= 8.
 	if not GameState.has_all_gadgets():
 		return
-	if not GameState.has_upgrades_at_least(6):
+	if GameState.get_average_ship_upgrade_level() < 8.0:
 		return
 
 	GameState.mid_core_event_triggered = true
