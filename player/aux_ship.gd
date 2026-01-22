@@ -73,10 +73,10 @@ func _update_targeting() -> void:
 		return
 
 	_fire(dir)
-	_fire_cooldown = ArtifactDatabase.get_aux_ship_fire_interval()
+	_fire_cooldown = GameState.get_aux_ship_fire_interval()
 
 func _pick_target() -> Node2D:
-	var max_range: float = ArtifactDatabase.get_aux_ship_range()
+	var max_range: float = GameState.get_aux_ship_range()
 	var best: Node2D = null
 	var best_d := max_range
 
@@ -104,7 +104,7 @@ func _fire(dir: Vector2) -> void:
 	laser.set("from_player", true)
 	laser.set("direction", dir)
 	laser.rotation = dir.angle() - Vector2.UP.angle()
-	laser.set("damage", ArtifactDatabase.get_aux_ship_laser_damage())
+	laser.set("damage", GameState.get_aux_ship_laser_damage())
 
 	var inherited := Vector2.ZERO
 	if _follow_target != null and is_instance_valid(_follow_target):

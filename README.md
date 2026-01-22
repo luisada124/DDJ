@@ -1,8 +1,6 @@
 todo:
 
 Meter um menu de upgrades para a nave auxiliar. 
-
-
  
 
 Inimigos a spawnar fora Da visão do jogador. 

@@ -156,31 +156,63 @@ text = "Upgrades"
 
 [node name="Info" type="Label" parent="UpgradeMenu/Panel/Margin/VBox"]
 layout_mode = 2
-text = "U para fechar"
+text = "Recursos"
 
-[node name="HullButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox"]
+[node name="MainShipTitle" type="Label" parent="UpgradeMenu/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Nave Principal"
+
+[node name="MainShipList" type="VBoxContainer" parent="UpgradeMenu/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="HullButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox/MainShipList"]
 layout_mode = 2
 text = "Hull"
 
-[node name="BlasterButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox"]
+[node name="BlasterButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox/MainShipList"]
 layout_mode = 2
 text = "Blaster"
 
-[node name="LaserDamageButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox"]
+[node name="LaserDamageButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox/MainShipList"]
 layout_mode = 2
 text = "Laser Damage"
 
-[node name="EngineButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox"]
+[node name="EngineButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox/MainShipList"]
 layout_mode = 2
 text = "Engine"
 
-[node name="ThrustersButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox"]
+[node name="ThrustersButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox/MainShipList"]
 layout_mode = 2
 text = "Thrusters"
 
-[node name="MagnetButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox"]
+[node name="MagnetButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox/MainShipList"]
 layout_mode = 2
 text = "Magnet"
+
+[node name="AuxShipTitle" type="Label" parent="UpgradeMenu/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Nave Auxiliar"
+
+[node name="AuxShipLockedInfo" type="Label" parent="UpgradeMenu/Panel/Margin/VBox"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Desbloqueia a Nave Auxiliar para estes upgrades."
+visible = false
+
+[node name="AuxShipList" type="VBoxContainer" parent="UpgradeMenu/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="AuxFireRateButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox/AuxShipList"]
+layout_mode = 2
+text = "Aux Fire Rate"
+
+[node name="AuxDamageButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox/AuxShipList"]
+layout_mode = 2
+text = "Aux Damage"
+
+[node name="AuxRangeButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox/AuxShipList"]
+layout_mode = 2
+text = "Aux Range"
 
 [node name="UpgradeDescription" type="RichTextLabel" parent="UpgradeMenu/Panel/Margin/VBox"]
 layout_mode = 2

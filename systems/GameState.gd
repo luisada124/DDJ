@@ -107,6 +107,9 @@ var upgrades := {
 	"engine": 0,    # mais aceleração
 	"thrusters": 0, # mais velocidade max
 	"magnet": 0,    # maior range/velocidade do magnet
+	"aux_fire_rate": 0, # nave auxiliar: fire rate
+	"aux_damage": 0,    # nave auxiliar: dano
+	"aux_range": 0,     # nave auxiliar: alcance
 }
 
 const ARTIFACT_PARTS_REQUIRED := 2
@@ -164,6 +167,28 @@ const UPGRADE_DEFS := {
 		"description": "Aumenta o magnet dos drops (+20% range e +15% speed por nível).",
 		"max_level": 10,
 		"base_cost": {"scrap": 8, "mineral": 6},
+		"growth": 1.35,
+	},
+
+	"aux_fire_rate": {
+		"title": "Aux Fire Rate",
+		"description": "Nave auxiliar dispara mais rapido (+8% cadencia por nivel).",
+		"max_level": 10,
+		"base_cost": {"scrap": 10, "mineral": 8},
+		"growth": 1.35,
+	},
+	"aux_damage": {
+		"title": "Aux Damage",
+		"description": "Aumenta o dano do laser da nave auxiliar (+12% por nivel).",
+		"max_level": 10,
+		"base_cost": {"scrap": 14, "mineral": 10},
+		"growth": 1.35,
+	},
+	"aux_range": {
+		"title": "Aux Range",
+		"description": "Aumenta o alcance da nave auxiliar (+8% por nivel).",
+		"max_level": 10,
+		"base_cost": {"scrap": 12, "mineral": 8},
 		"growth": 1.35,
 	},
 }
@@ -259,6 +284,8 @@ func has_all_gadgets() -> bool:
 func has_upgrades_at_least(min_level: int) -> bool:
 	for upgrade_id_variant in upgrades.keys():
 		var upgrade_id := str(upgrade_id_variant)
+		if upgrade_id.begins_with("aux_"):
+			continue
 		if get_upgrade_level(upgrade_id) < min_level:
 			return false
 	return true
@@ -941,6 +968,22 @@ func get_player_laser_damage() -> int:
 	var value := float(BASE_PLAYER_LASER_DAMAGE) * pow(1.10, level)
 	return int(round(value))
 
+func get_aux_ship_fire_interval() -> float:
+	var base := ArtifactDatabase.get_aux_ship_fire_interval()
+	var level := get_upgrade_level("aux_fire_rate")
+	return max(0.08, base * pow(0.92, level))
+
+func get_aux_ship_laser_damage() -> int:
+	var base := ArtifactDatabase.get_aux_ship_laser_damage()
+	var level := get_upgrade_level("aux_damage")
+	var value := float(base) * pow(1.12, level)
+	return int(round(value))
+
+func get_aux_ship_range() -> float:
+	var base := ArtifactDatabase.get_aux_ship_range()
+	var level := get_upgrade_level("aux_range")
+	return base * (1.0 + 0.08 * level)
+
 func get_acceleration() -> float:
 	var level := get_upgrade_level("engine")
 	return BASE_ACCELERATION * (1.0 + 0.12 * level)
@@ -986,6 +1029,13 @@ func get_upgrade_description(upgrade_id: String) -> String:
 			return "Mais velocidade máxima (+10% por nível)."
 		"magnet":
 			return "Aumenta o magnet dos drops (+20% range e +15% speed por nível)."
+
+		"aux_fire_rate":
+			return "Nave auxiliar dispara mais rapido (+8% cadencia por nivel)."
+		"aux_damage":
+			return "Aumenta o dano do laser da nave auxiliar (+12% por nivel)."
+		"aux_range":
+			return "Aumenta o alcance da nave auxiliar (+8% por nivel)."
 
 	var def = UPGRADE_DEFS.get(upgrade_id)
 	if def == null:
@@ -1358,6 +1408,9 @@ func _apply_defaults() -> void:
 		"engine": 0,
 		"thrusters": 0,
 		"magnet": 0,
+		"aux_fire_rate": 0,
+		"aux_damage": 0,
+		"aux_range": 0,
 	}
 	artifact_parts_collected = 0
 	artifact_completed = false
