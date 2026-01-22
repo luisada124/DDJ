@@ -617,12 +617,16 @@ func _format_cost(cost: Dictionary) -> String:
 	return " | ".join(parts)
 
 func _format_quest_rewards(def: Dictionary) -> String:
+	if def.is_empty():
+		return "Nenhuma"
+	
 	var parts: Array[String] = []
 
 	var reward: Dictionary = def.get("reward", {}) as Dictionary
-	var res_text := _format_cost(reward)
-	if not res_text.is_empty():
-		parts.append(res_text)
+	if not reward.is_empty():
+		var res_text := _format_cost(reward)
+		if not res_text.is_empty():
+			parts.append(res_text)
 
 	var artifact_reward: Dictionary = def.get("artifact_parts_reward", {}) as Dictionary
 	for artifact_id_variant in artifact_reward.keys():
@@ -632,6 +636,38 @@ func _format_quest_rewards(def: Dictionary) -> String:
 			continue
 		parts.append("%s x%d" % [ArtifactDatabase.get_artifact_title(artifact_id), count])
 
+	var consumable_reward: Dictionary = def.get("consumable_reward", {}) as Dictionary
+	for consumable_type_variant in consumable_reward.keys():
+		var consumable_type := str(consumable_type_variant)
+		var count := int(consumable_reward[consumable_type_variant])
+		if count <= 0:
+			continue
+		var consumable_name := consumable_type
+		match consumable_type:
+			"repair_kit":
+				consumable_name = "Kit de Reparação"
+		parts.append("%s x%d" % [consumable_name, count])
+
+	var map_reward := str(def.get("map_reward", ""))
+	if not map_reward.is_empty():
+		var map_name := map_reward
+		match map_reward:
+			"side_dash":
+				map_name = "Mapa Side Dash"
+			"aux_ship":
+				map_name = "Mapa Aux Ship"
+			"random_station":
+				map_name = "Mapa de Estação"
+		parts.append(map_name)
+
+	var discover_station_reward := str(def.get("discover_station_reward", ""))
+	if not discover_station_reward.is_empty():
+		var station_title := StationCatalog.get_station_title(discover_station_reward)
+		parts.append("Descobre: %s" % station_title)
+
+	if parts.is_empty():
+		return "Nenhuma"
+	
 	return " | ".join(parts)
 
 func _on_upgrade_pressed(upgrade_id: String) -> void:
@@ -2105,6 +2141,7 @@ func _get_dialogue_nodes(station_id: String, npc_id: String) -> Dictionary:
 					"choices": [
 						{"text": "Isso funciona mesmo?", "next": "works"},
 						{"text": "Tens alguma fofoca?", "next": "gossip"},
+						{"text": "Tens trabalho?", "next": "work"},
 						{"text": "Tchau.", "next": "end"},
 					],
 				},
@@ -2119,6 +2156,12 @@ func _get_dialogue_nodes(station_id: String, npc_id: String) -> Dictionary:
 					"text": "[b]Glip-Glop[/b]: Dizem que ha um cometa que cheira a sopa.\n[b]Tu[/b]: Sopa?\n[b]Glip-Glop[/b]: Sim. Nao lhe atires, senão vem a colher gigante.",
 					"choices": [
 						{"text": "Assustador.", "next": "end"},
+					],
+				},
+				"work": {
+					"text": "[b]Glip-Glop[/b]: Trabalho? Sim! O setor precisa de limpeza.\n[b]Glip-Glop[/b]: Se matares 20 basicos, dou-te uma recompensa decente.\n[b]Glip-Glop[/b]: Ou... se juntares 50 scrap, tambem pago bem.",
+					"choices": [
+						{"text": "Ok.", "next": "end"},
 					],
 				},
 			}
@@ -2169,12 +2212,13 @@ func _get_dialogue_nodes(station_id: String, npc_id: String) -> Dictionary:
 				},
 			}
 		"krrth":
-			return {
+			var krrth_nodes: Dictionary = {
 				"start": {
 					"text": "[b]Krr'th[/b]: Eu negocio apenas em tres coisas: mineral, scrap... e drama.\n[b]Bloop[/b]: Ele cobra taxa de drama.\n[b]Krr'th[/b]: E dedutivel!",
 					"choices": [
 						{"text": "Quanto custa 1 drama?", "next": "cost"},
 						{"text": "Diz-me algo estranho.", "next": "weird"},
+						{"text": "Tens uma missao?", "next": "mission"},
 						{"text": "Tchau.", "next": "end"},
 					],
 				},
@@ -2190,14 +2234,28 @@ func _get_dialogue_nodes(station_id: String, npc_id: String) -> Dictionary:
 						{"text": "Que fofo/terrivel.", "next": "end"},
 					],
 				},
+				"mission": {
+					"text": "[b]Krr'th[/b]: Missao? Sim. Os snipers estao a incomodar.\n[b]Krr'th[/b]: Mata 8 deles e dou-te uma recompensa. Drama incluido.",
+					"choices": [
+						{"text": "Ok.", "next": "end"},
+					],
+				},
 			}
+			# Mercador Delta: missão de sniper
+			if station_id == "station_delta":
+				var start: Dictionary = krrth_nodes.get("start", {}) as Dictionary
+				var choices: Array = (start.get("choices", []) as Array).duplicate()
+				start["choices"] = choices
+				krrth_nodes["start"] = start
+			return krrth_nodes
 		"bloop":
-			return {
+			var bloop_nodes: Dictionary = {
 				"start": {
 					"text": "[b]Bloop[/b]: *bloop* *bloop*\n[b]Tu[/b]: Isso foi uma frase?\n[b]Bloop[/b]: Sim. Disse que o teu capacete parece uma panela.",
 					"choices": [
 						{"text": "Ofensivo.", "next": "offense"},
 						{"text": "Obrigado?", "next": "thanks"},
+						{"text": "Tens trabalho?", "next": "work"},
 						{"text": "Adeus.", "next": "end"},
 					],
 				},
@@ -2213,7 +2271,20 @@ func _get_dialogue_nodes(station_id: String, npc_id: String) -> Dictionary:
 						{"text": "Entendido.", "next": "end"},
 					],
 				},
+				"work": {
+					"text": "[b]Bloop[/b]: *bloop* Sim. Preciso de mineral. Muito mineral.\n[b]Bloop[/b]: Se juntares 100, dou-te uma recompensa especial. *bloop*",
+					"choices": [
+						{"text": "Ok.", "next": "end"},
+					],
+				},
 			}
+			# Outpost Beta: missão de mineral
+			if station_id == "station_beta":
+				var start: Dictionary = bloop_nodes.get("start", {}) as Dictionary
+				var choices: Array = (start.get("choices", []) as Array).duplicate()
+				start["choices"] = choices
+				bloop_nodes["start"] = start
+			return bloop_nodes
 		"snee":
 			return {
 				"start": {
@@ -2230,7 +2301,14 @@ func _get_dialogue_nodes(station_id: String, npc_id: String) -> Dictionary:
 					"choices": [
 						{"text": "Conta uma historia.", "next": "story"},
 						{"text": "Tenho uma pergunta.", "next": "question"},
+						{"text": "Tens trabalho?", "next": "work"},
 						{"text": "Adeus.", "next": "end"},
+					],
+				},
+				"work": {
+					"text": "[b]Vexa[/b]: Trabalho? Sim. Preciso de um explorador.\n[b]Vexa[/b]: Descobre 2 estações novas e dou-te uma recompensa. E um mapa.",
+					"choices": [
+						{"text": "Ok.", "next": "end"},
 					],
 				},
 				"story": {
@@ -2284,11 +2362,12 @@ func _get_dialogue_nodes(station_id: String, npc_id: String) -> Dictionary:
 
 			return nodes
 		"oomu":
-			return {
+			var oomu_nodes: Dictionary = {
 				"start": {
 					"text": "[b]Oomu[/b]: Eu nao vendo nada. Eu so observo.\n[b]Rrrl[/b]: Ele observa e depois cobra.\n[b]Oomu[/b]: Detalhes.",
 					"choices": [
 						{"text": "O que observas?", "next": "observe"},
+						{"text": "Tens trabalho?", "next": "work"},
 						{"text": "Adeus.", "next": "end"},
 					],
 				},
@@ -2298,13 +2377,62 @@ func _get_dialogue_nodes(station_id: String, npc_id: String) -> Dictionary:
 						{"text": "Ok.", "next": "end"},
 					],
 				},
+				"work": {
+					"text": "[b]Oomu[/b]: Observo que precisas de um componente de regeneração.\n[b]Oomu[/b]: Mata 20 inimigos (qualquer tipo) e dou-te a peca. Observado.",
+					"choices": [
+						{"text": "Ok.", "next": "end"},
+					],
+				},
 			}
+			# Base Gamma: missão de auto regen
+			if station_id == "station_gamma":
+				var start: Dictionary = oomu_nodes.get("start", {}) as Dictionary
+				var choices: Array = (start.get("choices", []) as Array).duplicate()
+				start["choices"] = choices
+				oomu_nodes["start"] = start
+			return oomu_nodes
 		"rrrl":
 			return {
 				"start": {
 					"text": "[b]Rrrl[/b]: Rrrl.\n[b]Tu[/b]: Isso e um nome ou um aviso?\n[b]Rrrl[/b]: Sim.",
 					"choices": [
 						{"text": "Justo.", "next": "end"},
+					],
+				},
+			}
+		"hrrp":
+			return {
+				"start": {
+					"text": "[b]Hrrp[/b]: Hrrp.\n[b]Tu[/b]: Isso e um cumprimento?\n[b]Hrrp[/b]: Hrrp. Sim. E tambem um aviso.\n[b]Hrrp[/b]: Os snipers estao a ficar perigosos. Mata 25 deles e dou-te ametista.",
+					"choices": [
+						{"text": "Ok.", "next": "end"},
+					],
+				},
+			}
+		"nox":
+			return {
+				"start": {
+					"text": "[b]Nox-7[/b]: Nox-7 ao servico.\n[b]Tu[/b]: Servico de que?\n[b]Nox-7[/b]: De limpeza. E de historias. E de sopa.\n[b]Nox-7[/b]: Mas principalmente de limpeza.",
+					"choices": [
+						{"text": "Ok.", "next": "end"},
+					],
+				},
+			}
+		"glunk":
+			return {
+				"start": {
+					"text": "[b]Glunk[/b]: Glunk.\n[b]Tu[/b]: ...\n[b]Glunk[/b]: Glunk significa 'tenho trabalho se quiseres'.",
+					"choices": [
+						{"text": "Ok.", "next": "end"},
+					],
+				},
+			}
+		"snee":
+			return {
+				"start": {
+					"text": "[b]Snee-Snack[/b]: Acho que o espaco me da alergia.\n[b]Tu[/b]: O espaco?\n[b]Snee-Snack[/b]: Sim. Sempre que vejo estrelas: ATCHIM!\n[b]Krr'th[/b]: Ele espirra e muda o preco do mineral.",
+					"choices": [
+						{"text": "Saude.", "next": "end"},
 					],
 				},
 			}

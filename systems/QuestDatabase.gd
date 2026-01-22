@@ -2,13 +2,23 @@ extends RefCounted
 class_name QuestDatabase
 
 const QUEST_KILL_15_BASIC := "kill_15_basic"
+const QUEST_KILL_20_BASIC_SCRAP := "kill_20_basic_scrap"
+const QUEST_KILL_8_SNIPER_ZONE1 := "kill_8_sniper_zone1"
 const QUEST_KILL_10_SNIPER := "kill_10_sniper"
+const QUEST_KILL_25_SNIPER_AMETISTA := "kill_25_sniper_ametista"
 const QUEST_KILL_5_TANK := "kill_5_tank"
+const QUEST_KILL_12_TANK_AMETISTA := "kill_12_tank_ametista"
+const QUEST_KILL_30_MIXED := "kill_30_mixed"
+const QUEST_COLLECT_50_SCRAP := "collect_50_scrap"
+const QUEST_COLLECT_100_MINERAL := "collect_100_mineral"
 const QUEST_VACUUM_PART := "vacuum_part"
+const QUEST_REVERSE_THRUSTER_PART_QUEST := "reverse_thruster_part_quest"
 const QUEST_SIDE_DASH_MAP := "side_dash_map"
+const QUEST_AUTO_REGEN_PART_QUEST := "auto_regen_part_quest"
 const QUEST_AUX_SHIP_PART := "aux_ship_part"
 const QUEST_AUX_SHIP_MAP := "aux_ship_map"
 const QUEST_MINE_4_AMETISTA := "mine_4_ametista"
+const QUEST_DISCOVER_2_STATIONS := "discover_2_stations"
 const QUEST_TAVERN_BANDIT_1 := "tavern_bandit_1"
 const QUEST_TAVERN_BANDIT_2 := "tavern_bandit_2"
 const QUEST_TAVERN_BANDIT_3 := "tavern_bandit_3"
@@ -33,6 +43,22 @@ const QUEST_DEFS := {
 		"goal": 15,
 		"reward": {"scrap": 60, "mineral": 25},
 	},
+	QUEST_KILL_20_BASIC_SCRAP: {
+		"title": "Limpeza Total",
+		"description": "Mata 20 inimigos basicos para limpar o setor.",
+		"enemy_id": "basic",
+		"goal": 20,
+		"giver_station_id": "station_alpha",
+		"reward": {"scrap": 80, "mineral": 30},
+	},
+	QUEST_KILL_8_SNIPER_ZONE1: {
+		"title": "Atiradores de Elite",
+		"description": "Mata 8 inimigos sniper. Desafio para iniciantes.",
+		"enemy_id": "sniper",
+		"goal": 8,
+		"giver_station_id": "station_delta",
+		"reward": {"scrap": 70, "mineral": 40},
+	},
 	QUEST_KILL_10_SNIPER: {
 		"title": "Atiradores",
 		"description": "Mata 10 inimigos sniper.",
@@ -40,12 +66,53 @@ const QUEST_DEFS := {
 		"goal": 10,
 		"reward": {"scrap": 50, "mineral": 45},
 	},
+	QUEST_KILL_25_SNIPER_AMETISTA: {
+		"title": "Caçador de Elite",
+		"description": "Mata 25 inimigos sniper. Recompensa especial com ametista.",
+		"enemy_id": "sniper",
+		"goal": 25,
+		"giver_station_id": "station_beta",
+		"reward": {"scrap": 120, "mineral": 80, "ametista": 1},
+	},
 	QUEST_KILL_5_TANK: {
 		"title": "Blindados",
 		"description": "Mata 5 inimigos tank.",
 		"enemy_id": "tank",
 		"goal": 5,
 		"reward": {"scrap": 80, "mineral": 60},
+	},
+	QUEST_KILL_12_TANK_AMETISTA: {
+		"title": "Destruidor de Blindados",
+		"description": "Mata 12 inimigos tank. Recompensa especial com ametista.",
+		"enemy_id": "tank",
+		"goal": 12,
+		"giver_station_id": "station_gamma",
+		"reward": {"scrap": 150, "mineral": 100, "ametista": 1},
+	},
+	QUEST_KILL_30_MIXED: {
+		"title": "Variedade Letal",
+		"description": "Mata 30 inimigos de qualquer tipo (basicos, snipers ou tanks).",
+		"enemy_id": "any",
+		"goal": 30,
+		"giver_station_id": "station_zeta",
+		"reward": {"scrap": 140, "mineral": 90},
+	},
+	QUEST_COLLECT_50_SCRAP: {
+		"title": "Reciclagem",
+		"description": "Coleta 50 scrap de qualquer fonte.",
+		"resource_type": "scrap",
+		"goal": 50,
+		"giver_station_id": "station_alpha",
+		"reward": {"mineral": 30},
+		"consumable_reward": {"repair_kit": 1},
+	},
+	QUEST_COLLECT_100_MINERAL: {
+		"title": "Mineração Intensiva",
+		"description": "Coleta 100 mineral de qualquer fonte.",
+		"resource_type": "mineral",
+		"goal": 100,
+		"giver_station_id": "station_beta",
+		"reward": {"scrap": 200, "ametista": 1},
 	},
 	QUEST_VACUUM_PART: {
 		"title": "Filtro Perdido",
@@ -55,6 +122,15 @@ const QUEST_DEFS := {
 		"giver_station_id": "station_alpha",
 		"reward": {"scrap": 25},
 		"artifact_parts_reward": {"vacuum": 1},
+	},
+	QUEST_REVERSE_THRUSTER_PART_QUEST: {
+		"title": "Peca do Propulsor",
+		"description": "Uma peca rara do Reverse Thruster foi encontrada. Mata 12 inimigos basicos e volta para receber a peca.",
+		"enemy_id": "basic",
+		"goal": 12,
+		"giver_station_id": "station_delta",
+		"reward": {"scrap": 50},
+		"artifact_parts_reward": {"reverse_thruster": 1},
 	},
 	QUEST_SIDE_DASH_MAP: {
 		"title": "Mapa do Dash",
@@ -83,6 +159,15 @@ const QUEST_DEFS := {
 		"giver_station_id": "station_zeta",
 		"reward": {"scrap": 35},
 		"map_reward": "aux_ship",
+	},
+	QUEST_AUTO_REGEN_PART_QUEST: {
+		"title": "Componente de Regeneração",
+		"description": "Um componente raro de regeneração foi encontrado. Mata 20 inimigos (qualquer tipo) e volta para receber a peca.",
+		"enemy_id": "any",
+		"goal": 20,
+		"giver_station_id": "station_gamma",
+		"reward": {"scrap": 80, "mineral": 40},
+		"artifact_parts_reward": {"auto_regen": 1},
 	},
 	QUEST_MINE_4_AMETISTA: {
 		"title": "Minerio Especial",
@@ -151,14 +236,22 @@ const QUEST_DEFS := {
 		"giver_station_id": "station_epsilon",
 		"reward": {},
 	},
+	QUEST_DISCOVER_2_STATIONS: {
+		"title": "Explorador",
+		"description": "Descobre 2 estações novas interagindo com elas pela primeira vez.",
+		"goal": 2,
+		"giver_station_id": "station_epsilon",
+		"reward": {"scrap": 100},
+		"map_reward": "random_station",
+	},
 }
 
 const NPC_QUEST_POOLS := {
-	"scavenger": [QUEST_KILL_15_BASIC, QUEST_VACUUM_PART],
-	"marksman": [QUEST_KILL_10_SNIPER, QUEST_SIDE_DASH_MAP, QUEST_AUX_SHIP_PART],
-	"bruiser": [QUEST_KILL_5_TANK],
-	"bounty": [QUEST_KILL_15_BASIC, QUEST_KILL_10_SNIPER, QUEST_KILL_5_TANK, QUEST_AUX_SHIP_MAP],
-	"miner": [QUEST_MINE_4_AMETISTA],
+	"scavenger": [QUEST_KILL_15_BASIC, QUEST_KILL_20_BASIC_SCRAP, QUEST_VACUUM_PART, QUEST_COLLECT_50_SCRAP, QUEST_AUTO_REGEN_PART_QUEST],
+	"marksman": [QUEST_KILL_10_SNIPER, QUEST_KILL_8_SNIPER_ZONE1, QUEST_KILL_25_SNIPER_AMETISTA, QUEST_SIDE_DASH_MAP, QUEST_AUX_SHIP_PART],
+	"bruiser": [],  # Removido QUEST_KILL_5_TANK - tanks não existem na Zona 1 onde bruiser está
+	"bounty": [QUEST_KILL_15_BASIC, QUEST_KILL_10_SNIPER, QUEST_KILL_5_TANK, QUEST_AUX_SHIP_MAP, QUEST_REVERSE_THRUSTER_PART_QUEST, QUEST_DISCOVER_2_STATIONS],
+	"miner": [QUEST_MINE_4_AMETISTA, QUEST_COLLECT_100_MINERAL],
 	"hunter": [
 		QUEST_TAVERN_BANDIT_1,
 		QUEST_TAVERN_BANDIT_2,
