@@ -75,7 +75,9 @@ auto_regen:3
 
 PROMPS:
 
+Agora o Ricky  bem a corda. 
 
+Uma tecla de mapa e outra de zona. 
 
 Temos de fazer um menu inicial para o jogo, com o botão de continuar, "Novo Jogo". Quando clicamos no novo jogo isto é, no início do jogo, aparece um diálogo do Ricky, o nosso alien, a ser raptado pelos humanos, mas ele consegue escapar depois Deixa-nos no começo do jogo agora. implmenta isso
 

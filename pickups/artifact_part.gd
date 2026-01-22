@@ -13,7 +13,7 @@ const SIDE_DASH_TEX: Texture2D = preload("res://textures/partes artefactos/side.
 const AUX_SHIP_TEX: Texture2D = preload("res://textures/partes artefactos/nane-aux.png")
 const MINING_DRILL_TEX: Texture2D = preload("res://textures/partes artefactos/broca.png")
 const AUTO_REGEN_TEX: Texture2D = preload("res://textures/partes artefactos/auto-regen.png")
-const RELIC_TEX: Texture2D = preload("res://textures/rellic.png")
+const RELIC_TEX: Texture2D = preload("res://textures/Crystal_01.png")
 
 var _player_in_range: bool = false
 var _collector: Node2D = null

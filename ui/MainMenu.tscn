@@ -1,0 +1,209 @@
+[gd_scene load_steps=16 format=3 uid="uid://d2k7j6d2ywk0v"]
+
+[ext_resource type="Script" path="res://ui/main_menu.gd" id="1_menu_script"]
+[ext_resource type="Texture2D" path="res://textures/backgroud1.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://textures/ricky.webp" id="3_ricky"]
+[ext_resource type="Shader" path="res://shaders/uv_scroll.gdshader" id="4_uv_shader"]
+[ext_resource type="Shader" path="res://shaders/menu_overlay.gdshader" id="5_overlay_shader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bg_far"]
+shader = ExtResource("4_uv_shader")
+shader_parameter/uv_scale = Vector2(1.2, 1.2)
+shader_parameter/uv_offset = Vector2(0, 0)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bg_near"]
+shader = ExtResource("4_uv_shader")
+shader_parameter/uv_scale = Vector2(1.8, 1.8)
+shader_parameter/uv_offset = Vector2(0, 0)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_overlay"]
+shader = ExtResource("5_overlay_shader")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.05, 0.06, 0.1, 0.82)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.6, 1.0, 0.6)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button"]
+bg_color = Color(0.12, 0.16, 0.28, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.45, 0.75, 1.0, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_hover"]
+bg_color = Color(0.18, 0.24, 0.4, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6, 0.85, 1.0, 0.95)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_button_pressed"]
+bg_color = Color(0.08, 0.12, 0.2, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.6, 1.0, 0.95)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="LabelSettings" id="LabelSettings_title"]
+font_size = 54
+outline_size = 6
+outline_color = Color(0, 0, 0, 0.85)
+
+[sub_resource type="LabelSettings" id="LabelSettings_subtitle"]
+font_size = 20
+
+[sub_resource type="LabelSettings" id="LabelSettings_body"]
+font_size = 16
+
+[sub_resource type="LabelSettings" id="LabelSettings_caption"]
+font_size = 14
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_menu_script")
+
+[node name="Backgrounds" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="StarfieldFar" type="TextureRect" parent="Backgrounds"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture_repeat = 2
+texture = ExtResource("2_bg")
+material = SubResource("ShaderMaterial_bg_far")
+modulate = Color(1, 1, 1, 0.8)
+
+[node name="StarfieldNear" type="TextureRect" parent="Backgrounds"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+texture_repeat = 2
+texture = ExtResource("2_bg")
+material = SubResource("ShaderMaterial_bg_near")
+modulate = Color(0.8, 0.9, 1, 0.45)
+
+[node name="Overlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+material = SubResource("ShaderMaterial_overlay")
+mouse_filter = 2
+
+[node name="Content" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 64.0
+offset_top = 48.0
+offset_right = -64.0
+offset_bottom = -48.0
+
+[node name="MainRow" type="HBoxContainer" parent="Content"]
+layout_mode = 2
+alignment = 1
+size_flags_vertical = 3
+theme_override_constants/separation = 48
+
+[node name="LeftPanel" type="PanelContainer" parent="Content/MainRow"]
+custom_minimum_size = Vector2(540, 0)
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="PanelMargin" type="MarginContainer" parent="Content/MainRow/LeftPanel"]
+offset_left = 18.0
+offset_top = 18.0
+offset_right = -18.0
+offset_bottom = -18.0
+
+[node name="VBox" type="VBoxContainer" parent="Content/MainRow/LeftPanel/PanelMargin"]
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Content/MainRow/LeftPanel/PanelMargin/VBox"]
+text = "RICKY'S REVENGE"
+label_settings = SubResource("LabelSettings_title")
+
+[node name="Subtitle" type="Label" parent="Content/MainRow/LeftPanel/PanelMargin/VBox"]
+text = "Fuga em gravidade zero"
+label_settings = SubResource("LabelSettings_subtitle")
+
+[node name="Body" type="Label" parent="Content/MainRow/LeftPanel/PanelMargin/VBox"]
+text = "Os humanos raptaram o Ricky. Ele escapou e tem de recuperar a nave, os gadgets e o artefacto perdido."
+autowrap_mode = 3
+label_settings = SubResource("LabelSettings_body")
+
+[node name="ButtonBox" type="VBoxContainer" parent="Content/MainRow/LeftPanel/PanelMargin/VBox"]
+theme_override_constants/separation = 8
+
+[node name="ContinueButton" type="Button" parent="Content/MainRow/LeftPanel/PanelMargin/VBox/ButtonBox"]
+text = "Continuar"
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_colors/font_color = Color(0.85, 0.95, 1, 1)
+
+[node name="NewGameButton" type="Button" parent="Content/MainRow/LeftPanel/PanelMargin/VBox/ButtonBox"]
+text = "Novo Jogo"
+theme_override_styles/normal = SubResource("StyleBoxFlat_button")
+theme_override_styles/hover = SubResource("StyleBoxFlat_button_hover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_button_pressed")
+theme_override_colors/font_color = Color(0.95, 0.98, 1, 1)
+
+[node name="Hint" type="Label" parent="Content/MainRow/LeftPanel/PanelMargin/VBox"]
+text = "Dica: segura F para puxar a corda."
+label_settings = SubResource("LabelSettings_caption")
+modulate = Color(0.7, 0.8, 0.95, 0.8)
+
+[node name="Right" type="VBoxContainer" parent="Content/MainRow"]
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="RickyPortrait" type="TextureRect" parent="Content/MainRow/Right"]
+custom_minimum_size = Vector2(360, 360)
+size_flags_horizontal = 3
+size_flags_vertical = 3
+texture = ExtResource("3_ricky")
+stretch_mode = 5
+modulate = Color(1, 1, 1, 0.95)
+
+[node name="RickyCaption" type="Label" parent="Content/MainRow/Right"]
+text = "Ricky, o alien fujitivo"
+label_settings = SubResource("LabelSettings_caption")
+horizontal_alignment = 1
+modulate = Color(0.8, 0.9, 1, 0.75)
