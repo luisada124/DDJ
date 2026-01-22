@@ -14,6 +14,8 @@ const BASE_PLAYER_MAX_HEALTH := 10000000000
 const BASE_ALIEN_MAX_HEALTH := 50
 const BASE_FIRE_INTERVAL := 0.28
 const BASE_PLAYER_LASER_DAMAGE := 5
+const BASE_PLAYER_LASER_SPEED := 800.0
+const BASE_AUX_LASER_SPEED := 800.0
 const BASE_ACCELERATION := 470.0
 const BASE_MAX_SPEED := 360.0
 
@@ -105,12 +107,14 @@ var upgrades := {
 	"hull": 0,      # +HP max
 	"blaster": 0,   # mais fire rate (menos intervalo)
 	"laser_damage": 0, # mais dano do laser
+	"laser_speed": 0,  # velocidade do laser
 	"engine": 0,    # mais aceleração
 	"thrusters": 0, # mais velocidade max
 	"magnet": 0,    # maior range/velocidade do magnet
 	"aux_fire_rate": 0, # nave auxiliar: fire rate
 	"aux_damage": 0,    # nave auxiliar: dano
 	"aux_range": 0,     # nave auxiliar: alcance
+	"aux_laser_speed": 0, # nave auxiliar: velocidade do laser
 }
 
 const ARTIFACT_PARTS_REQUIRED := 2
@@ -147,6 +151,13 @@ const UPGRADE_DEFS := {
 		"description": "Aumenta o dano do laser (+10% por nivel).",
 		"max_level": 10,
 		"base_cost": {"scrap": 16, "mineral": 6},
+		"growth": 1.35,
+	},
+	"laser_speed": {
+		"title": "Laser Speed",
+		"description": "Dispara lasers mais rapidos (+10% velocidade por nivel).",
+		"max_level": 10,
+		"base_cost": {"scrap": 12, "mineral": 4},
 		"growth": 1.35,
 	},
 	"engine": {
@@ -190,6 +201,13 @@ const UPGRADE_DEFS := {
 		"description": "Aumenta o alcance da nave auxiliar (+8% por nivel).",
 		"max_level": 10,
 		"base_cost": {"scrap": 12, "mineral": 8},
+		"growth": 1.35,
+	},
+	"aux_laser_speed": {
+		"title": "Aux Laser Speed",
+		"description": "Aumenta a velocidade dos lasers da nave auxiliar (+10% por nivel).",
+		"max_level": 10,
+		"base_cost": {"scrap": 12, "mineral": 6},
 		"growth": 1.35,
 	},
 }
@@ -969,6 +987,10 @@ func get_player_laser_damage() -> int:
 	var value := float(BASE_PLAYER_LASER_DAMAGE) * pow(1.10, level)
 	return int(round(value))
 
+func get_player_laser_speed() -> float:
+	var level := get_upgrade_level("laser_speed")
+	return BASE_PLAYER_LASER_SPEED * pow(1.10, level)
+
 func get_aux_ship_fire_interval() -> float:
 	var base := ArtifactDatabase.get_aux_ship_fire_interval()
 	var level := get_upgrade_level("aux_fire_rate")
@@ -979,6 +1001,10 @@ func get_aux_ship_laser_damage() -> int:
 	var level := get_upgrade_level("aux_damage")
 	var value := float(base) * pow(1.12, level)
 	return int(round(value))
+
+func get_aux_ship_laser_speed() -> float:
+	var level := get_upgrade_level("aux_laser_speed")
+	return BASE_AUX_LASER_SPEED * pow(1.10, level)
 
 func get_aux_ship_range() -> float:
 	var base := ArtifactDatabase.get_aux_ship_range()
@@ -1024,6 +1050,8 @@ func get_upgrade_description(upgrade_id: String) -> String:
 			return "Dispara mais rápido (reduz o intervalo entre tiros)."
 		"laser_damage":
 			return "Aumenta o dano do laser (+10% por nivel)."
+		"laser_speed":
+			return "Dispara lasers mais rapidos (+10% velocidade por nivel)."
 		"engine":
 			return "Mais aceleração (+12% por nível)."
 		"thrusters":
@@ -1037,6 +1065,8 @@ func get_upgrade_description(upgrade_id: String) -> String:
 			return "Aumenta o dano do laser da nave auxiliar (+12% por nivel)."
 		"aux_range":
 			return "Aumenta o alcance da nave auxiliar (+8% por nivel)."
+		"aux_laser_speed":
+			return "Aumenta a velocidade dos lasers da nave auxiliar (+10% por nivel)."
 
 	var def = UPGRADE_DEFS.get(upgrade_id)
 	if def == null:
@@ -1406,12 +1436,14 @@ func _apply_defaults() -> void:
 		"hull": 0,
 		"blaster": 0,
 		"laser_damage": 0,
+		"laser_speed": 0,
 		"engine": 0,
 		"thrusters": 0,
 		"magnet": 0,
 		"aux_fire_rate": 0,
 		"aux_damage": 0,
 		"aux_range": 0,
+		"aux_laser_speed": 0,
 	}
 	artifact_parts_collected = 0
 	artifact_completed = false

@@ -19,6 +19,7 @@ extends Control
 @onready var hull_button: Button = $UpgradeMenu/Panel/Margin/VBox/MainShipList/HullButton
 @onready var blaster_button: Button = $UpgradeMenu/Panel/Margin/VBox/MainShipList/BlasterButton
 @onready var laser_damage_button: Button = $UpgradeMenu/Panel/Margin/VBox/MainShipList/LaserDamageButton
+@onready var laser_speed_button: Button = $UpgradeMenu/Panel/Margin/VBox/MainShipList/LaserSpeedButton
 @onready var engine_button: Button = $UpgradeMenu/Panel/Margin/VBox/MainShipList/EngineButton
 @onready var thrusters_button: Button = $UpgradeMenu/Panel/Margin/VBox/MainShipList/ThrustersButton
 @onready var magnet_button: Button = $UpgradeMenu/Panel/Margin/VBox/MainShipList/MagnetButton
@@ -27,6 +28,7 @@ extends Control
 @onready var aux_fire_rate_button: Button = $UpgradeMenu/Panel/Margin/VBox/AuxShipList/AuxFireRateButton
 @onready var aux_damage_button: Button = $UpgradeMenu/Panel/Margin/VBox/AuxShipList/AuxDamageButton
 @onready var aux_range_button: Button = $UpgradeMenu/Panel/Margin/VBox/AuxShipList/AuxRangeButton
+@onready var aux_laser_speed_button: Button = $UpgradeMenu/Panel/Margin/VBox/AuxShipList/AuxLaserSpeedButton
 
 @onready var reset_button: Button = $UpgradeMenu/Panel/Margin/VBox/ResetButton
 @onready var close_button: Button = $UpgradeMenu/Panel/Margin/VBox/CloseButton
@@ -166,12 +168,14 @@ func _ready() -> void:
 		"hull": hull_button,
 		"blaster": blaster_button,
 		"laser_damage": laser_damage_button,
+		"laser_speed": laser_speed_button,
 		"engine": engine_button,
 		"thrusters": thrusters_button,
 		"magnet": magnet_button,
 		"aux_fire_rate": aux_fire_rate_button,
 		"aux_damage": aux_damage_button,
 		"aux_range": aux_range_button,
+		"aux_laser_speed": aux_laser_speed_button,
 	}
 
 	for upgrade_id in _upgrade_buttons.keys():

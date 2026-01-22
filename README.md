@@ -28,7 +28,7 @@ Por cooldwon no dash
 
 desSpawn de materiais
 
-
+Tamanho das estações. 
 
 BOSSES
 kit reparação está sem os recursos. 
