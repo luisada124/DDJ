@@ -58,8 +58,8 @@ const STATIONS: Dictionary = {
 			{"id": "snee", "name": "Snee-Snack", "type": "bounty"},
 		],
 		"trades": {
-			"scrap_to_mineral": {"give": {"scrap": 6}, "receive": {"mineral": 1}},
-			"mineral_to_scrap": {"give": {"mineral": 1}, "receive": {"scrap": 12}},
+			"scrap_to_mineral": {"give": {"scrap": 10}, "receive": {"mineral": 1}},
+			"mineral_to_scrap": {"give": {"mineral": 1}, "receive": {"scrap": 14}},
 			"ametista_to_mineral": {"give": {"ametista": 1}, "receive": {"mineral": 36}},
 			"ametista_to_scrap": {"give": {"ametista": 1}, "receive": {"scrap": 55}},
 		},
