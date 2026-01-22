@@ -103,8 +103,8 @@ script = ExtResource("2_minimap")
 [node name="SpeechBubble" type="PanelContainer" parent="."]
 visible = false
 layout_mode = 0
-offset_right = 360.0
-offset_bottom = 80.0
+offset_right = 280.0
+offset_bottom = 60.0
 mouse_filter = 2
 
 [node name="SpeechLabel" type="Label" parent="SpeechBubble"]

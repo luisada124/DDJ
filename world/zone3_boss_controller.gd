@@ -22,7 +22,7 @@ func _start_intro() -> void:
 	if GameState.current_zone_id != "core":
 		return
 
-	GameState.emit_signal("speech_requested_timed", "Que lugar é este!..?", 8.5)
+	GameState.emit_signal("speech_requested_timed", "Que lugar é este!..?", 4.5)
 
 	# Delay antes do boss aparecer.
 	call_deferred("_spawn_after_delay")
