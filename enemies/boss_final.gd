@@ -5,13 +5,13 @@ const SHIP_FORWARD := Vector2.UP
 
 @export var texture: Texture2D = preload("res://textures/boss-final-removebg-preview.png")
 
-@export var base_max_health: int = 2400
+@export var base_max_health: int = 3600
 @export var base_move_speed: float = 210.0
 @export var orbit_distance: float = 820.0
 @export var engage_distance: float = 3200.0
 
-@export var laser_speed: float = 900.0
-@export var base_laser_damage: int = 12
+@export var laser_speed: float = 1050.0
+@export var base_laser_damage: int = 16
 
 @export var phase2_threshold: float = 0.65
 @export var phase3_threshold: float = 0.33
@@ -19,9 +19,9 @@ const SHIP_FORWARD := Vector2.UP
 @export var telegraph_color: Color = Color(1.0, 0.85, 0.25, 1.0)
 @export var rage_color: Color = Color(1.0, 0.25, 0.25, 1.0)
 
-@export var phase1_fire_interval: float = 1.10
-@export var phase2_fire_interval: float = 0.85
-@export var phase3_fire_interval: float = 0.70
+@export var phase1_fire_interval: float = 0.90
+@export var phase2_fire_interval: float = 0.65
+@export var phase3_fire_interval: float = 0.50
 
 @export var dash_telegraph_time: float = 0.75
 @export var dash_duration: float = 0.30

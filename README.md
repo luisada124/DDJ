@@ -1,18 +1,20 @@
 todo:
 
-Meter um menu de upgrades para a nave auxiliar. 
+FUNDO ARRANJAR
  
 
- A partir do momento em que se começam os bosses, não se pode trocar de zona. 
+Bosse final muito mais difícil. 
 
-Inimigos a spawnar fora Da visão do jogador. 
-
-meter mais vida na nave e menos inimigos a spawnar
-Meter os artefactos fora do minimapa só estarão disponíveis com mapas depois de os desbloquear. 
+ ter dIALOGO do Warp no no boss 1. 
 
 
-Mapa ser obtido como recompensa. 
-Estações têm de ser ou compradas a localização ou encontradas. 
+
+
+
+
+
+
+
  
 
 BALANCEAMENTO:
