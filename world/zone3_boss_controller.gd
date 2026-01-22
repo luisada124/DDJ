@@ -22,8 +22,7 @@ func _start_intro() -> void:
 	if GameState.current_zone_id != "core":
 		return
 
-	var player_pos := _get_player_pos_or_center()
-	GameState.speech_requested_at.emit("Que lugar é este!..?", player_pos)
+	GameState.emit_signal("speech_requested_timed", "Que lugar é este!..?", 8.5)
 
 	# Delay antes do boss aparecer.
 	call_deferred("_spawn_after_delay")
@@ -54,9 +53,3 @@ func _spawn_boss() -> void:
 	var boss := inst as Node2D
 	boss.global_position = boss_spawn_pos
 	root.add_child(boss)
-
-func _get_player_pos_or_center() -> Vector2:
-	var p := get_tree().get_first_node_in_group("player")
-	if p is Node2D:
-		return (p as Node2D).global_position
-	return global_position

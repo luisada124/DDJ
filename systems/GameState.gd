@@ -5,6 +5,7 @@ signal player_died
 signal alien_died
 signal speech_requested(text: String)
 signal speech_requested_at(text: String, world_pos: Vector2)
+signal speech_requested_timed(text: String, duration: float)
 
 const SAVE_PATH := "user://save.json"
 const SAVE_VERSION := 1

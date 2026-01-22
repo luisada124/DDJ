@@ -239,6 +239,7 @@ func _ready() -> void:
 	GameState.alien_died.connect(_on_alien_died)
 	GameState.speech_requested.connect(_show_speech_bubble)
 	GameState.speech_requested_at.connect(_show_speech_bubble_at)
+	GameState.speech_requested_timed.connect(_show_speech_bubble_timed)
 	_update_hud()
 	_update_boss_compass()
 
@@ -275,7 +276,8 @@ func _update_speech_bubble(delta: float) -> void:
 			_start_speech(
 				str(next_item.get("text", "")),
 				bool(next_item.get("has_anchor", false)),
-				next_item.get("world_pos", Vector2.ZERO) as Vector2
+				next_item.get("world_pos", Vector2.ZERO) as Vector2,
+				float(next_item.get("duration", 4.5))
 			)
 		else:
 			speech_bubble.visible = false
@@ -311,9 +313,10 @@ func _show_speech_bubble(text: String) -> void:
 			"text": text,
 			"has_anchor": false,
 			"world_pos": Vector2.ZERO,
+			"duration": 4.5,
 		})
 		return
-	_start_speech(text, false, Vector2.ZERO)
+	_start_speech(text, false, Vector2.ZERO, 4.5)
 
 func _show_speech_bubble_at(text: String, world_pos: Vector2) -> void:
 	if speech_bubble == null or speech_label == null:
@@ -323,15 +326,30 @@ func _show_speech_bubble_at(text: String, world_pos: Vector2) -> void:
 			"text": text,
 			"has_anchor": true,
 			"world_pos": world_pos,
+			"duration": 4.5,
 		})
 		return
-	_start_speech(text, true, world_pos)
+	_start_speech(text, true, world_pos, 4.5)
 
-func _start_speech(text: String, has_anchor: bool, world_pos: Vector2) -> void:
+func _show_speech_bubble_timed(text: String, duration: float) -> void:
+	if speech_bubble == null or speech_label == null:
+		return
+	var d: float = maxf(0.1, duration)
+	if speech_bubble.visible and _speech_time_left > 0.0:
+		_speech_queue.append({
+			"text": text,
+			"has_anchor": false,
+			"world_pos": Vector2.ZERO,
+			"duration": d,
+		})
+		return
+	_start_speech(text, false, Vector2.ZERO, d)
+
+func _start_speech(text: String, has_anchor: bool, world_pos: Vector2, duration: float) -> void:
 	speech_label.text = text
 	_speech_has_anchor = has_anchor
 	_speech_anchor_world = world_pos
-	_speech_time_left = 4.5
+	_speech_time_left = maxf(0.1, duration)
 	speech_bubble.visible = true
 
 

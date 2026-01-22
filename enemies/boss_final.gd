@@ -78,7 +78,7 @@ func take_damage(amount: int) -> void:
 		_die()
 
 func _die() -> void:
-	GameState.emit_signal("speech_requested", "...")
+	GameState.emit_signal("speech_requested_timed", "finalmente acabei com esta especie irritante, Vou maze dormir...", 9.0)
 	queue_free()
 
 func _physics_process(delta: float) -> void:
