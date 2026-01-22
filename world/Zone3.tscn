@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://c2022r782cuvy"]
 
-[ext_resource type="Texture2D" uid="uid://bjrm3amgjxcyo" path="res://textures/ChatGPT Image Jan 5, 2026, 12_57_27 AM.png" id="1_uuf5n"]
+[ext_resource type="Texture2D" uid="uid://m5wr8f2j7q56" path="res://textures/zona3.png" id="1_uuf5n"]
 [ext_resource type="Script" uid="uid://b42refxbrmobu" path="res://world/zone3_boss_controller.gd" id="2_zone3_boss_controller"]
 
 [node name="Zone3" type="Node2D"]

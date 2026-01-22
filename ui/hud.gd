@@ -293,16 +293,20 @@ func _update_speech_bubble(delta: float) -> void:
 
 	_speech_time_left -= delta
 	if _speech_time_left <= 0.0:
-		if _speech_queue.size() > 0:
+		while _speech_queue.size() > 0:
 			var next_item: Dictionary = _speech_queue[0] as Dictionary
 			_speech_queue.remove_at(0)
+			var next_text: String = str(next_item.get("text", "")).strip_edges()
+			if next_text.is_empty():
+				continue
 			_start_speech(
-				str(next_item.get("text", "")),
+				next_text,
 				bool(next_item.get("has_anchor", false)),
 				next_item.get("world_pos", Vector2.ZERO) as Vector2,
 				float(next_item.get("duration", 4.5))
 			)
-		else:
+			break
+		if _speech_time_left <= 0.0 and _speech_queue.is_empty():
 			speech_bubble.visible = false
 			return
 
@@ -331,45 +335,60 @@ func _update_speech_bubble(delta: float) -> void:
 func _show_speech_bubble(text: String) -> void:
 	if speech_bubble == null or speech_label == null:
 		return
+	var cleaned: String = text.strip_edges()
+	if cleaned.is_empty():
+		return
 	if speech_bubble.visible and _speech_time_left > 0.0:
 		_speech_queue.append({
-			"text": text,
+			"text": cleaned,
 			"has_anchor": false,
 			"world_pos": Vector2.ZERO,
 			"duration": 4.5,
 		})
 		return
-	_start_speech(text, false, Vector2.ZERO, 4.5)
+	_start_speech(cleaned, false, Vector2.ZERO, 4.5)
 
 func _show_speech_bubble_at(text: String, world_pos: Vector2) -> void:
 	if speech_bubble == null or speech_label == null:
 		return
+	var cleaned: String = text.strip_edges()
+	if cleaned.is_empty():
+		return
 	if speech_bubble.visible and _speech_time_left > 0.0:
 		_speech_queue.append({
-			"text": text,
+			"text": cleaned,
 			"has_anchor": true,
 			"world_pos": world_pos,
 			"duration": 4.5,
 		})
 		return
-	_start_speech(text, true, world_pos, 4.5)
+	_start_speech(cleaned, true, world_pos, 4.5)
 
 func _show_speech_bubble_timed(text: String, duration: float) -> void:
 	if speech_bubble == null or speech_label == null:
 		return
+	var cleaned: String = text.strip_edges()
+	if cleaned.is_empty():
+		return
 	var d: float = maxf(0.1, duration)
 	if speech_bubble.visible and _speech_time_left > 0.0:
 		_speech_queue.append({
-			"text": text,
+			"text": cleaned,
 			"has_anchor": false,
 			"world_pos": Vector2.ZERO,
 			"duration": d,
 		})
 		return
-	_start_speech(text, false, Vector2.ZERO, d)
+	_start_speech(cleaned, false, Vector2.ZERO, d)
 
 func _start_speech(text: String, has_anchor: bool, world_pos: Vector2, duration: float) -> void:
-	speech_label.text = text
+	var cleaned: String = text.strip_edges()
+	if cleaned.is_empty():
+		speech_label.text = ""
+		_speech_time_left = 0.0
+		speech_bubble.visible = false
+		return
+	speech_label.text = cleaned
 	_speech_has_anchor = has_anchor
 	_speech_anchor_world = world_pos
 	_speech_time_left = maxf(0.1, duration)
@@ -917,8 +936,10 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 		buy_artifact_part_button.disabled = not can_buy_part
 
 	var kit_cost: Dictionary = StationCatalog.get_repair_kit_cost(station_id)
-	buy_repair_kit_button.text = "Kit de reparacao (+50%% HP) (%s)" % _format_cost(kit_cost)
-	buy_repair_kit_button.disabled = not GameState.can_afford(kit_cost)
+	var kit_count: int = GameState.get_repair_kit_count()
+	var kit_max: int = GameState.MAX_REPAIR_KITS
+	buy_repair_kit_button.text = "Kit de reparacao (+50%% HP) (%s) [%d/%d]" % [_format_cost(kit_cost), kit_count, kit_max]
+	buy_repair_kit_button.disabled = kit_count >= kit_max or not GameState.can_afford(kit_cost)
 
 	var repair_cost: Dictionary = StationCatalog.get_ship_repair_cost(station_id)
 	repair_ship_button.text = "Reparar nave (cura total) (%s)" % _format_cost(repair_cost)
@@ -3125,11 +3146,12 @@ func _rebuild_inventory_list() -> void:
 	items_header.text = "Itens"
 	inventory_list.add_child(items_header)
 
-	var kit_count := GameState.get_repair_kit_count()
+	var kit_count: int = GameState.get_repair_kit_count()
+	var kit_max: int = GameState.MAX_REPAIR_KITS
 	var kit_row := HBoxContainer.new()
 	kit_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var kit_label := Label.new()
-	kit_label.text = "Kit de reparacao: %d" % kit_count
+	kit_label.text = "Kit de reparacao: %d/%d" % [kit_count, kit_max]
 	kit_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	kit_row.add_child(kit_label)
 

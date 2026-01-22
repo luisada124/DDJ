@@ -258,6 +258,22 @@ func _on_leader_tree_exiting(leader: Node2D) -> void:
 	_spawn_relic(_last_enemy_pos)
 
 func _spawn_relic(world_pos: Vector2) -> void:
+	# Pode ser chamado a partir de callbacks de física (ex: morte por laser).
+	# Spawns de Area2D durante "flushing queries" dão erro, por isso adiamos para o próximo frame.
+	if Engine.is_in_physics_frame():
+		call_deferred("_spawn_relic_next_frame", world_pos)
+		return
+	_spawn_relic_now(world_pos)
+
+func _spawn_relic_next_frame(world_pos: Vector2) -> void:
+	if not is_inside_tree():
+		return
+	await get_tree().process_frame
+	if not is_inside_tree():
+		return
+	_spawn_relic_now(world_pos)
+
+func _spawn_relic_now(world_pos: Vector2) -> void:
 	var required_core: int = ZoneCatalog.get_required_artifact_parts("core")
 	if GameState.artifact_parts_collected >= required_core:
 		return
@@ -276,7 +292,7 @@ func _spawn_relic(world_pos: Vector2) -> void:
 	relic.scale = Vector2(1.25, 1.25)
 	relic.set("artifact_id", "relic")
 	relic.set("prompt_text", "E - Artefacto (Relic)")
-	root.add_child(relic)
+	root.call_deferred("add_child", relic)
 
 func _get_player_pos_or_center() -> Vector2:
 	var p := get_tree().get_first_node_in_group("player")

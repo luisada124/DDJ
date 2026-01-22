@@ -31,6 +31,8 @@ var consumables := {
 	"repair_kit": 0,
 }
 
+const MAX_REPAIR_KITS: int = 3
+
 # Regeneração automática do "auto_regen".
 var _regen_cooldown: float = 0.0
 var _regen_accum: float = 0.0
@@ -693,7 +695,7 @@ func claim_quest(quest_id: String, station_id: String = "") -> bool:
 	for consumable_type_variant in consumable_reward.keys():
 		var consumable_type := str(consumable_type_variant)
 		var count := int(consumable_reward[consumable_type_variant])
-		consumables[consumable_type] = int(consumables.get(consumable_type, 0)) + count
+		_add_consumable(consumable_type, count)
 
 	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
 	q["claimed"] = true
@@ -883,15 +885,26 @@ func heal_player(amount: int) -> void:
 	_queue_save()
 
 func buy_repair_kit(cost: Dictionary) -> bool:
+	if get_repair_kit_count() >= MAX_REPAIR_KITS:
+		return false
 	if not can_afford(cost):
 		return false
 	for res_type_variant in cost.keys():
 		var res_type := str(res_type_variant)
 		resources[res_type] = int(resources.get(res_type, 0)) - int(cost[res_type])
-	consumables["repair_kit"] = int(consumables.get("repair_kit", 0)) + 1
+	_add_consumable("repair_kit", 1)
 	emit_signal("state_changed")
 	_queue_save()
 	return true
+
+func _add_consumable(consumable_type: String, count: int) -> void:
+	if count <= 0:
+		return
+	var current: int = int(consumables.get(consumable_type, 0))
+	var new_value: int = current + count
+	if consumable_type == "repair_kit":
+		new_value = mini(new_value, MAX_REPAIR_KITS)
+	consumables[consumable_type] = new_value
 
 func buy_vacuum_map(cost: Dictionary) -> bool:
 	if vacuum_map_bought:
@@ -1112,7 +1125,7 @@ func debug_grant_test_resources() -> void:
 	for res_type_variant in add.keys():
 		var res_type := str(res_type_variant)
 		resources[res_type] = int(resources.get(res_type, 0)) + int(add[res_type_variant])
-	consumables["repair_kit"] = int(consumables.get("repair_kit", 0)) + 20
+	_add_consumable("repair_kit", 20)
 	emit_signal("state_changed")
 	_queue_save()
 

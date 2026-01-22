@@ -1,14 +1,17 @@
 todo:
-
+os recursos estao a mudar quando se troca de zona
 FUNDO ARRANJAR
- 
+
+
+meter ametistas nos upgrades
+
 Meter o boss da fase 1 mais f*dido. 
 
 ter dIALOGO do Warp no no boss 1. 
 
 Tamanho das estações. 
 
-
+chatini quando mudo para a zona 3 pela primeira vez o evento do boss final esta a dar este erro, ve la o que e que se passa
 
  
 
