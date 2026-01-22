@@ -10,10 +10,10 @@ signal speech_requested_timed(text: String, duration: float)
 const SAVE_PATH := "user://save.json"
 const SAVE_VERSION := 1
 
-const BASE_PLAYER_MAX_HEALTH := 10000000000
-const BASE_ALIEN_MAX_HEALTH := 50
+const BASE_PLAYER_MAX_HEALTH := 220
+const BASE_ALIEN_MAX_HEALTH := 70
 const BASE_FIRE_INTERVAL := 0.28
-const BASE_PLAYER_LASER_DAMAGE := 5
+const BASE_PLAYER_LASER_DAMAGE := 6
 const BASE_ACCELERATION := 470.0
 const BASE_MAX_SPEED := 360.0
 

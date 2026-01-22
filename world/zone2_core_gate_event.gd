@@ -267,7 +267,7 @@ func _spawn_relic(world_pos: Vector2) -> void:
 		return
 	var relic := inst as Node2D
 	relic.global_position = world_pos
-	relic.scale = Vector2(1.8, 1.8)
+	relic.scale = Vector2(1.25, 1.25)
 	relic.set("artifact_id", "relic")
 	relic.set("prompt_text", "E - Artefacto (Relic)")
 	root.add_child(relic)

@@ -17,7 +17,7 @@ const EnemyScene: PackedScene = preload("res://enemies/Enemy.tscn")
 @export var spawn_radius_max: float = 520.0
 @export var respawn_interval: float = 2.0
 
-@export var station_safe_radius: float = 1000.0
+@export var station_safe_radius: float = 450.0
 @export var chase_range_override: float = 2600.0
 @export var guard_desired_distance: float = 420.0
 @export var enemy_scale: Vector2 = Vector2(0.5, 0.5)
@@ -29,6 +29,17 @@ var _guards: Array[Node] = []
 var _timer: Timer
 var _wave_kills: int = 0
 var _wave_spawned: int = 0
+
+func is_wave_cleared() -> bool:
+	if wave_total <= 0:
+		return true
+	return _wave_kills >= wave_total
+
+func get_wave_kills() -> int:
+	return _wave_kills
+
+func get_wave_total() -> int:
+	return wave_total
 
 func _ready() -> void:
 	if not enabled:

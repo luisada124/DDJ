@@ -7,17 +7,21 @@ extends Node2D
 @export var spawn_margin: float = 320.0
 @export var min_spawn_distance_from_player: float = 420.0
 
-@export var outer_spawn_interval: float = 3.0
+@export var outer_spawn_interval: float = 4.5
 @export var mid_spawn_interval: float = 2.0
 @export var core_spawn_interval: float = 1.3
 
-@export var outer_max_enemies: int = 4
+@export var outer_max_enemies: int = 3
 @export var mid_max_enemies: int = 7
 @export var core_max_enemies: int = 11
+
+# Tempo sem spawns ao entrar na Zona 1 (outer), para dar "respiro" no início.
+@export var outer_spawn_grace_seconds: float = 25.0
 
 @onready var spawn_timer: Timer = $SpawnTimer
 
 var _last_zone_id: String = ""
+var _zone_time: float = 0.0
 
 func _ready() -> void:
 	randomize()
@@ -33,9 +37,13 @@ func _on_state_changed() -> void:
 	var zone_id := GameState.current_zone_id
 	if zone_id != _last_zone_id:
 		_last_zone_id = zone_id
+		_zone_time = 0.0
 		_clear_enemies()
 
 	_update_timer_wait_time()
+
+func _process(delta: float) -> void:
+	_zone_time += delta
 
 func _update_timer_wait_time() -> void:
 	if spawn_timer == null:
@@ -46,11 +54,15 @@ func _on_spawn_timer_timeout() -> void:
 	# Zona 3 (core) é reservada para o boss final.
 	if GameState.current_zone_id == "core":
 		return
+	if GameState.current_zone_id == "outer" and _zone_time < outer_spawn_grace_seconds:
+		return
 	_spawn_enemy()
 	_update_timer_wait_time()
 
 func _spawn_enemy() -> void:
 	if GameState.current_zone_id == "core":
+		return
+	if GameState.current_zone_id == "outer" and _zone_time < outer_spawn_grace_seconds:
 		return
 	var max_allowed := _get_max_enemies(GameState.current_zone_id)
 	if _count_enemies() >= max_allowed:

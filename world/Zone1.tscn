@@ -131,9 +131,14 @@ comet_id = "meteor_09"
 position = Vector2(-8, -11)
 script = ExtResource("3_a3a3j")
 comet_scene = ExtResource("2_htqom")
+spawn_margin = 420.0
+min_spawn_distance_from_player = 1100.0
+spawn_attempts = 14
+initial_burst_count = 7
+initial_burst_delay = 0.6
 
 [node name="SpawnTimer" type="Timer" parent="CometSpawner"]
-wait_time = 3.0
+wait_time = 2.0
 autostart = true
 
 [connection signal="timeout" from="CometSpawner/SpawnTimer" to="CometSpawner" method="_on_spawn_timer_timeout"]

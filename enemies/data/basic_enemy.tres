@@ -5,5 +5,15 @@
 
 [resource]
 script = ExtResource("1_EnemyData")
+id = "basic"
+display_name = "Basic"
+move_speed = 282.0
+desired_distance = 320.0
+distance_tolerance = 20.0
+chase_range = 2000.0
 texture = ExtResource("2_pp2o4")
+max_health = 90
+contact_damage = 12
+fire_interval = 1.25
+laser_damage = 6
 mineral_drop_chance = 0.15
