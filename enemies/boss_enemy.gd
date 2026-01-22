@@ -39,8 +39,10 @@ func _on_state_changed() -> void:
 	_refresh_boss_active()
 
 func _refresh_boss_active() -> void:
-	# Removido limitador - boss sempre ativo
-	var should_show := true
+	# Verificar se o boss já foi morto
+	var zone_id := GameState.current_zone_id
+	var boss_id := "boss_%s" % zone_id
+	var should_show := not GameState.defeated_bosses.has(boss_id)
 	_set_boss_active(should_show)
 
 func _set_boss_active(active: bool) -> void:
@@ -73,6 +75,13 @@ func _set_patrol_anchor() -> void:
 
 func die() -> void:
 	_spawn_boss_artifact()
+	# Registrar que este boss foi morto
+	var zone_id := GameState.current_zone_id
+	var boss_id := "boss_%s" % zone_id
+	if not GameState.defeated_bosses.has(boss_id):
+		GameState.defeated_bosses.append(boss_id)
+		GameState.emit_signal("state_changed")
+		GameState._queue_save()
 	super.die()
 	GameState.complete_quest(GameState.QUEST_BOSS_PLANET)
 

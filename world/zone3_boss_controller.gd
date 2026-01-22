@@ -39,6 +39,12 @@ func _spawn_after_delay() -> void:
 func _spawn_boss() -> void:
 	if _spawned:
 		return
+	
+	# Verificar se o boss já foi morto
+	var boss_id := "boss_core"
+	if GameState.defeated_bosses.has(boss_id):
+		return
+	
 	_spawned = true
 
 	if BossScene == null:

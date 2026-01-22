@@ -16,6 +16,12 @@ extends Node2D
 @export var mid_spawn_interval: float = 2.0
 @export var core_spawn_interval: float = 1.3
 
+# Zona 2 (mid): sistema de ondas
+@export var mid_wave_interval_short: float = 30.0  # 30 segundos para 3 inimigos
+@export var mid_wave_interval_long: float = 60.0   # 1 minuto para 5 inimigos
+@export var mid_wave_count_short: int = 3
+@export var mid_wave_count_long: int = 5
+
 @export var outer_max_enemies: int = 3
 @export var mid_max_enemies: int = 7
 @export var core_max_enemies: int = 11
@@ -27,6 +33,8 @@ extends Node2D
 
 var _last_zone_id: String = ""
 var _zone_time: float = 0.0
+var _mid_wave_timer: float = 0.0
+var _mid_wave_count: int = 0  # Contador de ondas para alternar entre curta e longa
 
 func _ready() -> void:
 	randomize()
@@ -43,12 +51,33 @@ func _on_state_changed() -> void:
 	if zone_id != _last_zone_id:
 		_last_zone_id = zone_id
 		_zone_time = 0.0
+		_mid_wave_timer = 0.0
+		_mid_wave_count = 0
 		_clear_enemies()
 
 	_update_timer_wait_time()
 
 func _process(delta: float) -> void:
 	_zone_time += delta
+	
+	# Sistema de ondas para zona 2 (mid)
+	if GameState.current_zone_id == "mid":
+		_mid_wave_timer += delta
+		var wave_interval: float
+		var wave_count: int
+		
+		# Alternar entre onda curta (30s, 3 inimigos) e longa (60s, 5 inimigos)
+		if _mid_wave_count % 2 == 0:
+			wave_interval = mid_wave_interval_short
+			wave_count = mid_wave_count_short
+		else:
+			wave_interval = mid_wave_interval_long
+			wave_count = mid_wave_count_long
+		
+		if _mid_wave_timer >= wave_interval:
+			_mid_wave_timer = 0.0
+			_mid_wave_count += 1
+			_spawn_mid_wave(wave_count)
 
 func _update_timer_wait_time() -> void:
 	if spawn_timer == null:
@@ -58,6 +87,9 @@ func _update_timer_wait_time() -> void:
 func _on_spawn_timer_timeout() -> void:
 	# Zona 3 (core) é reservada para o boss final.
 	if GameState.current_zone_id == "core":
+		return
+	# Zona 2 (mid) usa sistema de ondas, não spawn contínuo
+	if GameState.current_zone_id == "mid":
 		return
 	if GameState.current_zone_id == "outer" and _zone_time < outer_spawn_grace_seconds:
 		return
@@ -198,3 +230,60 @@ func _pick_spawn_position(camera: Camera2D, player_pos: Vector2, zone_id: String
 			return spawn_pos
 
 	return best
+
+func _spawn_mid_wave(count: int) -> void:
+	# Spawnar uma onda de inimigos na zona 2, fora da visão do jogador
+	var camera := get_viewport().get_camera_2d()
+	if camera == null:
+		return
+	
+	var player := get_tree().get_first_node_in_group("player") as Node2D
+	if player == null:
+		return
+	
+	if enemy_scene == null:
+		return
+	
+	var viewport_size := get_viewport().get_visible_rect().size
+	var zoom := camera.zoom
+	var world_view_size := viewport_size / zoom
+	var cam_pos := camera.global_position
+	var player_pos := player.global_position
+	
+	# Calcular área fora da visão (fora da tela)
+	var spawn_margin: float = 200.0  # Margem para garantir que spawna fora da tela
+	var left := cam_pos.x - world_view_size.x / 2.0 - spawn_margin
+	var right := cam_pos.x + world_view_size.x / 2.0 + spawn_margin
+	var top := cam_pos.y - world_view_size.y / 2.0 - spawn_margin
+	var bottom := cam_pos.y + world_view_size.y / 2.0 + spawn_margin
+	
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	
+	for i in range(count):
+		var enemy = enemy_scene.instantiate()
+		if enemy == null:
+			continue
+		
+		enemy.set("difficulty_multiplier", _get_zone_difficulty("mid"))
+		enemy.set("enemy_id", _pick_enemy_id("mid"))
+		
+		if enemy is Node2D:
+			var enemy_2d := enemy as Node2D
+			enemy_2d.scale = enemy_scale
+			
+			# Escolher um lado aleatório (top, bottom, left, right) para spawnar
+			var side := rng.randi_range(0, 3)
+			var spawn_pos: Vector2
+			match side:
+				0:  # Topo
+					spawn_pos = Vector2(rng.randf_range(left, right), top)
+				1:  # Fundo
+					spawn_pos = Vector2(rng.randf_range(left, right), bottom)
+				2:  # Esquerda
+					spawn_pos = Vector2(left, rng.randf_range(top, bottom))
+				_:  # Direita
+					spawn_pos = Vector2(right, rng.randf_range(top, bottom))
+			
+			enemy_2d.global_position = spawn_pos
+			_get_container().add_child(enemy)

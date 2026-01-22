@@ -78,6 +78,13 @@ func take_damage(amount: int) -> void:
 		_die()
 
 func _die() -> void:
+	# Registrar que este boss foi morto
+	var zone_id := GameState.current_zone_id
+	var boss_id := "boss_%s" % zone_id
+	if not GameState.defeated_bosses.has(boss_id):
+		GameState.defeated_bosses.append(boss_id)
+		GameState.emit_signal("state_changed")
+		GameState._queue_save()
 	GameState.emit_signal("speech_requested_timed", "finalmente acabei com esta especie irritante, Vou maze dormir...", 9.0)
 	queue_free()
 
