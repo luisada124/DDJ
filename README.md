@@ -3,15 +3,14 @@ todo:
 FUNDO ARRANJAR
  
 
-Bosse final muito mais difícil. 
 
- ter dIALOGO do Warp no no boss 1. 
-
+ter dIALOGO do Warp no no boss 1. 
 
 
 
 
 
+Tamanho das estações. 
 
 
 
@@ -19,22 +18,13 @@ Bosse final muito mais difícil.
 
 BALANCEAMENTO:
 
-Balancear o preço das peças dos artefactos na zona 2 com a medista. 
-
-Zonas específicas com mais inimigos. 
-vida da nava
-jogo mais lento
-Estações defendidas por muitos inimigos. 
-Por cooldwon no dash
-
-Dá-me a lista de todos os itens do jogo para compra na loja. Essa lista, sabendo os drops dos meteoros e e recompensas das missões e drops dos inimigos que os kits de reparações têm de ser usados muitas vezes, portanto uma beca mais para o baratinho. 
+meter mais dano nos inimigos
 
 
 
-Tamanho das estações. 
 
-BOSSES
-kit reparação está sem os recursos. 
+
+limitar kits
 
 TEXTURAS:
 
