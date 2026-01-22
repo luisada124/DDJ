@@ -50,6 +50,9 @@ func _spawn_boss() -> void:
 	if BossScene == null:
 		return
 	var root := get_tree().current_scene
+	var zone_root := GameState.get_zone_root_node()
+	if zone_root != null:
+		root = zone_root
 	if root == null:
 		return
 
@@ -57,5 +60,6 @@ func _spawn_boss() -> void:
 	if not (inst is Node2D):
 		return
 	var boss := inst as Node2D
+	boss.set_as_top_level(true)
 	boss.global_position = boss_spawn_pos
-	root.add_child(boss)
+	root.call_deferred("add_child", boss)

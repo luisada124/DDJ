@@ -89,7 +89,8 @@ func explode() -> void:
 		queue_free()
 		return
 
-	var root: Node = get_tree().current_scene
+	var zone_root := GameState.get_zone_root_node()
+	var root: Node = zone_root as Node if zone_root != null else get_tree().current_scene
 	if root == null:
 		root = get_tree().root
 
@@ -98,7 +99,9 @@ func explode() -> void:
 		if root != null:
 			root.call_deferred("add_child", fx)
 		if fx is Node2D:
-			(fx as Node2D).global_position = global_position
+			var fx_2d := fx as Node2D
+			fx_2d.set_as_top_level(true)
+			fx_2d.global_position = global_position
 
 	_spawn_loot(root)
 	queue_free()
@@ -124,7 +127,9 @@ func _spawn_loot(root: Node) -> void:
 	for i in range(drops):
 		var loot: Node = pickup_scene.instantiate()
 		if loot is Node2D:
-			(loot as Node2D).global_position = global_position + Vector2(
+			var loot_2d := loot as Node2D
+			loot_2d.set_as_top_level(true)
+			loot_2d.global_position = global_position + Vector2(
 				randf_range(-8.0, 8.0),
 				randf_range(-8.0, 8.0)
 			)

@@ -280,7 +280,8 @@ func _spawn_relic_now(world_pos: Vector2) -> void:
 
 	if RelicScene == null:
 		return
-	var root: Node = get_tree().current_scene
+	var zone_root := GameState.get_zone_root_node()
+	var root: Node = zone_root as Node if zone_root != null else get_tree().current_scene
 	if root == null:
 		return
 
@@ -288,6 +289,7 @@ func _spawn_relic_now(world_pos: Vector2) -> void:
 	if not (inst is Node2D):
 		return
 	var relic := inst as Node2D
+	relic.set_as_top_level(true)
 	relic.global_position = world_pos
 	relic.scale = Vector2(1.25, 1.25)
 	relic.set("artifact_id", "relic")

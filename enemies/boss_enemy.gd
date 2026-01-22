@@ -253,10 +253,13 @@ func _spawn_boss_artifact() -> void:
 		return
 
 	var part := artifact_scene.instantiate()
+	if part is Node2D:
+		(part as Node2D).set_as_top_level(true)
 	part.global_position = global_position
 	part.set("artifact_id", artifact_id)
 
-	var root := get_tree().current_scene
+	var zone_root := GameState.get_zone_root_node()
+	var root := zone_root as Node if zone_root != null else get_tree().current_scene
 	if root != null:
 		root.call_deferred("add_child", part)
 

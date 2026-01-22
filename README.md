@@ -1,37 +1,29 @@
 todo:
-os recursos estao a mudar quando se troca de zona
-FUNDO ARRANJAR
 
+
+MUDAR O TEMPO DE APARECER O BOSS FINAL 10 S
+
+
+MUDAR A IMAGEM DOS MINERAIS E DA SUCA POR UMA CENA MAIS FIXE
+Uma tecla de mapa e outra de zona. 
 
 meter ametistas nos upgrades
 
-Meter o boss da fase 1 mais f*dido. 
 
-ter dIALOGO do Warp no no boss 1. 
 
-Tamanho das estações. 
+DEMO E RELATORIO:
 
-chatini quando mudo para a zona 3 pela primeira vez o evento do boss final esta a dar este erro, ve la o que e que se passa
+referencia texturas
+
 
  
 
-BALANCEAMENTO:
-
-meter mais dano nos inimigos
 
 
 
 
 
-limitar kits
-
-TEXTURAS:
-
-mecanicas a adicionar:
-
-
-upgrades:
-
+«
 
 
 colisions layer| colide com
@@ -60,15 +52,10 @@ Maquina auxiliar: 3
 
 auto_regen:3
 
-PROMPS:
 
- tirar o spawn de cometas na tela de visão do jogador. 
 
-Agora o Ricky  bem a corda. 
 
-Uma tecla de mapa e outra de zona. 
 
-Temos de fazer um menu inicial para o jogo, com o botão de continuar, "Novo Jogo". Quando clicamos no novo jogo isto é, no início do jogo, aparece um diálogo do Ricky, o nosso alien, a ser raptado pelos humanos, mas ele consegue escapar depois Deixa-nos no começo do jogo agora. implmenta isso
 
 
 

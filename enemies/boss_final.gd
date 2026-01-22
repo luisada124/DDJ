@@ -85,7 +85,9 @@ func _die() -> void:
 		GameState.defeated_bosses.append(boss_id)
 		GameState.emit_signal("state_changed")
 		GameState._queue_save()
-	GameState.emit_signal("speech_requested_timed", "finalmente acabei com esta especie irritante, Vou maze dormir...", 9.0)
+	var outro_time: float = 9.0
+	GameState.emit_signal("speech_requested_timed", "finalmente acabei com esta especie irritante, Vou maze dormir...", outro_time)
+	GameState.return_to_main_menu(outro_time + 0.25)
 	queue_free()
 
 func _physics_process(delta: float) -> void:

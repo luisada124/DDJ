@@ -293,10 +293,14 @@ func _spawn_loot() -> void:
 	var drops := randi_range(min_drops, max_drops)
 	for i in range(drops):
 		var loot = pickup_scene.instantiate()
-		loot.global_position = global_position + Vector2(
+		var desired_global := global_position + Vector2(
 			randf_range(-8.0, 8.0),
 			randf_range(-8.0, 8.0)
 		)
+		if loot is Node2D:
+			var loot_2d := loot as Node2D
+			loot_2d.set_as_top_level(true)
+			loot_2d.global_position = desired_global
 		if randf() < mineral_drop_chance:
 			loot.set("resource_type", "mineral")
 			loot.set("amount", mineral_amount * DROP_MULTIPLIER)
@@ -308,6 +312,7 @@ func _spawn_loot() -> void:
 		if in_zone2 and randf() < ametista_drop_chance:
 			loot.set("resource_type", "ametista")
 			loot.set("amount", DROP_MULTIPLIER)
-		var root := get_tree().current_scene
+		var zone_root := GameState.get_zone_root_node()
+		var root := zone_root as Node if zone_root != null else get_tree().current_scene
 		if root != null:
 			root.call_deferred("add_child", loot)

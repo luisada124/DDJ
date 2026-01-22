@@ -28,11 +28,13 @@ func _refresh_continue_state() -> void:
 
 func _on_continue_pressed() -> void:
 	GameState.intro_pending = false
+	GameState.begin_run()
 	get_tree().change_scene_to_file("res://world/Main.tscn")
 
 func _on_new_game_pressed() -> void:
 	GameState.reset_save()
 	GameState.intro_pending = true
+	GameState.begin_run()
 	get_tree().change_scene_to_file("res://world/Main.tscn")
 
 func _process(delta: float) -> void:

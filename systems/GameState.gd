@@ -232,11 +232,48 @@ const UPGRADE_DEFS := {
 }
 
 var _save_queued := false
+var _return_to_menu_queued: bool = false
 
 func _ready() -> void:
 	randomize()
 	load_game()
 	emit_signal("state_changed")
+
+func return_to_main_menu(delay: float = 0.0) -> void:
+	if _return_to_menu_queued:
+		return
+	_return_to_menu_queued = true
+	var d: float = maxf(0.0, delay)
+	call_deferred("_return_to_main_menu_deferred", d)
+
+func _return_to_main_menu_deferred(delay: float) -> void:
+	if not is_inside_tree():
+		return
+	if delay > 0.0:
+		var t: SceneTreeTimer = get_tree().create_timer(delay)
+		await t.timeout
+		if not is_inside_tree():
+			return
+	# Garantir que sai para o menu inicial mesmo se estiver em callbacks de física.
+	get_tree().change_scene_to_file("res://ui/MainMenu.tscn")
+
+func begin_run() -> void:
+	# Chamado quando se entra no jogo a partir do menu (permite re-terminar o jogo).
+	_return_to_menu_queued = false
+
+func get_zone_root_node() -> Node2D:
+	# Zona atual instanciada pelo ZoneManager (é onde devem viver pickups/cometas/etc).
+	for n in get_tree().get_nodes_in_group("zone_root"):
+		if n is Node2D and is_instance_valid(n) and not (n as Node).is_queued_for_deletion():
+			return n as Node2D
+
+	# Fallback: pegar no 1º filho Node2D do ZoneManager.
+	var zm := get_tree().get_first_node_in_group("zone_manager")
+	if zm != null:
+		for c in (zm as Node).get_children():
+			if c is Node2D and is_instance_valid(c) and not (c as Node).is_queued_for_deletion():
+				return c as Node2D
+	return null
 
 func _process(delta: float) -> void:
 	_tick_regen(delta)

@@ -33,6 +33,7 @@ func load_zone(zone_id: String) -> void:
 	add_child(_current_zone)
 	if _current_zone is Node2D:
 		var z := _current_zone as Node2D
+		z.add_to_group("zone_root")
 		z.position = zone_offset
 		z.scale = zone_scale
 		_push_zone_runtime_data(zone_id, z)
