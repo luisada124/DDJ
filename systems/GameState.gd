@@ -1289,6 +1289,10 @@ func collect_artifact_part(artifact_id: String = "relic") -> void:
 		unlocked_artifacts.append(artifact_id)
 		if artifact_id == "vacuum":
 			vacuum_is_broken = false
+		
+		# Mostrar balão de fala quando desbloqueia um artefato
+		var artifact_title := ArtifactDatabase.get_artifact_title(artifact_id)
+		emit_signal("speech_requested", "Yeee, construi um %s!" % artifact_title)
 
 	emit_signal("state_changed")
 	_queue_save()
@@ -1745,6 +1749,9 @@ func debug_unlock_all_gadgets() -> void:
 		artifact_parts[artifact_id] = required
 		if not unlocked_artifacts.has(artifact_id):
 			unlocked_artifacts.append(artifact_id)
+			# Mostrar balão de fala quando desbloqueia um artefato
+			var artifact_title := ArtifactDatabase.get_artifact_title(artifact_id)
+			emit_signal("speech_requested", "Yeee, construi um %s!" % artifact_title)
 
 	# Garantias especificas.
 	vacuum_is_broken = false
