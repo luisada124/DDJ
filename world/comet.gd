@@ -26,7 +26,7 @@ func _ready() -> void:
 		var detector := Area2D.new()
 		detector.name = "Detector"
 		# try to copy existing collision shape
-		var cs = get_node_or_null("CollisionShape2D")
+		var cs: Node = get_node_or_null("CollisionShape2D")
 		if cs == null:
 			cs = get_node_or_null("CollisionPolygon2D")
 		if cs != null and cs is CollisionShape2D:
@@ -63,7 +63,7 @@ func _apply_comet_data() -> void:
 
 	if has_node("comet"):
 		var sprite := $comet as Sprite2D
-		var tex = load(data.texture_path)
+		var tex: Resource = load(data.texture_path)
 		if tex is Texture2D:
 			sprite.texture = tex
 		sprite.scale = data.sprite_scale
@@ -81,13 +81,25 @@ func explode() -> void:
 	if _exploded:
 		return
 	_exploded = true
+
+	# Pode ser chamado enquanto o cometa está a sair da árvore (ex: mudança de zona)
+	# e aí `get_tree()` pode ser null/invalid.
+	if not is_inside_tree():
+		queue_free()
+		return
+
+	var root: Node = get_tree().current_scene
+	if root == null:
+		root = get_tree().root
+
 	if explosion_scene != null:
-		var fx = explosion_scene.instantiate()
-		get_tree().current_scene.add_child(fx)
+		var fx: Node = explosion_scene.instantiate()
+		if root != null:
+			root.call_deferred("add_child", fx)
 		if fx is Node2D:
 			(fx as Node2D).global_position = global_position
 
-	_spawn_loot()
+	_spawn_loot(root)
 	queue_free()
 
 func _on_detector_body_entered(body: Node) -> void:
@@ -97,19 +109,24 @@ func _on_detector_body_entered(body: Node) -> void:
 		return
 	if body is Node and body.is_in_group("comet"):
 		if body.has_method("explode"):
-			body.explode()
-		explode()
+			body.call_deferred("explode")
+		call_deferred("explode")
 
-func _spawn_loot() -> void:
+func _spawn_loot(root: Node) -> void:
+	if root == null:
+		return
 	var pickup_scene: PackedScene = load("res://pickups/Pickup.tscn") # adapta o caminho
+	if pickup_scene == null:
+		return
 
 	var drops := randi_range(min_scrap, max_scrap)
 	for i in range(drops):
-		var loot = pickup_scene.instantiate()
-		loot.global_position = global_position + Vector2(
-			randf_range(-8.0, 8.0),
-			randf_range(-8.0, 8.0)
-		)
+		var loot: Node = pickup_scene.instantiate()
+		if loot is Node2D:
+			(loot as Node2D).global_position = global_position + Vector2(
+				randf_range(-8.0, 8.0),
+				randf_range(-8.0, 8.0)
+			)
 		var in_zone2 := GameState.current_zone_id == "mid"
 		if in_zone2 and randf() < ametista_drop_chance:
 			loot.set("resource_type", "ametista")
@@ -118,4 +135,4 @@ func _spawn_loot() -> void:
 		else:
 			loot.set("resource_type", "scrap")
 		loot.set("amount", 1)
-		get_tree().current_scene.add_child(loot)
+		root.call_deferred("add_child", loot)

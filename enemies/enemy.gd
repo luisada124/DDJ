@@ -6,8 +6,8 @@ const SHIP_FORWARD := Vector2.UP   # ponta da nave na textura
 
 const EnemyDatabase := preload("res://enemies/EnemyDatabase.gd")
 
-const DEFAULT_STATION_SAFE_RADIUS := 1000.0
-const STATION_SAFE_MARGIN := 120.0
+const DEFAULT_STATION_SAFE_RADIUS := 450.0
+const STATION_SAFE_MARGIN := 60.0
 
 @export var enemy_id: String = "basic"
 @export var difficulty_multiplier: float = 1.0
