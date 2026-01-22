@@ -16,12 +16,17 @@ extends Control
 @onready var upgrade_info: Label = $UpgradeMenu/Panel/Margin/VBox/Info
 @onready var upgrade_description: RichTextLabel = $UpgradeMenu/Panel/Margin/VBox/UpgradeDescription
 
-@onready var hull_button: Button = $UpgradeMenu/Panel/Margin/VBox/HullButton
-@onready var blaster_button: Button = $UpgradeMenu/Panel/Margin/VBox/BlasterButton
-@onready var laser_damage_button: Button = $UpgradeMenu/Panel/Margin/VBox/LaserDamageButton
-@onready var engine_button: Button = $UpgradeMenu/Panel/Margin/VBox/EngineButton
-@onready var thrusters_button: Button = $UpgradeMenu/Panel/Margin/VBox/ThrustersButton
-@onready var magnet_button: Button = $UpgradeMenu/Panel/Margin/VBox/MagnetButton
+@onready var hull_button: Button = $UpgradeMenu/Panel/Margin/VBox/MainShipList/HullButton
+@onready var blaster_button: Button = $UpgradeMenu/Panel/Margin/VBox/MainShipList/BlasterButton
+@onready var laser_damage_button: Button = $UpgradeMenu/Panel/Margin/VBox/MainShipList/LaserDamageButton
+@onready var engine_button: Button = $UpgradeMenu/Panel/Margin/VBox/MainShipList/EngineButton
+@onready var thrusters_button: Button = $UpgradeMenu/Panel/Margin/VBox/MainShipList/ThrustersButton
+@onready var magnet_button: Button = $UpgradeMenu/Panel/Margin/VBox/MainShipList/MagnetButton
+@onready var aux_ship_locked_info: Label = $UpgradeMenu/Panel/Margin/VBox/AuxShipLockedInfo
+@onready var aux_ship_list: VBoxContainer = $UpgradeMenu/Panel/Margin/VBox/AuxShipList
+@onready var aux_fire_rate_button: Button = $UpgradeMenu/Panel/Margin/VBox/AuxShipList/AuxFireRateButton
+@onready var aux_damage_button: Button = $UpgradeMenu/Panel/Margin/VBox/AuxShipList/AuxDamageButton
+@onready var aux_range_button: Button = $UpgradeMenu/Panel/Margin/VBox/AuxShipList/AuxRangeButton
 
 @onready var reset_button: Button = $UpgradeMenu/Panel/Margin/VBox/ResetButton
 @onready var close_button: Button = $UpgradeMenu/Panel/Margin/VBox/CloseButton
@@ -164,6 +169,9 @@ func _ready() -> void:
 		"engine": engine_button,
 		"thrusters": thrusters_button,
 		"magnet": magnet_button,
+		"aux_fire_rate": aux_fire_rate_button,
+		"aux_damage": aux_damage_button,
+		"aux_range": aux_range_button,
 	}
 
 	for upgrade_id in _upgrade_buttons.keys():
@@ -551,7 +559,13 @@ func _update_hud() -> void:
 		_rebuild_inventory_list()
 
 func _update_upgrade_menu(scrap: int, mineral: int) -> void:
-	upgrade_info.text = "Scrap: %d | Mineral: %d | (U) Fechar" % [scrap, mineral]
+	upgrade_info.text = "Scrap: %d | Mineral: %d" % [scrap, mineral]
+
+	var aux_unlocked := GameState.has_aux_ship()
+	if aux_ship_list != null:
+		aux_ship_list.visible = aux_unlocked
+	if aux_ship_locked_info != null:
+		aux_ship_locked_info.visible = not aux_unlocked
 
 	for upgrade_id in _upgrade_buttons.keys():
 		var button: Button = _upgrade_buttons[upgrade_id]
@@ -559,8 +573,14 @@ func _update_upgrade_menu(scrap: int, mineral: int) -> void:
 		var title := GameState.get_upgrade_title(upgrade_id)
 		var level := GameState.get_upgrade_level(upgrade_id)
 		var max_level := GameState.get_upgrade_max_level(upgrade_id)
+		var is_aux: bool = str(upgrade_id).begins_with("aux_")
 
 		var button_color := Color(1, 1, 1)
+		if is_aux and not aux_unlocked:
+			button.text = "%s (Bloqueado)" % title
+			button.disabled = true
+			button.modulate = Color(0.6, 0.6, 0.6)
+			continue
 		if level >= 5:
 			button_color = Color(0.0, 1.0, 0.0)
 		button.modulate = button_color
@@ -603,9 +623,14 @@ func _format_quest_rewards(def: Dictionary) -> String:
 	return " | ".join(parts)
 
 func _on_upgrade_pressed(upgrade_id: String) -> void:
+	if upgrade_id.begins_with("aux_") and not GameState.has_aux_ship():
+		return
 	GameState.buy_upgrade(upgrade_id)
 
 func _on_upgrade_hovered(upgrade_id: String) -> void:
+	if upgrade_id.begins_with("aux_") and not GameState.has_aux_ship():
+		upgrade_description.text = "Desbloqueia a Nave Auxiliar para usar estes upgrades."
+		return
 	var title := GameState.get_upgrade_title(upgrade_id)
 	var level := GameState.get_upgrade_level(upgrade_id)
 	var max_level := GameState.get_upgrade_max_level(upgrade_id)

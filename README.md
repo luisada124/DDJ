@@ -1,7 +1,7 @@
 todo:
 
 Meter um menu de upgrades para a nave auxiliar. 
-
+ 
 
  A partir do momento em que se começam os bosses, não se pode trocar de zona. 
 
