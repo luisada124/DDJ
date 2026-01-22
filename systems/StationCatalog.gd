@@ -128,6 +128,21 @@ const STATIONS: Dictionary = {
 		"vault_cost": {"scrap": 55, "mineral": 35},
 		"offered_quests": [],
 	},
+	"station_kappa": {
+		"title": "Posto Kappa",
+		"prompt": "E - Posto Kappa",
+		"color": Color(0.8, 0.9, 1.0),
+		"tavern": {
+			"base_hi_score": 0,
+			"reward": {},
+		},
+		"npcs": [
+			{"id": "vexa", "name": "Vexa", "type": "miner"},
+		],
+		"trades": {},
+		"vault_cost": {"scrap": 90, "mineral": 35},
+		"offered_quests": [],
+	},
 	"boss_planet": {
 		"title": "Planeta Perdido",
 		"prompt": "E - Planeta Perdido",

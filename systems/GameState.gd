@@ -38,6 +38,11 @@ var _regen_accum: float = 0.0
 var discovered_station_ids: PackedStringArray = PackedStringArray([])
 var alpha_station_map_bought: bool = false
 
+# Zona 2 intro (Posto Kappa + broca).
+var zone2_intro_station_local: Vector2 = Vector2.ZERO
+var zone2_drill_given: bool = false
+var mining_drill_part_local: Vector2 = Vector2.ZERO
+
 var resources := {
 	"scrap": 0,
 	"mineral": 0,
@@ -250,8 +255,89 @@ func add_resource(type: String, amount: int) -> void:
 		resources[type] = 0
 	resources[type] += amount
 	print(type, " =", resources[type])
+	_record_resource_gain(type, amount)
 	emit_signal("state_changed")
 	_queue_save()
+
+func _record_resource_gain(type: String, amount: int) -> void:
+	if amount <= 0:
+		return
+
+	var changed := false
+	for quest_id_variant in quests.keys():
+		var quest_id := str(quest_id_variant)
+		var q: Dictionary = quests.get(quest_id, {}) as Dictionary
+		if not bool(q.get("accepted", false)):
+			continue
+		if bool(q.get("completed", false)):
+			continue
+
+		var def: Dictionary = QUEST_DEFS.get(quest_id, {}) as Dictionary
+		var res_type := str(def.get("resource_type", ""))
+		if res_type.is_empty() or res_type != type:
+			continue
+
+		var goal: int = int(def.get("goal", 0))
+		var progress: int = int(q.get("progress", 0))
+		progress = min(progress + amount, goal)
+		q["progress"] = progress
+		if progress >= goal:
+			q["completed"] = true
+		quests[quest_id] = q
+		changed = true
+
+	if changed:
+		emit_signal("state_changed")
+		_queue_save()
+
+func give_zone2_mining_drill_near_player() -> bool:
+	# Dá a broca (1 peça) ao jogador via pickup ao pé do player.
+	if has_artifact("mining_drill"):
+		return false
+
+	zone2_drill_given = true
+
+	var zm: Node = get_tree().get_first_node_in_group("zone_manager") as Node
+	var zone_node: Node2D = null
+	if zm != null:
+		for c in zm.get_children():
+			if c is Node2D:
+				zone_node = c as Node2D
+				break
+	if zone_node == null:
+		emit_signal("state_changed")
+		_queue_save()
+		return false
+
+	var player: Node2D = get_tree().get_first_node_in_group("player") as Node2D
+	if player == null:
+		emit_signal("state_changed")
+		_queue_save()
+		return false
+
+	var spawn_global := player.global_position + Vector2(160, 40)
+	mining_drill_part_local = zone_node.to_local(spawn_global)
+
+	var part_scene: PackedScene = load("res://pickups/ArtifactPart.tscn")
+	if part_scene == null:
+		emit_signal("state_changed")
+		_queue_save()
+		return false
+
+	var inst: Node = part_scene.instantiate()
+	if inst == null or not (inst is Node2D):
+		emit_signal("state_changed")
+		_queue_save()
+		return false
+
+	var part := inst as Node2D
+	part.position = mining_drill_part_local
+	part.set("artifact_id", "mining_drill")
+	zone_node.add_child(part)
+
+	emit_signal("state_changed")
+	_queue_save()
+	return true
 
 func record_vacuum_use() -> void:
 	# Conta apenas os usos iniciais (tutorial). Depois de reparado, o Vacuum nao volta a partir.
@@ -519,6 +605,10 @@ func claim_quest(quest_id: String, station_id: String = "") -> bool:
 		side_dash_map_unlocked = true
 	elif map_reward == "aux_ship":
 		aux_ship_map_unlocked = true
+
+	var discover_station_reward := str(def.get("discover_station_reward", ""))
+	if not discover_station_reward.is_empty():
+		discover_station(discover_station_reward)
 
 	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
 	q["claimed"] = true
@@ -1245,6 +1335,9 @@ func save_game() -> void:
 		"consumables": consumables,
 		"discovered_stations": discovered,
 		"alpha_station_map_bought": alpha_station_map_bought,
+		"zone2_intro_station_local": [zone2_intro_station_local.x, zone2_intro_station_local.y],
+		"zone2_drill_given": zone2_drill_given,
+		"mining_drill_part_local": [mining_drill_part_local.x, mining_drill_part_local.y],
 		"vacuum_map_bought": vacuum_map_bought,
 		"vacuum_random_part_local": [vacuum_random_part_local.x, vacuum_random_part_local.y],
 		"vacuum_random_part_collected": vacuum_random_part_collected,
@@ -1338,6 +1431,20 @@ func load_game() -> void:
 	# Garantia: Refugio Epsilon aparece sempre no inicio.
 	if not discovered_station_ids.has("station_epsilon"):
 		discovered_station_ids.append("station_epsilon")
+
+	var stored_zone2_station: Variant = data.get("zone2_intro_station_local")
+	if typeof(stored_zone2_station) == TYPE_ARRAY and (stored_zone2_station as Array).size() >= 2:
+		var a2 := stored_zone2_station as Array
+		zone2_intro_station_local = Vector2(float(a2[0]), float(a2[1]))
+	else:
+		zone2_intro_station_local = Vector2.ZERO
+	zone2_drill_given = bool(data.get("zone2_drill_given", false))
+	var stored_drill: Variant = data.get("mining_drill_part_local")
+	if typeof(stored_drill) == TYPE_ARRAY and (stored_drill as Array).size() >= 2:
+		var ad := stored_drill as Array
+		mining_drill_part_local = Vector2(float(ad[0]), float(ad[1]))
+	else:
+		mining_drill_part_local = Vector2.ZERO
 
 	vacuum_map_bought = bool(data.get("vacuum_map_bought", false))
 	vacuum_random_part_collected = bool(data.get("vacuum_random_part_collected", false))
@@ -1535,6 +1642,9 @@ func _apply_defaults() -> void:
 	boss_planet_resources_unlocked = false
 	discovered_station_ids = PackedStringArray(["station_epsilon"])
 	alpha_station_map_bought = false
+	zone2_intro_station_local = Vector2.ZERO
+	zone2_drill_given = false
+	mining_drill_part_local = Vector2.ZERO
 	vacuum_map_bought = false
 	vacuum_random_part_local = Vector2.ZERO
 	vacuum_random_part_world = Vector2.ZERO

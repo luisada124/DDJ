@@ -31,6 +31,8 @@ var _wave_kills: int = 0
 var _wave_spawned: int = 0
 
 func is_wave_cleared() -> bool:
+	if not enabled:
+		return true
 	if wave_total <= 0:
 		return true
 	return _wave_kills >= wave_total
@@ -39,9 +41,12 @@ func get_wave_kills() -> int:
 	return _wave_kills
 
 func get_wave_total() -> int:
+	if not enabled:
+		return 0
 	return wave_total
 
 func _ready() -> void:
+	_apply_station_overrides()
 	if not enabled:
 		return
 
@@ -53,6 +58,32 @@ func _ready() -> void:
 	add_child(_timer)
 
 	call_deferred("_ensure_guards")
+
+func _apply_station_overrides() -> void:
+	var station := get_parent()
+	if station == null:
+		return
+
+	var station_id_variant: Variant = station.get("station_id")
+	var station_id := ""
+	if station_id_variant != null:
+		station_id = str(station_id_variant)
+
+	match station_id:
+		"station_kappa":
+			# Posto de tutorial: sem guardas.
+			enabled = false
+			wave_total = 0
+			max_alive = 0
+		"station_epsilon":
+			wave_total = 3
+			max_alive = 3
+		"station_delta":
+			wave_total = 3
+			max_alive = 3
+		"station_alpha":
+			wave_total = 5
+			max_alive = 5
 
 func _ensure_guards() -> void:
 	if not enabled:

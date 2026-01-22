@@ -412,12 +412,18 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 
 	if event.is_action_pressed("interact") and _active_trader != null and not trader_menu.visible:
+		# Descobrir a estação automaticamente na primeira interação
+		if not _active_station_id.is_empty() and not GameState.is_station_discovered(_active_station_id):
+			GameState.discover_station(_active_station_id)
 		_set_trader_menu_visible(true)
 		get_viewport().set_input_as_handled()
 		return
 
 	if event.is_action_pressed("open_upgrades"):
 		if _active_station != null:
+			# Descobrir a estação automaticamente na primeira interação
+			if not _active_station_id.is_empty() and not GameState.is_station_discovered(_active_station_id):
+				GameState.discover_station(_active_station_id)
 			_set_upgrade_menu_visible(not upgrade_menu.visible)
 			get_viewport().set_input_as_handled()
 		return
@@ -1716,6 +1722,9 @@ func _on_dialogue_choice(next_node: String) -> void:
 					if station_id.is_empty():
 						station_id = DEFAULT_STATION_ID
 					GameState.accept_quest(arg, station_id)
+					if arg == QuestDatabase.QUEST_MINE_4_AMETISTA:
+						GameState.give_zone2_mining_drill_near_player()
+						_set_trader_menu_visible(false)
 				"claim_quest":
 					var station_id2 := _active_station_id
 					if station_id2.is_empty():
@@ -2262,6 +2271,16 @@ func _get_dialogue_nodes(station_id: String, npc_id: String) -> Dictionary:
 
 				start["choices"] = choices
 				nodes["start"] = start
+
+			# Posto Kappa (Zona 2): intro de mineração.
+			if station_id == "station_kappa":
+				nodes["start"] = {
+					"text": "[b]Vexa[/b]: Ah, és novo por estas bandas?\nAqui temos um minério especial. Se me apanhas quatro com esta broca, dou-te uma recompensa.",
+					"choices": [
+						{"text": "Missao.", "next": "quest"},
+						{"text": "Ok.", "next": "end"},
+					],
+				}
 
 			return nodes
 		"oomu":
