@@ -313,6 +313,19 @@ func has_upgrades_at_least(min_level: int) -> bool:
 			return false
 	return true
 
+func get_average_ship_upgrade_level() -> float:
+	var total: int = 0
+	var count: int = 0
+	for upgrade_id_variant in upgrades.keys():
+		var upgrade_id := str(upgrade_id_variant)
+		if upgrade_id.begins_with("aux_"):
+			continue
+		total += get_upgrade_level(upgrade_id)
+		count += 1
+	if count <= 0:
+		return 0.0
+	return float(total) / float(count)
+
 func is_vault_unlocked(station_id: String) -> bool:
 	return bool(vault_unlocked.get(station_id, false))
 

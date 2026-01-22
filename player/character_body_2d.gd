@@ -14,6 +14,8 @@ const ROTATION_SPEED := 3.0
 const LaserScene := preload("res://player/lasers/Laser.tscn")
 const AlienScene: PackedScene = preload("res://player/Alien.tscn")
 const AuxShipScene: PackedScene = preload("res://player/AuxShip.tscn")
+const ALIEN_DOCK_DISTANCE := 70.0
+const ALIEN_DOCK_ARM_DISTANCE := 120.0
 
 var fire_cooldown: float = 0.0
 var dash_cooldown: float = 0.0
@@ -22,6 +24,7 @@ var dash_dir: Vector2 = Vector2.ZERO
 var _controlling_alien: bool = false
 var _alien: CharacterBody2D = null
 var _aux_ship: Node2D = null
+var _alien_auto_dock_armed: bool = false
 
 @onready var _camera: Camera2D = $Camera2D
 @export var alien_camera_zoom: Vector2 = Vector2(1.6, 1.6)
@@ -65,6 +68,8 @@ func _physics_process(delta: float) -> void:
 			add_to_group("player")
 			_set_camera_zoom_input_enabled(true)
 			_move_camera_to(self, _saved_ship_zoom)
+			return
+		if _auto_dock_alien():
 			return
 
 		# nave fica em "idle" enquanto controlas o alien
@@ -232,6 +237,8 @@ func _check_collisions() -> void:
 				invincible_timer = INVINCIBILITY_TIME
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _controlling_alien:
+		return
 	if event.is_action_pressed("eva_toggle"):
 		_toggle_eva()
 		get_viewport().set_input_as_handled()
@@ -265,6 +272,7 @@ func _spawn_alien() -> void:
 		_alien.call("setup", self)
 
 	_controlling_alien = true
+	_alien_auto_dock_armed = false
 	GameState.reset_alien_health()
 	_save_ship_camera_zoom()
 	_move_camera_to(_alien, alien_camera_zoom)
@@ -279,7 +287,7 @@ func _try_dock_alien() -> void:
 		return
 
 	var dist: float = global_position.distance_to(_alien.global_position)
-	if dist <= 70.0:
+	if dist <= ALIEN_DOCK_DISTANCE:
 		_on_alien_dock_requested()
 
 func _on_alien_dock_requested() -> void:
@@ -294,6 +302,19 @@ func _on_alien_dock_requested() -> void:
 	_alien = null
 
 	_move_camera_to(self, _saved_ship_zoom)
+
+func _auto_dock_alien() -> bool:
+	if _alien == null or not is_instance_valid(_alien):
+		return false
+	var dist: float = global_position.distance_to(_alien.global_position)
+	if not _alien_auto_dock_armed:
+		if dist >= ALIEN_DOCK_ARM_DISTANCE:
+			_alien_auto_dock_armed = true
+		return false
+	if dist <= ALIEN_DOCK_DISTANCE:
+		_on_alien_dock_requested()
+		return true
+	return false
 
 func _save_ship_camera_zoom() -> void:
 	if _camera == null or not is_instance_valid(_camera):
