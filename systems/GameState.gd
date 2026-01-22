@@ -518,7 +518,18 @@ func record_enemy_kill(enemy_id: String) -> void:
 
 		var def: Dictionary = QUEST_DEFS.get(quest_id, {}) as Dictionary
 		var required_enemy_id := str(def.get("enemy_id", ""))
-		if required_enemy_id.is_empty() or required_enemy_id != enemy_id:
+		
+		# Suporte para "any" - qualquer inimigo conta
+		if required_enemy_id == "any":
+			# Qualquer kill conta
+			pass
+		# Suporte para "mixed" - precisa de lógica especial
+		elif required_enemy_id == "mixed":
+			# Para mixed, precisamos contar separadamente cada tipo
+			# Por enquanto, vamos contar qualquer kill como progresso
+			# (pode ser melhorado depois com tracking específico)
+			pass
+		elif required_enemy_id.is_empty() or required_enemy_id != enemy_id:
 			continue
 
 		var goal: int = int(def.get("goal", 0))
@@ -605,10 +616,26 @@ func claim_quest(quest_id: String, station_id: String = "") -> bool:
 		side_dash_map_unlocked = true
 	elif map_reward == "aux_ship":
 		aux_ship_map_unlocked = true
+	elif map_reward == "random_station":
+		# Descobre uma estação aleatória não descoberta
+		var all_stations := ["station_alpha", "station_beta", "station_gamma", "station_delta", "station_zeta"]
+		var undiscovered: Array[String] = []
+		for sid in all_stations:
+			if not is_station_discovered(sid):
+				undiscovered.append(sid)
+		if not undiscovered.is_empty():
+			var random_station := undiscovered[randi() % undiscovered.size()]
+			discover_station(random_station)
 
 	var discover_station_reward := str(def.get("discover_station_reward", ""))
 	if not discover_station_reward.is_empty():
 		discover_station(discover_station_reward)
+	
+	var consumable_reward: Dictionary = def.get("consumable_reward", {}) as Dictionary
+	for consumable_type_variant in consumable_reward.keys():
+		var consumable_type := str(consumable_type_variant)
+		var count := int(consumable_reward[consumable_type_variant])
+		consumables[consumable_type] = int(consumables.get(consumable_type, 0)) + count
 
 	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
 	q["claimed"] = true
@@ -1262,6 +1289,10 @@ func collect_artifact_part(artifact_id: String = "relic") -> void:
 		unlocked_artifacts.append(artifact_id)
 		if artifact_id == "vacuum":
 			vacuum_is_broken = false
+		
+		# Mostrar balão de fala quando desbloqueia um artefato
+		var artifact_title := ArtifactDatabase.get_artifact_title(artifact_id)
+		emit_signal("speech_requested", "Yeee, construi um %s!" % artifact_title)
 
 	emit_signal("state_changed")
 	_queue_save()
@@ -1304,6 +1335,32 @@ func discover_station(station_id: String) -> void:
 	if discovered_station_ids.has(station_id):
 		return
 	discovered_station_ids.append(station_id)
+	
+	# Atualizar missão de descobrir estações
+	_record_station_discovery()
+	
+	emit_signal("state_changed")
+	_queue_save()
+
+func _record_station_discovery() -> void:
+	var quest_id := QuestDatabase.QUEST_DISCOVER_2_STATIONS
+	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
+	if not bool(q.get("accepted", false)):
+		return
+	if bool(q.get("completed", false)):
+		return
+	
+	var def: Dictionary = QuestDatabase.QUEST_DEFS.get(quest_id, {}) as Dictionary
+	var goal: int = int(def.get("goal", 0))
+	var progress: int = int(q.get("progress", 0))
+	
+	# Incrementa o progresso quando uma estação é descoberta
+	progress = min(progress + 1, goal)
+	q["progress"] = progress
+	
+	if progress >= goal:
+		q["completed"] = true
+	quests[quest_id] = q
 	emit_signal("state_changed")
 	_queue_save()
 
@@ -1692,6 +1749,9 @@ func debug_unlock_all_gadgets() -> void:
 		artifact_parts[artifact_id] = required
 		if not unlocked_artifacts.has(artifact_id):
 			unlocked_artifacts.append(artifact_id)
+			# Mostrar balão de fala quando desbloqueia um artefato
+			var artifact_title := ArtifactDatabase.get_artifact_title(artifact_id)
+			emit_signal("speech_requested", "Yeee, construi um %s!" % artifact_title)
 
 	# Garantias especificas.
 	vacuum_is_broken = false
@@ -1722,10 +1782,10 @@ func _recalculate_zone_unlocks() -> void:
 func _recalculate_player_stats() -> void:
 	var old_max := player_max_health
 	player_max_health = BASE_PLAYER_MAX_HEALTH + get_upgrade_level("hull") * 10
-	if player_health >= old_max:
-		player_health = player_max_health
-	else:
-		player_health = clamp(player_health, 0, player_max_health)
+	var health_increase := player_max_health - old_max
+	if health_increase > 0:
+		player_health += health_increase
+	player_health = clamp(player_health, 0, player_max_health)
 
 func _queue_save() -> void:
 	if _save_queued:

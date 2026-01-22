@@ -39,9 +39,8 @@ func _on_state_changed() -> void:
 	_refresh_boss_active()
 
 func _refresh_boss_active() -> void:
+	# Removido limitador - boss sempre ativo
 	var should_show := true
-	if require_quest_active:
-		should_show = GameState.has_boss_planet_marker()
 	_set_boss_active(should_show)
 
 func _set_boss_active(active: bool) -> void:

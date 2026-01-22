@@ -13,6 +13,13 @@ func _ready() -> void:
 	remove_from_group("station")
 	_resources_root = get_node_or_null(resources_path)
 	_guard_spawner = get_node_or_null("StationGuardSpawner")
+	# Desabilitar spawner de guardas do planeta perdido
+	if _guard_spawner != null:
+		_guard_spawner.set("enabled", false)
+		_guard_spawner.set("max_guards", 0)
+		_guard_spawner.set("wave_total", 0)
+		_guard_spawner.set_process(false)
+		_guard_spawner.set_physics_process(false)
 	_refresh_visibility()
 	_refresh_resources()
 	GameState.state_changed.connect(_on_state_changed)
@@ -22,9 +29,8 @@ func _on_state_changed() -> void:
 	_refresh_resources()
 
 func _refresh_visibility() -> void:
+	# Removido limitador - planeta sempre visível
 	var should_show := true
-	if require_quest_active:
-		should_show = GameState.has_boss_planet_marker()
 	_set_planet_active(should_show)
 	if should_show:
 		_ensure_boss_completion_if_missing()
@@ -54,10 +60,11 @@ func _set_planet_active(active: bool) -> void:
 	var prompt := get_node_or_null("Prompt") as Label
 	if prompt != null:
 		prompt.visible = active and _player_in_range
+	# Guard spawner sempre desabilitado para o planeta perdido
 	if _guard_spawner != null:
-		_guard_spawner.set("enabled", active)
-		_guard_spawner.set_process(active)
-		_guard_spawner.set_physics_process(active)
+		_guard_spawner.set("enabled", false)
+		_guard_spawner.set_process(false)
+		_guard_spawner.set_physics_process(false)
 
 func _set_resources_active(active: bool) -> void:
 	if _resources_root == null:
@@ -74,3 +81,7 @@ func _set_resource_node_active(node: Node, active: bool) -> void:
 		var area := node as Area2D
 		area.set_deferred("monitoring", active)
 		area.set_deferred("monitorable", active)
+
+func _is_blocked_by_guards() -> bool:
+	# Planeta perdido nunca é bloqueado por guardas
+	return false

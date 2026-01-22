@@ -2,7 +2,7 @@ extends StaticBody2D
 
 const AMETISTA_TEXTURE: Texture2D = preload("res://textures/ametista-block.png")
 
-@export var spawn_chance: float = 0.15
+@export var spawn_chance: float = 1.0
 @export var mine_duration: float = 3.0
 @export var yield_amount: int = 1
 
