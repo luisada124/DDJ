@@ -2,7 +2,7 @@ extends Node2D
 
 const BossScene: PackedScene = preload("res://enemies/BossFinal.tscn")
 
-@export var spawn_delay: float = 30.0
+@export var spawn_delay: float = 15.0
 @export var boss_spawn_pos: Vector2 = Vector2(0, 0)
 
 var _spawned: bool = false

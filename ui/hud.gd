@@ -1876,6 +1876,9 @@ func _end_dialogue() -> void:
 func _inject_npc_quest_nodes(nodes: Dictionary, station_id: String, npc_id: String) -> Dictionary:
 	if nodes.is_empty():
 		return nodes
+	# Posto Kappa tem um diálogo custom com 2 missões (não usar injeção automática).
+	if station_id == "station_kappa":
+		return nodes
 	if npc_id == "hunter" or npc_id == "bandit":
 		return nodes
 
@@ -2424,40 +2427,127 @@ func _get_dialogue_nodes(station_id: String, npc_id: String) -> Dictionary:
 				start["choices"] = choices
 				nodes["start"] = start
 
-			# Posto Kappa (Zona 2): intro de mineração.
+			# Posto Kappa (Zona 2): 2 missões (broca + humanos) em blocos separados.
 			if station_id == "station_kappa":
+				var mine_id: String = QuestDatabase.QUEST_MINE_4_AMETISTA
+				var humans_id: String = QuestDatabase.QUEST_DEFEAT_HUMANS
+
+				var mine_def: Dictionary = GameState.QUEST_DEFS.get(mine_id, {}) as Dictionary
+				var mine_q: Dictionary = GameState.get_quest_state(mine_id)
+				var mine_accepted: bool = bool(mine_q.get("accepted", false))
+				var mine_completed: bool = bool(mine_q.get("completed", false))
+				var mine_claimed: bool = bool(mine_q.get("claimed", false))
+				var mine_goal: int = int(mine_def.get("goal", 0))
+				var mine_progress: int = int(mine_q.get("progress", 0))
+
+				var humans_q: Dictionary = GameState.get_quest_state(humans_id)
+				var humans_accepted: bool = bool(humans_q.get("accepted", false))
+				var humans_completed: bool = bool(humans_q.get("completed", false))
+				var humans_claimed: bool = bool(humans_q.get("claimed", false))
+
 				nodes["start"] = {
-					"text": "[b]Vexa[/b]: Ah, és novo por estas bandas?\nAqui temos um minério especial. Se me apanhas quatro com esta broca, dou-te uma recompensa.\n\n[b]Vexa[/b]: Achas que estas preparado para enfrentar os Humanos?",
+					"text": "[b]Vexa[/b]: Ah, és novo por estas bandas? O que queres tratar primeiro?",
 					"choices": [
-						{"text": "Sim.", "next": "try_humans"},
-						{"text": "Nao.", "next": "humans_no"},
-						{"text": "Sobre a broca...", "next": "quest"},
+						{"text": "Missão: Minério Especial", "next": "kappa_drill"},
+						{"text": "Missão: Derrotar os Humanos", "next": "kappa_humans"},
 						{"text": "Adeus.", "next": "end"},
 					],
 				}
+
+				# Bloco 1: Broca / Minerar 4 ametistas.
+				if not mine_accepted:
+					nodes["kappa_drill"] = {
+						"text": "[b]Vexa[/b]: Aqui temos um minério especial. Se me apanhas quatro com esta broca, dou-te uma recompensa.\n[b]Vexa[/b]: Queres aceitar? (A broca vai aparecer perto de ti.)",
+						"choices": [
+							{"text": "Aceitar (receber broca).", "next": "action:accept_quest:%s:end" % mine_id},
+							{"text": "Voltar.", "next": "start"},
+						],
+					}
+				elif mine_accepted and not mine_completed:
+					nodes["kappa_drill"] = {
+						"text": "[b]Vexa[/b]: Volta quando tiveres 4 ametistas.\nProgresso: %d/%d" % [mine_progress, mine_goal],
+						"choices": [
+							{"text": "Voltar.", "next": "start"},
+						],
+					}
+				elif mine_completed and not mine_claimed:
+					nodes["kappa_drill"] = {
+						"text": "[b]Vexa[/b]: Boa. Trouxeste o que pedi?\n[b]Vexa[/b]: Entrega e eu dou-te a recompensa.",
+						"choices": [
+							{"text": "Entregar (recompensa).", "next": "action:claim_quest:%s:kappa_drill_claimed" % mine_id},
+							{"text": "Depois.", "next": "start"},
+						],
+					}
+					nodes["kappa_drill_claimed"] = {
+						"text": "[b]Vexa[/b]: Negócio fechado. Agora tens novas coordenadas no mapa.\n[b]Tu[/b]: Finalmente, direção.",
+						"choices": [
+							{"text": "Ok.", "next": "end"},
+						],
+					}
+				else:
+					nodes["kappa_drill"] = {
+						"text": "[b]Vexa[/b]: Já tratámos do minério. Não te vicies... ou vicia-te, eu não mando.",
+						"choices": [
+							{"text": "Voltar.", "next": "start"},
+						],
+					}
+
+				# Bloco 2: Humanos / chamar a horda.
+				if not humans_accepted:
+					nodes["kappa_humans"] = {
+						"text": "[b]Vexa[/b]: Achas que estás preparado para enfrentar os Humanos?",
+						"choices": [
+							{"text": "Sim.", "next": "try_humans"},
+							{"text": "Não.", "next": "humans_no"},
+							{"text": "Voltar.", "next": "start"},
+						],
+					}
+				elif humans_accepted and not humans_completed:
+					nodes["kappa_humans"] = {
+						"text": "[b]Vexa[/b]: A patrulha já foi chamada.\n[b]Vexa[/b]: Vai ao núcleo e derruba o líder.",
+						"choices": [
+							{"text": "Ok.", "next": "end"},
+						],
+					}
+				elif humans_completed and not humans_claimed:
+					nodes["kappa_humans"] = {
+						"text": "[b]Vexa[/b]: Então? Caíram?\n[b]Vexa[/b]: Entrega a missão para receberes a recompensa.",
+						"choices": [
+							{"text": "Entregar (recompensa).", "next": "action:claim_quest:%s:kappa_humans_claimed" % humans_id},
+							{"text": "Depois.", "next": "end"},
+						],
+					}
+					nodes["kappa_humans_claimed"] = {
+						"text": "[b]Vexa[/b]: Bom trabalho. Humanos aprendem depressa... mas não hoje.\n[b]Tu[/b]: Ainda bem.",
+						"choices": [
+							{"text": "Ok.", "next": "end"},
+						],
+					}
+				else:
+					nodes["kappa_humans"] = {
+						"text": "[b]Vexa[/b]: Já está. E que fique como aviso.",
+						"choices": [
+							{"text": "Ok.", "next": "end"},
+						],
+					}
+
 				nodes["try_humans"] = {
-					"text": "[b]Tu[/b]: Sim.\n[b]Vexa[/b]: Entao que comece.",
+					"text": "[b]Tu[/b]: Sim.\n[b]Vexa[/b]: Então que comece.",
 					"choices": [
 						{"text": "Vamos a isso.", "next": "action:try_start_humans:ok:end"},
-						{"text": "Espera.", "next": "end"},
+						{"text": "Espera.", "next": "kappa_humans"},
 					],
 				}
 				nodes["humans_not_ready"] = {
 					"text": "__DYNAMIC__",
 					"choices": [
-						{"text": "Ok.", "next": "end"},
-					],
-				}
-				nodes["humans_started"] = {
-					"text": "__DYNAMIC__",
-					"choices": [
-						{"text": "Fechar.", "next": "end"},
+						{"text": "Ok.", "next": "kappa_humans"},
 					],
 				}
 				nodes["humans_no"] = {
 					"text": "[b]Vexa[/b]: Sensato. Humanos gostam de certezas... e de tiros.",
 					"choices": [
-						{"text": "Ok.", "next": "end"},
+						{"text": "Ok.", "next": "kappa_humans"},
 					],
 				}
 
