@@ -262,6 +262,13 @@ static func get_beta_station_map_cost(station_id: String) -> Dictionary:
 		return {"scrap": 600, "mineral": 400, "ametista": 8}
 	return {}
 
+static func get_zeta_station_map_cost(station_id: String) -> Dictionary:
+	# Mapa caro para o Posto Zeta, vendido no Outpost Beta.
+	if station_id == "station_beta":
+		return {"scrap": 220, "mineral": 120, "ametista": 5}
+	return {}
+
+
 static func get_aux_ship_shop_part_cost(station_id: String) -> Dictionary:
 	# Aux Ship (3 pecas): 1 peca vendida numa estacao da Zona 2.
 	# O UI faz gate pela zona atual.

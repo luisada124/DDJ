@@ -56,6 +56,7 @@ extends Control
 @onready var buy_auto_regen_map_zone2_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyAutoRegenMapZone2Button
 @onready var buy_kappa_station_map_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyKappaStationMapButton
 @onready var buy_beta_station_map_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyBetaStationMapButton
+@onready var buy_zeta_station_map_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyZetaStationMapButton
 @onready var buy_aux_ship_part_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyAuxShipPartButton
 @onready var buy_repair_kit_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/BuyRepairKitButton
 @onready var ametista_to_mineral_button: Button = $TraderMenu/Panel/Margin/VBox/Tabs/Mercado/AmetistaToMineralButton
@@ -221,6 +222,7 @@ func _ready() -> void:
 	buy_auto_regen_map_zone2_button.pressed.connect(_on_buy_auto_regen_map_zone2_pressed)
 	buy_kappa_station_map_button.pressed.connect(_on_buy_kappa_station_map_pressed)
 	buy_beta_station_map_button.pressed.connect(_on_buy_beta_station_map_pressed)
+	buy_zeta_station_map_button.pressed.connect(_on_buy_zeta_station_map_pressed)
 	buy_aux_ship_part_button.pressed.connect(_on_buy_aux_ship_part_pressed)
 	buy_repair_kit_button.pressed.connect(_on_buy_repair_kit_pressed)
 	ametista_to_mineral_button.pressed.connect(_on_trade_ametista_to_mineral)
@@ -774,6 +776,7 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	var ar_map2_cost: Dictionary = StationCatalog.get_auto_regen_map_zone2_cost(station_id)
 	var kappa_map_cost: Dictionary = StationCatalog.get_kappa_station_map_cost(station_id)
 	var beta_map_cost: Dictionary = StationCatalog.get_beta_station_map_cost(station_id)
+	var zeta_map_cost: Dictionary = StationCatalog.get_zeta_station_map_cost(station_id)
 	var aux_shop_cost: Dictionary = StationCatalog.get_aux_ship_shop_part_cost(station_id)
 
 	var parts := "%d/%d" % [GameState.artifact_parts_collected, GameState.ARTIFACT_PARTS_REQUIRED]
@@ -873,6 +876,12 @@ func _update_trader_menu(scrap: int, mineral: int) -> void:
 	if show_beta_map:
 		buy_beta_station_map_button.text = "Mapa para Posto Beta (marca no minimapa) (%s)" % _format_cost(beta_map_cost)
 		buy_beta_station_map_button.disabled = not GameState.can_afford(beta_map_cost)
+
+	var show_zeta_map := not zeta_map_cost.is_empty() and not GameState.zeta_station_map_bought and not GameState.is_station_discovered("station_zeta")
+	buy_zeta_station_map_button.visible = show_zeta_map
+	if show_zeta_map:
+		buy_zeta_station_map_button.text = "Mapa para Posto Zeta (marca no minimapa) (%s)" % _format_cost(zeta_map_cost)
+		buy_zeta_station_map_button.disabled = not GameState.can_afford(zeta_map_cost)
 
 	var aux_have := GameState.get_artifact_parts("aux_ship")
 	var aux_required := ArtifactDatabase.get_parts_required("aux_ship")
@@ -1220,6 +1229,13 @@ func _on_buy_beta_station_map_pressed() -> void:
 		station_id = DEFAULT_STATION_ID
 	var cost: Dictionary = StationCatalog.get_beta_station_map_cost(station_id)
 	GameState.buy_beta_station_map(cost)
+
+func _on_buy_zeta_station_map_pressed() -> void:
+	var station_id := _active_station_id
+	if station_id.is_empty():
+		station_id = DEFAULT_STATION_ID
+	var cost: Dictionary = StationCatalog.get_zeta_station_map_cost(station_id)
+	GameState.buy_zeta_station_map(cost)
 
 func _on_buy_aux_ship_part_pressed() -> void:
 	var station_id := _active_station_id

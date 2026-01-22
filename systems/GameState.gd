@@ -40,6 +40,7 @@ var discovered_station_ids: PackedStringArray = PackedStringArray([])
 var alpha_station_map_bought: bool = false
 var kappa_station_map_bought: bool = false
 var beta_station_map_bought: bool = false
+var zeta_station_map_bought: bool = false
 
 # Zona 2 intro (Posto Kappa + broca).
 var zone2_intro_station_local: Vector2 = Vector2.ZERO
@@ -1477,6 +1478,23 @@ func buy_beta_station_map(cost: Dictionary) -> bool:
 	_queue_save()
 	return true
 
+func buy_zeta_station_map(cost: Dictionary) -> bool:
+	if zeta_station_map_bought:
+		return false
+	if cost.is_empty():
+		return false
+	if not can_afford(cost):
+		return false
+
+	for res_type_variant in cost.keys():
+		var res_type := str(res_type_variant)
+		resources[res_type] = int(resources.get(res_type, 0)) - int(cost[res_type_variant])
+	zeta_station_map_bought = true
+	discover_station("station_zeta")
+	emit_signal("state_changed")
+	_queue_save()
+	return true
+
 func save_game() -> void:
 	var discovered: Array[String] = []
 	for sid in discovered_station_ids:
@@ -1490,6 +1508,7 @@ func save_game() -> void:
 		"alpha_station_map_bought": alpha_station_map_bought,
 		"kappa_station_map_bought": kappa_station_map_bought,
 		"beta_station_map_bought": beta_station_map_bought,
+		"zeta_station_map_bought": zeta_station_map_bought,
 		"defeated_bosses": defeated_bosses,
 		"zone2_intro_station_local": [zone2_intro_station_local.x, zone2_intro_station_local.y],
 		"zone2_drill_given": zone2_drill_given,
@@ -1576,6 +1595,7 @@ func load_game() -> void:
 	alpha_station_map_bought = bool(data.get("alpha_station_map_bought", false))
 	kappa_station_map_bought = bool(data.get("kappa_station_map_bought", false))
 	beta_station_map_bought = bool(data.get("beta_station_map_bought", false))
+	zeta_station_map_bought = bool(data.get("zeta_station_map_bought", false))
 	
 	# Carregar bosses mortos
 	defeated_bosses = []
@@ -1814,6 +1834,7 @@ func _apply_defaults() -> void:
 	alpha_station_map_bought = false
 	kappa_station_map_bought = false
 	beta_station_map_bought = false
+	zeta_station_map_bought = false
 	defeated_bosses = []
 	zone2_intro_station_local = Vector2.ZERO
 	zone2_drill_given = false

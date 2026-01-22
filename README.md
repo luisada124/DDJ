@@ -65,6 +65,8 @@ auto_regen:3
 
 PROMPS:
 
+ tirar o spawn de cometas na tela de visão do jogador. 
+
 Agora o Ricky  bem a corda. 
 
 Uma tecla de mapa e outra de zona. 
