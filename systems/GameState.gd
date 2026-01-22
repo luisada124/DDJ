@@ -1775,10 +1775,10 @@ func _recalculate_zone_unlocks() -> void:
 func _recalculate_player_stats() -> void:
 	var old_max := player_max_health
 	player_max_health = BASE_PLAYER_MAX_HEALTH + get_upgrade_level("hull") * 10
-	if player_health >= old_max:
-		player_health = player_max_health
-	else:
-		player_health = clamp(player_health, 0, player_max_health)
+	var health_increase := player_max_health - old_max
+	if health_increase > 0:
+		player_health += health_increase
+	player_health = clamp(player_health, 0, player_max_health)
 
 func _queue_save() -> void:
 	if _save_queued:
