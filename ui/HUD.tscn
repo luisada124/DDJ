@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3 uid="uid://bhyk7leudmqo"]
 
 [ext_resource type="Script" uid="uid://cwxyih27hxbjv" path="res://ui/hud.gd" id="1_1x8ju"]
-[ext_resource type="Script" path="res://ui/minimap.gd" id="2_minimap"]
-[ext_resource type="Script" path="res://ui/large_minimap.gd" id="3_large_minimap"]
+[ext_resource type="Script" uid="uid://ivinn1ui0fmn" path="res://ui/minimap.gd" id="2_minimap"]
+[ext_resource type="Script" uid="uid://wgmic1lcn5s4" path="res://ui/large_minimap.gd" id="3_large_minimap"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -69,6 +69,7 @@ text = "Alien: 50 / 50"
 [node name="BossHealthContainer" type="MarginContainer" parent="."]
 visible = false
 layout_mode = 1
+anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -220.0
@@ -81,12 +82,11 @@ layout_mode = 2
 
 [node name="BossHealthLabel" type="Label" parent="BossHealthContainer/BossHealthBox"]
 layout_mode = 2
-horizontal_alignment = 1
 text = "BOSS"
+horizontal_alignment = 1
 
 [node name="BossHealthBar" type="ProgressBar" parent="BossHealthContainer/BossHealthBox"]
 layout_mode = 2
-max_value = 100.0
 value = 100.0
 
 [node name="MiniMap" type="Control" parent="."]
@@ -98,6 +98,7 @@ offset_left = 16.0
 offset_top = -196.0
 offset_right = 196.0
 offset_bottom = -16.0
+grow_vertical = 0
 script = ExtResource("2_minimap")
 
 [node name="SpeechBubble" type="PanelContainer" parent="."]
@@ -110,22 +111,25 @@ mouse_filter = 2
 [node name="SpeechLabel" type="Label" parent="SpeechBubble"]
 layout_mode = 2
 autowrap_mode = 3
-text = ""
 
 [node name="UpgradeMenu" type="Control" parent="."]
 process_mode = 3
-layout_mode = 3
+visible = false
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
-visible = false
 
 [node name="Dim" type="ColorRect" parent="UpgradeMenu"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 0.55)
 
@@ -140,6 +144,8 @@ offset_left = -220.0
 offset_top = -200.0
 offset_right = 220.0
 offset_bottom = 200.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Margin" type="MarginContainer" parent="UpgradeMenu/Panel"]
 layout_mode = 2
@@ -199,10 +205,10 @@ layout_mode = 2
 text = "Nave Auxiliar"
 
 [node name="AuxShipLockedInfo" type="Label" parent="UpgradeMenu/Panel/Margin/VBox"]
-layout_mode = 2
-autowrap_mode = 3
-text = "Desbloqueia a Nave Auxiliar para estes upgrades."
 visible = false
+layout_mode = 2
+text = "Desbloqueia a Nave Auxiliar para estes upgrades."
+autowrap_mode = 3
 
 [node name="AuxShipList" type="VBoxContainer" parent="UpgradeMenu/Panel/Margin/VBox"]
 layout_mode = 2
@@ -224,20 +230,18 @@ layout_mode = 2
 text = "Aux Laser Speed"
 
 [node name="UpgradeDescription" type="RichTextLabel" parent="UpgradeMenu/Panel/Margin/VBox"]
-layout_mode = 2
 custom_minimum_size = Vector2(0, 64)
-fit_content = false
-scroll_active = false
-autowrap_mode = 3
+layout_mode = 2
 text = "Passa o rato por cima de um upgrade."
+scroll_active = false
 
 [node name="ButtonsSeparator" type="HSeparator" parent="UpgradeMenu/Panel/Margin/VBox"]
 layout_mode = 2
 
 [node name="ResetButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox"]
+visible = false
 layout_mode = 2
 text = "Reset Save"
-visible = false
 
 [node name="CloseButton" type="Button" parent="UpgradeMenu/Panel/Margin/VBox"]
 layout_mode = 2
@@ -245,18 +249,22 @@ text = "Fechar"
 
 [node name="MapMenu" type="Control" parent="."]
 process_mode = 3
-layout_mode = 3
+visible = false
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
-visible = false
 
 [node name="Dim" type="ColorRect" parent="MapMenu"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 0.55)
 
@@ -271,6 +279,8 @@ offset_left = -400.0
 offset_top = -300.0
 offset_right = 400.0
 offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Margin" type="MarginContainer" parent="MapMenu/Panel"]
 layout_mode = 2
@@ -288,34 +298,40 @@ text = "Mapa"
 
 [node name="Info" type="Label" parent="MapMenu/Panel/Margin/VBox"]
 layout_mode = 2
-autowrap_mode = 3
 text = "(M) fecha"
+autowrap_mode = 3
 
 [node name="Tabs" type="TabContainer" parent="MapMenu/Panel/Margin/VBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+current_tab = 0
 
 [node name="Zonas" type="ScrollContainer" parent="MapMenu/Panel/Margin/VBox/Tabs"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 follow_focus = true
+metadata/_tab_index = 0
 
 [node name="ZoneList" type="VBoxContainer" parent="MapMenu/Panel/Margin/VBox/Tabs/Zonas"]
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Visualizacao" type="Control" parent="MapMenu/Panel/Margin/VBox/Tabs"]
+visible = false
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+metadata/_tab_index = 1
 
 [node name="LargeMinimap" type="Control" parent="MapMenu/Panel/Margin/VBox/Tabs/Visualizacao"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("3_large_minimap")
 
 [node name="CloseMapButton" type="Button" parent="MapMenu/Panel/Margin/VBox"]
@@ -324,18 +340,22 @@ text = "Fechar"
 
 [node name="TraderMenu" type="Control" parent="."]
 process_mode = 3
-layout_mode = 3
+visible = false
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
-visible = false
 
 [node name="Dim" type="ColorRect" parent="TraderMenu"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 0.55)
 
@@ -350,6 +370,8 @@ offset_left = -440.0
 offset_top = -300.0
 offset_right = 440.0
 offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Margin" type="MarginContainer" parent="TraderMenu/Panel"]
 layout_mode = 2
@@ -366,14 +388,14 @@ layout_mode = 2
 text = "Planeta - Estacao"
 
 [node name="BossPlanetPanel" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox"]
-layout_mode = 2
 visible = false
+layout_mode = 2
 size_flags_vertical = 3
 
 [node name="BossPlanetInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/BossPlanetPanel"]
 layout_mode = 2
-autowrap_mode = 3
 text = "Recursos do planeta."
+autowrap_mode = 3
 
 [node name="BossPlanetCollectButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/BossPlanetPanel"]
 layout_mode = 2
@@ -382,43 +404,17 @@ text = "Coletar recompensa"
 [node name="Tabs" type="TabContainer" parent="TraderMenu/Panel/Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
+current_tab = 3
 
 [node name="Mercado" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
+visible = false
 layout_mode = 2
-
-[node name="Taberna" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
-layout_mode = 2
-
-[node name="TabernaScroll" type="ScrollContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-follow_focus = true
-
-[node name="TabernaContent" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="Mecanico" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
-layout_mode = 2
-
-[node name="Cofre" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
-layout_mode = 2
-
-[node name="CofreScroll" type="ScrollContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-follow_focus = true
-
-[node name="CofreContent" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll"]
-layout_mode = 2
-size_flags_horizontal = 3
+metadata/_tab_index = 0
 
 [node name="Info" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
 layout_mode = 2
-autowrap_mode = 3
 text = "Trocas"
+autowrap_mode = 3
 
 [node name="ScrapToMineralButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mercado"]
 layout_mode = 2
@@ -492,33 +488,46 @@ text = "Trocar"
 layout_mode = 2
 text = "Trocar"
 
+[node name="Taberna" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
+visible = false
+layout_mode = 2
+metadata/_tab_index = 1
+
+[node name="TabernaScroll" type="ScrollContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+follow_focus = true
+
+[node name="TabernaContent" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+
 [node name="DialogueSeparatorTitle" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 text = "Conversas"
 
 [node name="DialogueText" type="RichTextLabel" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
-layout_mode = 2
 custom_minimum_size = Vector2(0, 140)
-fit_content = false
-scroll_active = false
-autowrap_mode = 3
+layout_mode = 2
 text = "..."
+scroll_active = false
 
 [node name="DialogueChoices" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 
 [node name="EndDialogueButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+visible = false
 layout_mode = 2
 text = "Sair da conversa"
-visible = false
 
 [node name="MissionsToDialogueSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 
 [node name="TavernInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
-autowrap_mode = 3
 text = "Taberna: fala com NPCs para obter missoes."
+autowrap_mode = 3
 
 [node name="NPCSeparatorTitle" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
@@ -537,47 +546,45 @@ layout_mode = 2
 text = "NPC 3"
 
 [node name="NPCToMissionsSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
-layout_mode = 2
 visible = false
+layout_mode = 2
 
 [node name="MissionsSeparatorTitle" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+visible = false
 layout_mode = 2
 text = "Missoes"
-visible = false
 
 [node name="QuestList" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
-layout_mode = 2
 visible = false
+layout_mode = 2
 
 [node name="QuestDetails" type="RichTextLabel" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
-layout_mode = 2
-custom_minimum_size = Vector2(0, 120)
-fit_content = false
-scroll_active = false
-autowrap_mode = 3
-text = "Seleciona uma missao."
 visible = false
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+text = "Seleciona uma missao."
+scroll_active = false
 
 [node name="DeliverySeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
-layout_mode = 2
 visible = false
+layout_mode = 2
 
 [node name="DeliveryTitle" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+visible = false
 layout_mode = 2
 text = "Entregar missoes"
-visible = false
 
 [node name="DeliveryList" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
-layout_mode = 2
 visible = false
+layout_mode = 2
 
 [node name="BanditQteSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
-layout_mode = 2
 visible = false
+layout_mode = 2
 
 [node name="BanditQtePanel" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
-layout_mode = 2
 visible = false
+layout_mode = 2
 
 [node name="BanditQteTitle" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/BanditQtePanel"]
 layout_mode = 2
@@ -585,8 +592,8 @@ text = "Duelo contra Bandido"
 
 [node name="BanditQteInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/BanditQtePanel"]
 layout_mode = 2
-autowrap_mode = 3
 text = "Acerta a sequencia de WASD antes do tempo acabar."
+autowrap_mode = 3
 
 [node name="BanditQteProgress" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/BanditQtePanel"]
 layout_mode = 2
@@ -602,7 +609,6 @@ text = "Comecar duelo"
 
 [node name="BanditQteResult" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent/BanditQtePanel"]
 layout_mode = 2
-text = ""
 
 [node name="KnifeGameSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
@@ -613,8 +619,8 @@ text = "Knife Game"
 
 [node name="KnifeGameInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
-autowrap_mode = 3
 text = "Press A S D W in order. 20s per attempt."
+autowrap_mode = 3
 
 [node name="KnifeGameHighScore" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
@@ -630,25 +636,29 @@ text = "Press: -"
 
 [node name="KnifeGameResult" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
-text = ""
 
 [node name="KnifeGameStartButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
 layout_mode = 2
 text = "Start Knife Game"
 
 [node name="DebugBossSeparator" type="HSeparator" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
-layout_mode = 2
 visible = false
+layout_mode = 2
 
 [node name="DebugBossPlanetButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Taberna/TabernaScroll/TabernaContent"]
+visible = false
 layout_mode = 2
 text = "DEBUG: Ativar missao Planeta Perdido"
+
+[node name="Mecanico" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
 visible = false
+layout_mode = 2
+metadata/_tab_index = 2
 
 [node name="MechanicInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mecanico"]
 layout_mode = 2
-autowrap_mode = 3
 text = "Mecanico: upgrades so podem ser feitos nas estacoes."
+autowrap_mode = 3
 
 [node name="OpenUpgradesButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Mecanico"]
 layout_mode = 2
@@ -658,22 +668,34 @@ text = "Abrir upgrades (U)"
 layout_mode = 2
 text = "Reparar nave (cura total)"
 
+[node name="Cofre" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs"]
+layout_mode = 2
+metadata/_tab_index = 3
+
+[node name="CofreScroll" type="ScrollContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+follow_focus = true
+
+[node name="CofreContent" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+
 [node name="VaultInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent"]
 layout_mode = 2
-autowrap_mode = 3
 text = "Cofre: compra e guarda recursos (nao perdes na morte)."
+autowrap_mode = 3
 
 [node name="BuyVaultButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent"]
 layout_mode = 2
 text = "Comprar cofre"
 
 [node name="VaultStatus" type="RichTextLabel" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent"]
-layout_mode = 2
 custom_minimum_size = Vector2(0, 150)
-fit_content = false
-scroll_active = false
-autowrap_mode = 3
+layout_mode = 2
 text = "..."
+scroll_active = false
 
 [node name="VaultButtons" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent"]
 layout_mode = 2
@@ -691,8 +713,8 @@ layout_mode = 2
 
 [node name="PercentInfo" type="Label" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons"]
 layout_mode = 2
-autowrap_mode = 3
 text = "Depositar/levantar por percentagem (0–100%)"
+autowrap_mode = 3
 
 [node name="ScrapRow" type="VBoxContainer" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons"]
 layout_mode = 2
@@ -711,8 +733,6 @@ text = "100%"
 [node name="ScrapSlider" type="HSlider" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/ScrapRow/ScrapControls"]
 layout_mode = 2
 size_flags_horizontal = 3
-min_value = 0.0
-max_value = 100.0
 step = 5.0
 value = 100.0
 
@@ -741,8 +761,6 @@ text = "100%"
 [node name="MineralSlider" type="HSlider" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/MineralRow/MineralControls"]
 layout_mode = 2
 size_flags_horizontal = 3
-min_value = 0.0
-max_value = 100.0
 step = 5.0
 value = 100.0
 
@@ -771,8 +789,6 @@ text = "100%"
 [node name="AmetistaSlider" type="HSlider" parent="TraderMenu/Panel/Margin/VBox/Tabs/Cofre/CofreScroll/CofreContent/VaultButtons/AmetistaRow/AmetistaControls"]
 layout_mode = 2
 size_flags_horizontal = 3
-min_value = 0.0
-max_value = 100.0
 step = 5.0
 value = 100.0
 
@@ -788,8 +804,8 @@ text = "Levantar"
 layout_mode = 2
 
 [node name="TavernBottomBar" type="HBoxContainer" parent="TraderMenu/Panel/Margin/VBox"]
-layout_mode = 2
 visible = false
+layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="AcceptKillQuestButton" type="Button" parent="TraderMenu/Panel/Margin/VBox/TavernBottomBar"]
@@ -808,18 +824,22 @@ text = "Fechar"
 
 [node name="MissionsMenu" type="Control" parent="."]
 process_mode = 3
-layout_mode = 3
+visible = false
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
-visible = false
 
 [node name="Dim" type="ColorRect" parent="MissionsMenu"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 0.55)
 
@@ -834,6 +854,8 @@ offset_left = -360.0
 offset_top = -320.0
 offset_right = 360.0
 offset_bottom = 320.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Margin" type="MarginContainer" parent="MissionsMenu/Panel"]
 layout_mode = 2
@@ -851,15 +873,17 @@ text = "Missoes"
 
 [node name="Info" type="Label" parent="MissionsMenu/Panel/Margin/VBox"]
 layout_mode = 2
-autowrap_mode = 3
 text = "(TAB) fecha | Recompensas sao entregues nas estacoes"
+autowrap_mode = 3
 
 [node name="Tabs" type="TabContainer" parent="MissionsMenu/Panel/Margin/VBox"]
 layout_mode = 2
 size_flags_vertical = 3
+current_tab = 0
 
 [node name="Missoes" type="VBoxContainer" parent="MissionsMenu/Panel/Margin/VBox/Tabs"]
 layout_mode = 2
+metadata/_tab_index = 0
 
 [node name="MissionScroll" type="ScrollContainer" parent="MissionsMenu/Panel/Margin/VBox/Tabs/Missoes"]
 layout_mode = 2
@@ -872,7 +896,9 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="Inventario" type="VBoxContainer" parent="MissionsMenu/Panel/Margin/VBox/Tabs"]
+visible = false
 layout_mode = 2
+metadata/_tab_index = 1
 
 [node name="InventoryScroll" type="ScrollContainer" parent="MissionsMenu/Panel/Margin/VBox/Tabs/Inventario"]
 layout_mode = 2

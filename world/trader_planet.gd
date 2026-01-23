@@ -18,6 +18,15 @@ func _ready() -> void:
 	prompt.visible = false
 	prompt.text = prompt_text
 	set_process(true)
+
+	# Render: manter o planeta "atrás" de tudo, mas o prompt sempre visível por cima.
+	if sprite != null:
+		sprite.z_as_relative = false
+		sprite.z_index = -1000
+	if prompt != null:
+		prompt.z_as_relative = false
+		prompt.z_index = 1000
+
 	if planet_texture != null:
 		sprite.texture = planet_texture
 	if not station_id.is_empty():

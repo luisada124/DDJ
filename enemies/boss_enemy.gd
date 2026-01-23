@@ -32,6 +32,7 @@ var _spawned_phase3: bool = false
 var _special_cd: float = 0.0
 var _special_lock: bool = false
 var _cached_sprite: Sprite2D = null
+var _boss_music_started: bool = false
 
 const EnemyScene: PackedScene = preload("res://enemies/Enemy.tscn")
 
@@ -48,6 +49,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	super._physics_process(delta)
+	var was_engaged: bool = boss_engaged
 	if _tracking_player:
 		boss_engaged = true
 		_engaged_timer = boss_disengage_delay
@@ -55,6 +57,10 @@ func _physics_process(delta: float) -> void:
 		_engaged_timer = maxf(0.0, _engaged_timer - delta)
 		if _engaged_timer <= 0.0:
 			boss_engaged = false
+
+	if boss_engaged and not was_engaged and not _boss_music_started:
+		_boss_music_started = true
+		get_tree().call_group("music", "set_boss_mode", true)
 
 	_update_phase()
 	_apply_phase_stats()
@@ -132,7 +138,8 @@ func _run_special_attack() -> void:
 		_special_lock = false
 		return
 
-	var root: Node = get_tree().current_scene
+	var zone_root := GameState.get_zone_root_node()
+	var root: Node = zone_root as Node if zone_root != null else get_tree().current_scene
 	if root == null:
 		_special_lock = false
 		return
@@ -167,7 +174,8 @@ func _run_special_attack() -> void:
 func _spawn_phase_minions(phase: int) -> void:
 	if EnemyScene == null:
 		return
-	var root: Node = get_tree().current_scene
+	var zone_root := GameState.get_zone_root_node()
+	var root: Node = zone_root as Node if zone_root != null else get_tree().current_scene
 	if root == null:
 		return
 
@@ -179,6 +187,7 @@ func _spawn_phase_minions(phase: int) -> void:
 		if not (inst is Node2D):
 			continue
 		var e := inst as Node2D
+		e.set_as_top_level(true)
 		e.set("enemy_id", "basic")
 		var diff: float = 1.6
 		if phase == 2:
@@ -235,6 +244,7 @@ func _set_patrol_anchor() -> void:
 		_pick_patrol_target()
 
 func die() -> void:
+	get_tree().call_group("music", "set_boss_mode", false)
 	_spawn_boss_artifact()
 	# Registrar que este boss foi morto
 	var zone_id := GameState.current_zone_id
@@ -271,7 +281,8 @@ func _shoot(dir_to_player: Vector2) -> void:
 	if laser_scene == null:
 		return
 
-	var root: Node = get_tree().current_scene
+	var zone_root := GameState.get_zone_root_node()
+	var root: Node = zone_root as Node if zone_root != null else get_tree().current_scene
 	if root == null:
 		return
 
@@ -338,6 +349,8 @@ func _spawn_laser_at(root: Node, dir: Vector2, damage: int, speed: float, offset
 	if not (inst is Area2D):
 		return
 	var laser := inst as Area2D
+	# O ZoneManager escala/desloca a zona; manter projéteis em coordenadas globais.
+	laser.set_as_top_level(true)
 	laser.global_position = global_position + dir * 44.0 + offset
 	laser.set("direction", dir)
 	laser.set("rotation", dir.angle() - Vector2.UP.angle())

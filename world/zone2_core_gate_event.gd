@@ -82,6 +82,7 @@ func _start_event() -> void:
 	if _active:
 		return
 	_active = true
+	get_tree().call_group("music", "set_boss_mode", true)
 
 	var speaker_pos := _pick_speaker_enemy_pos()
 	_spawn_speaker()
@@ -122,7 +123,8 @@ func _spawn_patrol_after_delay() -> void:
 	_spawn_patrol()
 
 func _spawn_patrol() -> void:
-	var root: Node = get_tree().current_scene
+	var zone_root := GameState.get_zone_root_node()
+	var root: Node = zone_root as Node if zone_root != null else get_tree().current_scene
 	if root == null:
 		return
 
@@ -146,6 +148,7 @@ func _spawn_enemy(root: Node, enemy_id: String, player_pos: Vector2, rng: Random
 	if not (inst is Node2D):
 		return
 	var e := inst as Node2D
+	e.set_as_top_level(true)
 	e.set("enemy_id", enemy_id)
 	e.set("difficulty_multiplier", patrol_difficulty_multiplier)
 	e.scale = patrol_enemy_scale
@@ -154,7 +157,7 @@ func _spawn_enemy(root: Node, enemy_id: String, player_pos: Vector2, rng: Random
 	var radius: float = patrol_spawn_radius + rng.randf_range(-patrol_spawn_jitter, patrol_spawn_jitter)
 	e.global_position = player_pos + Vector2(cos(angle), sin(angle)) * radius
 
-	root.add_child(e)
+	root.call_deferred("add_child", e)
 
 func _spawn_speaker() -> void:
 	if EnemyScene == null:
@@ -162,7 +165,8 @@ func _spawn_speaker() -> void:
 	if _speaker != null and is_instance_valid(_speaker):
 		return
 
-	var root: Node = get_tree().current_scene
+	var zone_root := GameState.get_zone_root_node()
+	var root: Node = zone_root as Node if zone_root != null else get_tree().current_scene
 	if root == null:
 		return
 
@@ -170,6 +174,7 @@ func _spawn_speaker() -> void:
 	if not (inst is Node2D):
 		return
 	var speaker := inst as Node2D
+	speaker.set_as_top_level(true)
 	speaker.set("enemy_id", speaker_enemy_id)
 	speaker.set("difficulty_multiplier", speaker_difficulty_multiplier)
 	speaker.scale = speaker_scale
@@ -180,7 +185,7 @@ func _spawn_speaker() -> void:
 	var angle: float = rng.randf_range(0.0, TAU)
 	speaker.global_position = player_pos + Vector2(cos(angle), sin(angle)) * speaker_spawn_distance
 
-	root.add_child(speaker)
+	root.call_deferred("add_child", speaker)
 	_speaker = speaker
 
 func _spawn_leader() -> void:
@@ -191,7 +196,8 @@ func _spawn_leader() -> void:
 	if _leader != null and is_instance_valid(_leader):
 		return
 
-	var root: Node = get_tree().current_scene
+	var zone_root := GameState.get_zone_root_node()
+	var root: Node = zone_root as Node if zone_root != null else get_tree().current_scene
 	if root == null:
 		return
 
@@ -199,6 +205,7 @@ func _spawn_leader() -> void:
 	if not (inst is Node2D):
 		return
 	var leader := inst as Node2D
+	leader.set_as_top_level(true)
 	leader.set("enemy_id", leader_enemy_id)
 	leader.set("difficulty_multiplier", leader_difficulty_multiplier)
 	leader.scale = leader_scale
@@ -210,7 +217,7 @@ func _spawn_leader() -> void:
 	var angle: float = rng.randf_range(0.0, TAU)
 	leader.global_position = player_pos + Vector2(cos(angle), sin(angle)) * leader_spawn_distance
 
-	root.add_child(leader)
+	root.call_deferred("add_child", leader)
 	_leader = leader
 	_leader_last_pos = leader.global_position
 	var hp_variant: Variant = leader.get("current_health")
@@ -233,6 +240,7 @@ func _on_leader_died(_enemy: Node2D, leader: Node2D) -> void:
 	if leader == null:
 		return
 	GameState.mid_core_patrol_cleared = true
+	get_tree().call_group("music", "set_boss_mode", false)
 	GameState.complete_quest(GameState.QUEST_DEFEAT_HUMANS)
 	GameState.queue_save()
 	_spawn_relic(leader.global_position)
@@ -254,8 +262,14 @@ func _on_leader_tree_exiting(leader: Node2D) -> void:
 		return
 
 	GameState.mid_core_patrol_cleared = true
+	get_tree().call_group("music", "set_boss_mode", false)
 	GameState.queue_save()
 	_spawn_relic(_last_enemy_pos)
+
+func _exit_tree() -> void:
+	# Se a zona for descarregada durante o evento, garantir que a música volta ao normal.
+	if is_inside_tree():
+		get_tree().call_group("music", "set_boss_mode", false)
 
 func _spawn_relic(world_pos: Vector2) -> void:
 	# Pode ser chamado a partir de callbacks de física (ex: morte por laser).

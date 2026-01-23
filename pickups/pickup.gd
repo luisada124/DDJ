@@ -5,8 +5,8 @@ extends Area2D
 @export var spin_speed: float = 2.0
 @export var magnet_range: float = 140.0
 @export var magnet_speed: float = 420.0
-@export var despawn_seconds: float = 300.0
-@export var despawn_scrap_only: bool = true
+@export var despawn_seconds: float = 30.0
+@export var despawn_scrap_only: bool = false
 
 var _player: Node2D
 var _default_texture: Texture2D

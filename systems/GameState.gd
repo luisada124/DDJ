@@ -204,7 +204,7 @@ const UPGRADE_DEFS := {
 		"growth": 1.35,
 	},
 	"magnet": {
-		"title": "Ima",
+		"title": "Iman",
 		"description": "Aumenta o magnet dos drops (+20% range e +15% speed por nível).",
 		"max_level": 10,
 		"base_cost": {"scrap": 8, "mineral": 6},

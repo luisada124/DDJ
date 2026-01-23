@@ -54,6 +54,7 @@ var _spawned_phase3: bool = false
 func _ready() -> void:
 	add_to_group("enemy")
 	add_to_group("boss")
+	get_tree().call_group("music", "set_boss_mode", true)
 	_rng.randomize()
 
 	if sprite != null and texture != null:
@@ -87,6 +88,7 @@ func _die() -> void:
 		GameState._queue_save()
 	var outro_time: float = 9.0
 	GameState.emit_signal("speech_requested_timed", "finalmente acabei com esta especie irritante, Vou maze dormir...", outro_time)
+	get_tree().call_group("music", "set_boss_mode", false)
 	GameState.return_to_main_menu(outro_time + 0.25)
 	queue_free()
 

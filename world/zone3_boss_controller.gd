@@ -51,10 +51,8 @@ func _spawn_boss() -> void:
 
 	if BossScene == null:
 		return
-	var root := get_tree().current_scene
 	var zone_root := GameState.get_zone_root_node()
-	if zone_root != null:
-		root = zone_root
+	var root: Node = zone_root as Node if zone_root != null else get_tree().current_scene
 	if root == null:
 		return
 
