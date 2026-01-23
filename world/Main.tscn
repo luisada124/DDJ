@@ -1,12 +1,19 @@
-[gd_scene load_steps=6 format=3 uid="uid://cn7tfg61pg54m"]
+[gd_scene load_steps=7 format=3 uid="uid://cn7tfg61pg54m"]
 
 [ext_resource type="PackedScene" uid="uid://dlsssxy4tf0b8" path="res://player/player.tscn" id="1_oxuid"]
 [ext_resource type="Script" uid="uid://bqbajxy8ecdtf" path="res://world/ZoneManager.gd" id="2_zone_manager"]
 [ext_resource type="PackedScene" uid="uid://bhyk7leudmqo" path="res://ui/HUD.tscn" id="3_hh730"]
 [ext_resource type="PackedScene" uid="uid://cjmbx7whxydvt" path="res://enemies/Enemy.tscn" id="4_rqm65"]
 [ext_resource type="Script" uid="uid://ba81qwhug47xy" path="res://world/enemy_spawner.gd" id="7_enemy_spawner"]
+[ext_resource type="Script" path="res://world/music_player.gd" id="8_music_player"]
 
 [node name="Main" type="Node2D"]
+
+[node name="MusicPlayer" type="AudioStreamPlayer" parent="."]
+script = ExtResource("8_music_player")
+desired_volume_db = -10.0
+shuffle_on_start = true
+audio_dir = "res://audio"
 
 [node name="ZoneManager" type="Node2D" parent="."]
 script = ExtResource("2_zone_manager")
