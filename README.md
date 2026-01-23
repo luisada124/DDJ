@@ -1,19 +1,32 @@
 todo:
 
 
-MUDAR O TEMPO DE APARECER O BOSS FINAL para 10 segundos
-
-
-MUDAR A IMAGEM DOS MINERAIS E DA SUCA POR UMA CENA MAIS FIXE
-Uma tecla de mapa e outra de zona. 
-
-meter ametistas nos upgrades
-
 
 
 DEMO E RELATORIO:
 
-referencia texturas
+You will have to prepare:
+
+A trailer video (less than 2min)
+A presentation (max 5 min (including a 2 min trailer))
+Include and present:
+challenge
+game pitch
+game features & mechanics (gameplay)
+trailer
+Include in the presentation slides but not to present in the session:
+assets/libraries used (not referencing used assets might constitute fraud)
+process & iteration
+ a slide with the percentage of each member effort for the digital project
+A demo  
+Deliver by the end of the 26th of January  in  Moodle a zip file  with:
+
+Trailer
+Link to itch.io of your game
+Your source code or link to the repository with source code
+Presentation
+
+referencia texturas:
 
 
  
