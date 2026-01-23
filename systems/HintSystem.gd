@@ -100,7 +100,6 @@ var _hint_history: Array[Dictionary] = []
 var _tutorial_shown: bool = false
 var _known_artifacts: PackedStringArray = PackedStringArray([])
 var _vacuum_break_hint_shown: bool = false
-var _vacuum_was_broken: bool = false
 
 # Milestones de progressão (para não repetir hints)
 var _milestones: Dictionary = {
@@ -135,6 +134,7 @@ func _ready() -> void:
 
 	# Conectar ao sinal de mudança de estado para detectar novos artefactos
 	GameState.state_changed.connect(_on_game_state_changed)
+	GameState.vacuum_broken.connect(_on_vacuum_broken)
 
 	# Conectar ao sinal de morte do jogador
 	GameState.player_died.connect(_on_player_died)
@@ -358,7 +358,6 @@ func reset_all() -> void:
 	print("[HintSystem] RESET COMPLETO - Novo jogo iniciado!")
 	_tutorial_shown = false
 	_vacuum_break_hint_shown = false
-	_vacuum_was_broken = false
 	_known_artifacts.clear()
 	_hint_history.clear()
 	_last_hint_time = 0.0
@@ -432,7 +431,7 @@ func _maybe_show_tutorial() -> void:
 	var intro_messages := [
 		"Sou o Ricky. Fui trazido para este espaço desconhecido...",
 		"Tenho de explorar e melhorar a nave com artefactos, gadgets e upgrades.",
-		"Para depois conseguir derrotar o grande vilão!",
+		"Para depois conseguir extinguir a humanidade!",
 	]
 
 	# Controlos básicos
@@ -461,11 +460,6 @@ func _maybe_show_tutorial() -> void:
 	print("[HintSystem] *** TUTORIAL ENVIADO COM SUCESSO ***")
 
 func _on_game_state_changed() -> void:
-	# Verificar se o aspirador partiu
-	if GameState.vacuum_broken_once and not _vacuum_was_broken and not _vacuum_break_hint_shown:
-		_vacuum_was_broken = true
-		_schedule_vacuum_break_hint()
-
 	# Verificar milestones de progressão
 	_check_progression_milestones()
 
@@ -577,6 +571,11 @@ func _schedule_vacuum_break_hint() -> void:
 	GameState.emit_signal("speech_requested", "Para voltar à nave, fica a pressionar F perto dela.")
 	await get_tree().create_timer(5.0).timeout
 	GameState.emit_signal("speech_requested", "Abre o mapa (M) e segue para o Refúgio Epsilon.")
+
+func _on_vacuum_broken() -> void:
+	if _vacuum_break_hint_shown:
+		return
+	_schedule_vacuum_break_hint()
 
 func _on_player_died() -> void:
 	print("[HintSystem] Jogador morreu!")

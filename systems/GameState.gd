@@ -8,6 +8,7 @@ signal speech_requested_at(text: String, world_pos: Vector2)
 signal speech_requested_timed(text: String, duration: float)
 signal zone2_core_horde_requested
 signal station_entered(station_id: String)
+signal vacuum_broken
 
 const SAVE_PATH := "user://save.json"
 const SAVE_VERSION := 1
@@ -448,6 +449,7 @@ func _break_vacuum() -> void:
 	vacuum_shop_part_bought = false
 
 	# Mensagens movidas para HintSystem._schedule_vacuum_break_hint()
+	emit_signal("vacuum_broken")
 	emit_signal("state_changed")
 	_queue_save()
 
