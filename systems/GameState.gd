@@ -1500,8 +1500,8 @@ func set_current_zone(zone_id: String) -> void:
 	var is_first_visit := not visited_zones.has(zone_id)
 	if is_first_visit:
 		visited_zones.append(zone_id)
-		# Mostrar mensagem apenas se não for a zona inicial
-		if zone_id != "outer":
+		# Mensagens de chegada por zona (evitar duplicados no boss da zona 3).
+		if zone_id == "mid":
 			emit_signal("speech_requested", "Uau esta zona tem uma cor estranha.")
 
 	current_zone_id = zone_id
