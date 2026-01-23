@@ -447,9 +447,7 @@ func _break_vacuum() -> void:
 	vacuum_random_part_collected = false
 	vacuum_shop_part_bought = false
 
-	emit_signal("speech_requested", "Bolas, o aspirador partiu-se. Tenho de arranjar pecas para o recuperar.")
-	emit_signal("speech_requested", "Parece que tenho de sair da nave para apanhar.")
-	emit_signal("speech_requested", "Pressione F para sair.")
+	# Mensagens movidas para HintSystem._schedule_vacuum_break_hint()
 	emit_signal("state_changed")
 	_queue_save()
 

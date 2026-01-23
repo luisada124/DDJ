@@ -4,7 +4,7 @@ extends Node
 const IDLE_TIME_THRESHOLD := 120.0  # 2 min sem progresso
 const HINT_COOLDOWN := 60.0  # 1 min entre hints
 const CHECK_INTERVAL := 15.0  # Verifica a cada 15s
-const VACUUM_BREAK_HINT_DELAY := 30.0  # 30s após aspirador partir
+const VACUUM_BREAK_HINT_DELAY := 10.0  # 10s após aspirador partir
 
 const MAX_HINT_HISTORY := 10
 const SAVE_PATH := "user://hint_system.json"
