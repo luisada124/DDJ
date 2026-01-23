@@ -1,5 +1,7 @@
 extends Node2D
 
+signal wave_completed
+
 const EnemyScene: PackedScene = preload("res://enemies/Enemy.tscn")
 
 @export var enabled: bool = true
@@ -29,6 +31,7 @@ var _guards: Array[Node] = []
 var _timer: Timer
 var _wave_kills: int = 0
 var _wave_spawned: int = 0
+var _wave_completed_emitted: bool = false
 
 func is_wave_cleared() -> bool:
 	if not enabled:
@@ -211,6 +214,11 @@ func _on_guard_tree_exited(guard: Node) -> void:
 		return
 	_wave_kills += 1
 
+	# Emitir sinal quando a onda for completa pela primeira vez
+	if _wave_kills >= wave_total and not _wave_completed_emitted:
+		_wave_completed_emitted = true
+		emit_signal("wave_completed")
+
 func _remove_guard(guard: Node) -> void:
 	var next: Array[Node] = []
 	for n in _guards:
@@ -230,6 +238,7 @@ func _reset_wave() -> void:
 	_despawn_all_guards()
 	_wave_kills = 0
 	_wave_spawned = 0
+	_wave_completed_emitted = false
 
 func _pick_enemy_id() -> String:
 	match GameState.current_zone_id:

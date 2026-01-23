@@ -7,6 +7,7 @@ signal speech_requested(text: String)
 signal speech_requested_at(text: String, world_pos: Vector2)
 signal speech_requested_timed(text: String, duration: float)
 signal zone2_core_horde_requested
+signal station_entered(station_id: String)
 
 const SAVE_PATH := "user://save.json"
 const SAVE_VERSION := 1
@@ -121,6 +122,14 @@ var boss_planet_resources_unlocked: bool = false
 # Rastrear bosses mortos (uma vez por campanha)
 var defeated_bosses: Array[String] = []
 
+# Sistema de hints: tracking temporal
+var last_quest_claim_time: float = 0.0
+var last_upgrade_time: float = 0.0
+var last_artifact_unlock_time: float = 0.0
+var last_resource_gain_time: float = 0.0
+var last_enemy_kill_time: float = 0.0
+var session_start_time: float = 0.0
+
 var upgrades := {
 	"hull": 0,      # +HP max
 	"blaster": 0,   # mais fire rate (menos intervalo)
@@ -144,6 +153,7 @@ var unlocked_artifacts: PackedStringArray = PackedStringArray([])
 
 var current_zone_id: String = "outer"
 var unlocked_zones: PackedStringArray = PackedStringArray(["outer"])
+var visited_zones: PackedStringArray = PackedStringArray([])
 
 # Runtime data (nao vai para o save): usado pelo minimapa/POIs.
 var zone_bounds_world: Rect2 = Rect2(-512, -512, 1024, 1024)
@@ -237,6 +247,7 @@ var _return_to_menu_queued: bool = false
 func _ready() -> void:
 	randomize()
 	load_game()
+	session_start_time = Time.get_ticks_msec() / 1000.0
 	emit_signal("state_changed")
 
 func return_to_main_menu(delay: float = 0.0) -> void:
@@ -302,6 +313,11 @@ func add_resource(type: String, amount: int) -> void:
 		resources[type] = 0
 	resources[type] += amount
 	print(type, " =", resources[type])
+
+	# Rastrear tempo de ganho de recursos
+	if amount > 0:
+		last_resource_gain_time = Time.get_ticks_msec() / 1000.0
+
 	_record_resource_gain(type, amount)
 	emit_signal("state_changed")
 	_queue_save()
@@ -599,11 +615,22 @@ func accept_quest(quest_id: String, station_id: String = "") -> bool:
 	if not station_id.is_empty():
 		q["accepted_station_id"] = station_id
 	quests[quest_id] = q
+
+	# Revelar estação target se a quest tiver uma
+	var def: Dictionary = QUEST_DEFS.get(quest_id, {}) as Dictionary
+	var target_station := str(def.get("target_station_id", ""))
+	if not target_station.is_empty() and not is_station_discovered(target_station):
+		discover_station(target_station)
+		emit_signal("speech_requested", "A localização foi marcada no teu mapa!")
+
 	emit_signal("state_changed")
 	_queue_save()
 	return true
 
 func record_enemy_kill(enemy_id: String) -> void:
+	# Rastrear tempo de kill de inimigos
+	last_enemy_kill_time = Time.get_ticks_msec() / 1000.0
+
 	var changed := false
 	for quest_id_variant in quests.keys():
 		var quest_id := str(quest_id_variant)
@@ -737,6 +764,19 @@ func claim_quest(quest_id: String, station_id: String = "") -> bool:
 	var q: Dictionary = quests.get(quest_id, {}) as Dictionary
 	q["claimed"] = true
 	quests[quest_id] = q
+
+	# Rastrear tempo de claim de quest
+	last_quest_claim_time = Time.get_ticks_msec() / 1000.0
+
+	# Mensagem aleatória de conclusão de missão
+	var completion_messages: Array[String] = [
+		"Pega!!",
+		"Bumba na fofinha;)",
+		"+1 pimba!",
+		"Bota pra dentro"
+	]
+	var random_message := completion_messages[randi() % completion_messages.size()]
+	emit_signal("speech_requested", random_message)
 
 	emit_signal("state_changed")
 	_queue_save()
@@ -1354,6 +1394,10 @@ func buy_upgrade(upgrade_id: String) -> bool:
 		resources[res_type] = int(resources.get(res_type, 0)) - int(cost[res_type])
 
 	upgrades[upgrade_id] = level + 1
+
+	# Rastrear tempo de upgrade
+	last_upgrade_time = Time.get_ticks_msec() / 1000.0
+
 	_recalculate_player_stats()
 	emit_signal("state_changed")
 	_queue_save()
@@ -1398,14 +1442,31 @@ func collect_artifact_part(artifact_id: String = "relic") -> void:
 		current = required
 	artifact_parts[artifact_id] = current
 
+	# Mensagem ao apanhar parte de artefacto
+	var artifact_title: String = ArtifactDatabase.get_artifact_title(artifact_id)
+	if current < required:
+		emit_signal("speech_requested", "Apanhei uma parte de %s! (%d/%d)" % [artifact_title, current, required])
+		get_tree().create_timer(5.0).timeout.connect(func():
+			emit_signal("speech_requested", "Usa Tab para ver o inventário.")
+		)
+
 	if current >= required:
 		unlocked_artifacts.append(artifact_id)
 		if artifact_id == "vacuum":
 			vacuum_is_broken = false
-		
+
+		# Rastrear tempo de unlock de artefacto
+		last_artifact_unlock_time = Time.get_ticks_msec() / 1000.0
+
 		# Mostrar balão de fala quando desbloqueia um artefato
-		var artifact_title := ArtifactDatabase.get_artifact_title(artifact_id)
-		emit_signal("speech_requested", "Yeee, construi um %s!" % artifact_title)
+		var artifact_description: String = ArtifactDatabase.get_artifact_description(artifact_id)
+		emit_signal("speech_requested", "Uau arranjei %s!" % artifact_title)
+
+		# Mostrar descrição 5 segundos depois
+		if not artifact_description.is_empty():
+			get_tree().create_timer(5.0).timeout.connect(func():
+				emit_signal("speech_requested", artifact_description)
+			)
 
 	emit_signal("state_changed")
 	_queue_save()
@@ -1423,6 +1484,15 @@ func can_access_zone(zone_id: String) -> bool:
 func set_current_zone(zone_id: String) -> void:
 	if not can_access_zone(zone_id):
 		return
+
+	# Verificar se é a primeira vez a visitar esta zona
+	var is_first_visit := not visited_zones.has(zone_id)
+	if is_first_visit:
+		visited_zones.append(zone_id)
+		# Mostrar mensagem apenas se não for a zona inicial
+		if zone_id != "outer":
+			emit_signal("speech_requested", "Uau esta zona tem uma cor estranha.")
+
 	current_zone_id = zone_id
 	emit_signal("state_changed")
 	_queue_save()
@@ -1435,6 +1505,13 @@ func set_zone_runtime_data(bounds_world: Rect2, pois_world: Array) -> void:
 func reset_save() -> void:
 	_apply_defaults()
 	save_game()
+
+	# Resetar o HintSystem também
+	if has_node("/root/HintSystem"):
+		var hint_system = get_node("/root/HintSystem")
+		if hint_system.has_method("reset_all"):
+			hint_system.reset_all()
+
 	emit_signal("state_changed")
 
 func is_station_discovered(station_id: String) -> bool:
@@ -1604,6 +1681,12 @@ func save_game() -> void:
 		"unlocked_artifacts": unlocked_artifacts,
 		"current_zone_id": current_zone_id,
 		"unlocked_zones": unlocked_zones,
+		"visited_zones": visited_zones,
+		"last_quest_claim_time": last_quest_claim_time,
+		"last_upgrade_time": last_upgrade_time,
+		"last_artifact_unlock_time": last_artifact_unlock_time,
+		"last_resource_gain_time": last_resource_gain_time,
+		"last_enemy_kill_time": last_enemy_kill_time,
 	}
 
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
@@ -1829,6 +1912,22 @@ func load_game() -> void:
 	else:
 		unlocked_zones = PackedStringArray(["outer"])
 
+	var loaded_visited = data.get("visited_zones")
+	if typeof(loaded_visited) == TYPE_ARRAY:
+		visited_zones = PackedStringArray(loaded_visited)
+	elif typeof(loaded_visited) == TYPE_PACKED_STRING_ARRAY:
+		visited_zones = loaded_visited
+	else:
+		visited_zones = PackedStringArray([])
+
+	# Carregar timestamps de hint system
+	last_quest_claim_time = float(data.get("last_quest_claim_time", 0.0))
+	last_upgrade_time = float(data.get("last_upgrade_time", 0.0))
+	last_artifact_unlock_time = float(data.get("last_artifact_unlock_time", 0.0))
+	last_resource_gain_time = float(data.get("last_resource_gain_time", 0.0))
+	last_enemy_kill_time = float(data.get("last_enemy_kill_time", 0.0))
+	session_start_time = Time.get_ticks_msec() / 1000.0
+
 	_recalculate_zone_unlocks()
 	if not can_access_zone(current_zone_id):
 		current_zone_id = "outer"
@@ -1872,6 +1971,7 @@ func _apply_defaults() -> void:
 	unlocked_artifacts.append("vacuum")
 	current_zone_id = "outer"
 	unlocked_zones = PackedStringArray(["outer"])
+	visited_zones = PackedStringArray([])
 	_recalculate_player_stats()
 	player_health = player_max_health
 	alien_max_health = BASE_ALIEN_MAX_HEALTH
@@ -1922,6 +2022,12 @@ func _apply_defaults() -> void:
 	aux_ship_random_part_world = Vector2.ZERO
 	aux_ship_random_part_collected = false
 	aux_ship_shop_part_bought = false
+	last_quest_claim_time = 0.0
+	last_upgrade_time = 0.0
+	last_artifact_unlock_time = 0.0
+	last_resource_gain_time = 0.0
+	last_enemy_kill_time = 0.0
+	session_start_time = Time.get_ticks_msec() / 1000.0
 
 func queue_save() -> void:
 	_queue_save()
@@ -1938,7 +2044,14 @@ func debug_unlock_all_gadgets() -> void:
 			unlocked_artifacts.append(artifact_id)
 			# Mostrar balão de fala quando desbloqueia um artefato
 			var artifact_title := ArtifactDatabase.get_artifact_title(artifact_id)
-			emit_signal("speech_requested", "Yeee, construi um %s!" % artifact_title)
+			var artifact_description := ArtifactDatabase.get_artifact_description(artifact_id)
+			emit_signal("speech_requested", "Uau arranjei %s!" % artifact_title)
+
+			# Mostrar descrição 5 segundos depois
+			if not artifact_description.is_empty():
+				get_tree().create_timer(5.0).timeout.connect(func():
+					emit_signal("speech_requested", artifact_description)
+				)
 
 	# Garantias especificas.
 	vacuum_is_broken = false

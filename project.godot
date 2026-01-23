@@ -18,6 +18,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 GameState="*res://systems/GameState.gd"
+HintSystem="*res://systems/HintSystem.gd"
 
 [display]
 

@@ -24,6 +24,10 @@ func _ready() -> void:
 		prompt.text = StationCatalog.get_prompt(station_id)
 		sprite.modulate = StationCatalog.get_station_color(station_id)
 
+	# Conectar ao sinal de wave_completed do guard spawner
+	if guard_spawner != null and guard_spawner.has_signal("wave_completed"):
+		guard_spawner.wave_completed.connect(_on_guards_defeated)
+
 func is_player_in_range() -> bool:
 	return _player_in_range
 
@@ -83,3 +87,7 @@ func _is_blocked_by_guards() -> bool:
 	if not guard_spawner.has_method("is_wave_cleared"):
 		return false
 	return not bool(guard_spawner.call("is_wave_cleared"))
+
+func _on_guards_defeated() -> void:
+	var station_title := StationCatalog.get_station_title(station_id)
+	GameState.emit_signal("speech_requested", "Guardas eliminados! Vai falar com os NPCs do %s." % station_title)
