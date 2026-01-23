@@ -243,6 +243,8 @@ func die() -> void:
 		GameState.defeated_bosses.append(boss_id)
 		GameState.emit_signal("state_changed")
 		GameState._queue_save()
+		# Mensagem de vitória
+		GameState.emit_signal("speech_requested", "Mataste o boss! Parece que deixou cair algo...")
 	super.die()
 	GameState.complete_quest(GameState.QUEST_BOSS_PLANET)
 

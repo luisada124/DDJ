@@ -398,13 +398,7 @@ func _maybe_play_intro() -> void:
 	if not GameState.intro_pending:
 		return
 	GameState.intro_pending = false
-	var lines := [
-		"Eu sou o Ricky... os humanos apanharam-me!",
-		"Estao a levar-me preso na nave deles!",
-		"Consegui escapar. Tenho de voltar para a minha nave.",
-	]
-	for line in lines:
-		GameState.emit_signal("speech_requested_timed", line, 5.0)
+	# Introdução movida para HintSystem._maybe_show_tutorial()
 
 
 func _input(event: InputEvent) -> void:
@@ -761,6 +755,7 @@ func register_station_in_range(station: Node, station_id: String, in_range: bool
 		if _active_station_id != station_id:
 			_active_npc_id = ""
 			_active_npc_type = ""
+			GameState.emit_signal("station_entered", station_id)
 		_active_station = station
 		_active_station_id = station_id
 	else:

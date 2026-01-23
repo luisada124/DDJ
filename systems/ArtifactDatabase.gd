@@ -5,15 +5,18 @@ class_name ArtifactDatabase
 const ARTIFACTS: Dictionary = {
 	"vacuum": {
 		"title": "Aspirador",
+		"description": "Permite que a nave recolha recursos automaticamente sem sair.",
 		"parts_required": 2,
 	},
 	"reverse_thruster": {
 		"title": "Thruster Reverso",
+		"description": "Permite andar para trás com a nave.",
 		"parts_required": 3,
 		"reverse_thrust_factor": 0.45,
 	},
 	"side_dash": {
 		"title": "Dash Lateral",
+		"description": "Dá a habilidade de fazer dash lateral (botão esquerdo/direito do rato).",
 		"parts_required": 3,
 		"dash_speed": 900.0,
 		"dash_duration": 0.10,
@@ -21,6 +24,7 @@ const ARTIFACTS: Dictionary = {
 	},
 	"aux_ship": {
 		"title": "Nave Auxiliar",
+		"description": "Uma nave auxiliar que segue e ataca inimigos automaticamente.",
 		"parts_required": 3,
 		"fire_interval": 0.45,
 		"laser_damage": 4,
@@ -28,10 +32,12 @@ const ARTIFACTS: Dictionary = {
 	},
 	"mining_drill": {
 		"title": "Broca de Mineracao",
+		"description": "Permite extrair ametista de cometas especiais.",
 		"parts_required": 1,
 	},
 	"auto_regen": {
 		"title": "Regenerador",
+		"description": "Regenera vida da nave automaticamente quando não leva dano.",
 		"parts_required": 2,
 		"regen_delay": 6.0,
 		"regen_rate": 3.0, # HP por segundo
@@ -44,6 +50,10 @@ static func is_valid_artifact(artifact_id: String) -> bool:
 static func get_artifact_title(artifact_id: String) -> String:
 	var def: Dictionary = ARTIFACTS.get(artifact_id, {})
 	return str(def.get("title", artifact_id))
+
+static func get_artifact_description(artifact_id: String) -> String:
+	var def: Dictionary = ARTIFACTS.get(artifact_id, {})
+	return str(def.get("description", ""))
 
 static func get_parts_required(artifact_id: String) -> int:
 	var def: Dictionary = ARTIFACTS.get(artifact_id, {})
