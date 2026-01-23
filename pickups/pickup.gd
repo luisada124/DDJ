@@ -11,6 +11,7 @@ extends Area2D
 var _player: Node2D
 var _default_texture: Texture2D
 const AMETISTA_TEXTURE: Texture2D = preload("res://textures/ametista-block.png")
+const SUCATA_TEXTURE: Texture2D = preload("res://textures/sucata.png")
 
 func _ready() -> void:
 	add_to_group("pickup")
@@ -28,11 +29,12 @@ func _update_visuals() -> void:
 		return
 
 	var sprite := $Sprite2D as Sprite2D
-	sprite.texture = _default_texture
+	sprite.texture = SUCATA_TEXTURE
+	sprite.scale = Vector2(0.07, 0.07)
 	sprite.modulate = Color(1, 1, 1)
 
 	if resource_type == "mineral":
-		sprite.modulate = Color(0.45, 0.85, 1.0)
+		sprite.texture = _default_texture
 	elif resource_type == "ametista":
 		sprite.texture = AMETISTA_TEXTURE
 		sprite.modulate = Color(1, 1, 1)
