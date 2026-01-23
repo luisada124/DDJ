@@ -1361,12 +1361,23 @@ func get_upgrade_cost(upgrade_id: String) -> Dictionary:
 	var base_cost: Dictionary = def.get("base_cost", {})
 	var growth: float = float(def.get("growth", 1.0))
 	var level := get_upgrade_level(upgrade_id)
+	var next_level := level + 1
 
 	var cost := {}
 	for res_type in base_cost.keys():
 		var base_amount := int(base_cost[res_type])
 		var scaled := int(ceil(base_amount * pow(growth, level)))
 		cost[res_type] = max(scaled, 0)
+
+	var extra_ametista := 0
+	if next_level == 8:
+		extra_ametista = 1
+	elif next_level == 9:
+		extra_ametista = 2
+	elif next_level == 10:
+		extra_ametista = 3
+	if extra_ametista > 0:
+		cost["ametista"] = int(cost.get("ametista", 0)) + extra_ametista
 	return cost
 
 func can_afford(cost: Dictionary) -> bool:
